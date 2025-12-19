@@ -9,7 +9,8 @@ src/
 │   ├── ui/           # shadcn 컴포넌트
 │   ├── common/       # Header, Footer, Layout
 │   ├── auth/         # 로그인, 회원가입 관련
-│   └── moimo/        # 모임 관련 컴포넌트
+│   ├── moim/         # 모임 관련 컴포넌트
+│   ├── chat/         # 채팅 관련 컴포넌트
 ├── hooks/            # 커스텀 훅 (useAuth, useSocket)
 ├── lib/              # 유틸리티 (utils.ts, axios.ts)
 ├── pages/            # 라우트 페이지
