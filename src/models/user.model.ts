@@ -10,6 +10,6 @@ export interface User {
     provider: string;
     providerId?: string;
     role: UserRole;
-    // avatarUrl?: string;
+    profileImage?: string;
     createdAt: Date;
 }
