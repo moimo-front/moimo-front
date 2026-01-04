@@ -5,49 +5,45 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
   color-scheme: light;
 
   --radius: 0.625rem;
 
   /* Palette 1: Warmth, Casual & Palette 2: Softness */
-  --background: #FFF9EE;
+  --background: #fff9ee;
   /* Warm White */
-  --foreground: #2E2E2E;
+  --foreground: #2e2e2e;
   /* Text Main */
 
-  --card: #FFFFFF;
-  --card-foreground: #2E2E2E;
+  --card: #ffffff;
+  --card-foreground: #2e2e2e;
 
-  --popover: #FFFFFF;
-  --popover-foreground: #2E2E2E;
+  --popover: #ffffff;
+  --popover-foreground: #2e2e2e;
 
-  --primary: #FFC34A;
+  --primary: #ffc34a;
   /* Main Yellow */
-  --primary-foreground: #2E2E2E;
+  --primary-foreground: #2e2e2e;
 
-  --secondary: #FFE1A3;
+  --secondary: #ffe1a3;
   /* Sub Yellow (Soft) */
-  --secondary-foreground: #2E2E2E;
+  --secondary-foreground: #2e2e2e;
 
-  --muted: #EFE4CC;
+  --muted: #efe4cc;
   /* Border/Divider color for backgrounds */
-  --muted-foreground: #6B6B6B;
+  --muted-foreground: #6b6b6b;
   /* Text Sub */
 
-  --accent: #FFD77D;
+  --accent: #ffd77d;
   /* Bubble Point Yellow */
-  --accent-foreground: #2E2E2E;
+  --accent-foreground: #2e2e2e;
 
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
 
-  --border: #EFE4CC;
-  --input: #EFE4CC;
-  --ring: #FFC34A;
+  --border: #efe4cc;
+  --input: #efe4cc;
+  --ring: #ffc34a;
 
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -55,17 +51,19 @@
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
 
-  --sidebar: #FFF9EE;
-  --sidebar-foreground: #2E2E2E;
-  --sidebar-primary: #FFC34A;
-  --sidebar-primary-foreground: #2E2E2E;
-  --sidebar-accent: #FFE1A3;
-  --sidebar-accent-foreground: #2E2E2E;
-  --sidebar-border: #EFE4CC;
-  --sidebar-ring: #FFC34A;
+  --sidebar: #fff9ee;
+  --sidebar-foreground: #2e2e2e;
+  --sidebar-primary: #ffc34a;
+  --sidebar-primary-foreground: #2e2e2e;
+  --sidebar-accent: #ffe1a3;
+  --sidebar-accent-foreground: #2e2e2e;
+  --sidebar-border: #efe4cc;
+  --sidebar-ring: #ffc34a;
 }
 
 @theme inline {
+  --font-sans: "Pretendard", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
