@@ -12,6 +12,8 @@ src/
 │   ├── auth/         # 인증 관련 컴포넌트
 │   ├── moim/         # 모임 관련 컴포넌트
 │   ├── chat/         # 채팅 관련 컴포넌트
+├── constants/        # 상수 정의
+│   ├── interests.ts  # 관심사 카테고리 정의
 ├── hooks/            # 커스텀 훅 (useAuthMutations 등)
 ├── lib/              # 공통 라이브러리 설정 (QueryClient, utils 등)
 ├── mock/             # MSW 핸들러 및 설정

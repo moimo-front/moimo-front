@@ -2,12 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { INTEREST_CATEGORIES } from "@/constants/interests";
 
-const INTEREST_CATEGORIES = [
-    "기획/PM", "디자인", "프론트엔드", "백엔드",
-    "데이터 분석", "AI/ML", "데브옵스", "인프라",
-    "마케팅", "창업", "운동", "독서"
-];
 
 const SelectInterests = () => {
     const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
