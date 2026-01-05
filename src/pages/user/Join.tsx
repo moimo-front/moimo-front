@@ -14,6 +14,9 @@ export const joinSchema = z
             .string()
             .min(1, "이메일을 입력해주세요.")
             .email("이메일 형식이 올바르지 않습니다."),
+        nickname: z
+            .string()
+            .min(1, "닉네임을 입력해주세요."),
         password: z
             .string()
             .min(1, "비밀번호를 입력해주세요.")
@@ -92,6 +95,34 @@ const Join = () => {
                                     </p>
                                 )}
                             </div>
+                            {/* 닉네임 입력 섹션 */}
+                            <div className="grid gap-2">
+                                <Label
+                                    htmlFor="nickname"
+                                    className="text-sm font-medium text-muted-foreground mr-auto"
+                                >
+                                    닉네임
+                                </Label>
+                                <div className="flex gap-2">
+                                    <Input
+                                        {...register("nickname")}
+                                        type="nickname"
+                                        placeholder="노래하는햄스터"
+                                        className="h-12 border-input focus-visible:ring-primary flex-1"
+                                    />
+                                    <Button
+                                        type="button"
+                                        className="h-12 px-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-[8px] transition-colors shadow-none border-none shrink-0"
+                                    >
+                                        중복확인
+                                    </Button>
+                                </div>
+                                {errors.nickname && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.nickname.message}
+                                    </p>
+                                )}
+                            </div>
                             {/* 비밀번호 입력 섹션 */}
                             <div className="grid gap-2">
                                 <Label
@@ -132,12 +163,12 @@ const Join = () => {
                                     </p>
                                 )}
                             </div>
-                            {/* 등록 버튼 */}
+                            {/* 회원가입 버튼 */}
                             <Button
                                 type="submit"
                                 className="w-full h-14 mt-2 text-lg font-bold bg-primary hover:bg-primary/90 text-white shadow-md border-none"
                             >
-                                프로필 등록하기
+                                회원가입하기
                             </Button>
                         </div>
                     </form>
