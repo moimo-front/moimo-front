@@ -16,7 +16,7 @@ export const login = async (data: LoginFormValues): Promise<UserResponse> => {
 };
 
 export const join = async (data: any): Promise<{ message: string }> => {
-    const response = await apiClient.post("/users/join", data);
+    const response = await apiClient.post("/users/register", data);
     return response.data;
 };
 

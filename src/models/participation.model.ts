@@ -8,4 +8,5 @@ export interface Participation {
     status: ParticipationStatus;
     checkedIn: Attendance;
     createdAt: Date;
+    updatedAt?: Date;
 }
