@@ -1,7 +1,7 @@
 function Footer() {
   return (
     <>
-      <div className="flex h-[100px] bg-foreground text-sm text-card">
+      <div className="flex h-[100px] bg-foreground text-sm text-card shrink-0">
         <div className="flex flex-col justify-around mx-1">
           <div className="text-lg">MoiMo</div>
           <div className="text-[12px] text-card/80">

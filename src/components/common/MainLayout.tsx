@@ -4,13 +4,13 @@ import Footer from "./Footer";
 
 function MainLayout() {
   return (
-    <>
+    <div className="flex flex-col h-screen overflow-y-auto [scrollbar-gutter:stable]">
       <Header />
-      <main>
+      <main className="flex-1">
         <Outlet />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }
 

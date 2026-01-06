@@ -4,7 +4,7 @@ export interface User {
     id: number;
     name?: string;
     email: string;
-    password: string;
+    password?: string;
     nickname: string;
     bio?: string;
     provider: string;

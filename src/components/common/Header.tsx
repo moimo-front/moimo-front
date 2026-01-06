@@ -2,7 +2,7 @@ import { Button } from "../ui/button";
 
 function Header() {
   return (
-    <div className="flex items-center w-full h-[67px] bg-card">
+    <div className="flex items-center w-full h-[67px] bg-card sticky top-0 z-50 shrink-0">
       <Button
         size="lg"
         variant="ghost"
