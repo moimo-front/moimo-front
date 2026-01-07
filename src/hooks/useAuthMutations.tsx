@@ -24,7 +24,7 @@ export const useLoginMutation = () => {
         },
         onSuccess: (data) => {
             // 로그인 성공 시 전역 상태 업데이트
-            storeLogin(data.user.username);
+            storeLogin(data.user.nickname);
         },
         onError: (error) => {
             console.error(error);
@@ -101,12 +101,12 @@ export const useResetPasswordMutation = () => {
 export const useGoogleLoginMutation = () => {
     const { storeLogin } = useAuthStore();
     return useMutation({
-        mutationFn: async (token: string) => {
-            const resData = await googleLogin(token);
+        mutationFn: async (data: { token: string; redirectUri: string }) => {
+            const resData = await googleLogin(data);
             return resData;
         },
         onSuccess: (data) => {
-            storeLogin(data.user.username);
+            storeLogin(data.user.nickname);
         },
         onError: (error: AxiosError<{ message: string }>) => {
             console.error(error);

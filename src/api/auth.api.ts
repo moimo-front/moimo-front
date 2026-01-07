@@ -2,21 +2,31 @@ import type { LoginFormValues } from "@/pages/user/Login";
 import { apiClient } from "./client";
 import type { JoinFormValues } from "@/pages/user/Join";
 
-export interface UserResponse {
+export interface LoginResponse {
     user: {
-        id: string;
         email: string;
-        username: string;
+        nickname: string;
     };
-    token: string;
+    accessToken: string;
+    isNewUser: boolean;
 }
 
-export const login = async (data: LoginFormValues): Promise<UserResponse> => {
+export const login = async (data: LoginFormValues): Promise<LoginResponse> => {
     try {
         const response = await apiClient.post("/users/login", data);
         return response.data;
     } catch (error) {
         console.error("login error:", error);
+        throw error;
+    }
+};
+
+export const googleLogin = async (data: { token: string; redirectUri: string }): Promise<LoginResponse> => {
+    try {
+        const response = await apiClient.post("/users/login/google", data);
+        return response.data;
+    } catch (error) {
+        console.error("googleLogin error:", error);
         throw error;
     }
 };
@@ -67,16 +77,6 @@ export const resetPassword = async (data: any): Promise<{ message: string }> => 
         return response.data;
     } catch (error) {
         console.error("resetPassword error:", error);
-        throw error;
-    }
-};
-
-export const googleLogin = async (token: string): Promise<UserResponse> => {
-    try {
-        const response = await apiClient.post("/users/login/google", { token });
-        return response.data;
-    } catch (error) {
-        console.error("googleLogin error:", error);
         throw error;
     }
 };

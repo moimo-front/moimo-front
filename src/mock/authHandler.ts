@@ -8,7 +8,7 @@ export const login = http.post(`${httpUrl}/users/login`, async ({ request }) => 
     const { email, password } = (await request.json()) as any;
     await delay(1000);
 
-    if (email === "moimo@email.com" && password === "password123") {
+    if (email === "moimo@email.com" && password === "12345678") {
         return HttpResponse.json({
             user: {
                 id: "1",
@@ -26,15 +26,18 @@ export const login = http.post(`${httpUrl}/users/login`, async ({ request }) => 
 });
 
 // 구글 로그인
-export const googleLogin = http.post(`${httpUrl}/users/login/google`, async () => {
+export const googleLogin = http.post(`${httpUrl}/users/login/google`, async ({ request }) => {
+    const { token, redirectUri } = (await request.json()) as any;
+    console.log('google login request:', { token, redirectUri });
     await delay(1000);
     return HttpResponse.json({
         user: {
-            provider_id: "google-123",
             email: "google-user@email.com",
-            username: "구글사용자",
+            nickname: "구글사용자",
         },
-        accessToken: "mock-google-jwt-token",
+        // accessToken: "mock-google-jwt-token",
+        accessToken: token,
+        isNewUser: true,
     },
         { status: 200 }
     );
