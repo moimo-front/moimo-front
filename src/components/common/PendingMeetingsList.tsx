@@ -20,6 +20,7 @@ function PendingMeetingsList() {
             location={topic.location}
             participantsCount={topic.participantsCount}
             imageUrl={topic.imageUrl}
+            href=""
           />
         ))}
       </div>

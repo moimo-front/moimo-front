@@ -16,6 +16,7 @@ function PopularMeetingList() {
             location={topic.location}
             participantsCount={topic.participantsCount}
             imageUrl={topic.imageUrl}
+            href=""
           />
         ))}
       </div>

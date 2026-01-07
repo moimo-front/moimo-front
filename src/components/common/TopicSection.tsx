@@ -3,7 +3,7 @@ import TopicCard from "../common/TopicCard";
 
 function TopicSection() {
   return (
-    <div className="h-[400px]">
+    <div className="py-4">
       <div className="grid grid-cols-5 gap-3">
         {TOPIC_CATEGORIES.map((topic) => (
           <TopicCard
