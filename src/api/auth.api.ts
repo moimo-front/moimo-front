@@ -31,6 +31,17 @@ export const googleLogin = async (data: { token: string; redirectUri: string }):
     }
 };
 
+// 로그아웃
+export const logout = async () => {
+    try {
+        const response = await apiClient.post(`/users/logout`);
+        return response.data;
+    } catch (error) {
+        console.error("logout error:", error);
+        throw error;
+    }
+}
+
 export const join = async (data: JoinFormValues): Promise<{ message: string }> => {
     try {
         const response = await apiClient.post("/users/register", data);

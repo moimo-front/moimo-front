@@ -11,11 +11,10 @@ export const login = http.post(`${httpUrl}/users/login`, async ({ request }) => 
     if (email === "moimo@email.com" && password === "12345678") {
         return HttpResponse.json({
             user: {
-                id: "1",
                 email,
-                username: "테스터",
+                nickname: "테스터",
             },
-            token: "mock-jwt-token",
+            accessToken: "mock-jwt-token",
         });
     }
 
@@ -41,6 +40,12 @@ export const googleLogin = http.post(`${httpUrl}/users/login/google`, async ({ r
     },
         { status: 200 }
     );
+});
+
+// 로그아웃 핸들러
+export const logout = http.post(`${httpUrl}/users/logout`, async () => {
+    await delay(1000);
+    return HttpResponse.json({ message: "로그아웃이 완료되었습니다." });
 });
 
 // 회원가입 핸들러

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { useGoogleLoginMutation, useLoginMutation } from "@/hooks/useAuthMutations";
+import { useGoogleLoginMutation, useLoginMutation, useLogoutMutation } from "@/hooks/useAuthMutations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
@@ -31,6 +31,7 @@ export type LoginFormValues = z.infer<typeof loginSchema>;
 const Login = () => {
     const { mutateAsync: loginMutation, isPending } = useLoginMutation();
     const googleLoginMutation = useGoogleLoginMutation();
+    const { mutateAsync: logoutMutation } = useLogoutMutation();
     const navigate = useNavigate();
 
     const {

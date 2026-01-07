@@ -8,7 +8,8 @@ import {
     checkNickname,
     findPassword,
     resetPassword,
-    googleLogin
+    googleLogin,
+    logout
 } from "@/api/auth.api";
 import { AxiosError } from "axios";
 import type { JoinFormValues } from "@/pages/user/Join";
@@ -24,7 +25,43 @@ export const useLoginMutation = () => {
         },
         onSuccess: (data) => {
             // 로그인 성공 시 전역 상태 업데이트
-            storeLogin(data.user.nickname);
+            storeLogin(data.user.nickname, data.accessToken);
+        },
+        onError: (error) => {
+            console.error(error);
+        }
+    })
+}
+
+// 구글 로그인 Mutation
+export const useGoogleLoginMutation = () => {
+    const { storeLogin } = useAuthStore();
+    return useMutation({
+        mutationFn: async (data: { token: string; redirectUri: string }) => {
+            const resData = await googleLogin(data);
+            return resData;
+        },
+        onSuccess: (data) => {
+            storeLogin(data.user.nickname, data.accessToken);
+        },
+        onError: (error: AxiosError<{ message: string }>) => {
+            console.error(error);
+        }
+    })
+}
+
+// 로그아웃 Mutation
+export const useLogoutMutation = () => {
+    const { storeLogout } = useAuthStore();
+
+    return useMutation({
+        mutationFn: async () => {
+            const resData = await logout();
+            return resData;
+        },
+        onSuccess: () => {
+            // 로그아웃 성공 시 전역 상태 업데이트
+            storeLogout();
         },
         onError: (error) => {
             console.error(error);
@@ -93,23 +130,6 @@ export const useResetPasswordMutation = () => {
         mutationFn: async (data: any) => {
             const resData = await resetPassword(data);
             return resData;
-        }
-    })
-}
-
-// 구글 로그인 Mutation
-export const useGoogleLoginMutation = () => {
-    const { storeLogin } = useAuthStore();
-    return useMutation({
-        mutationFn: async (data: { token: string; redirectUri: string }) => {
-            const resData = await googleLogin(data);
-            return resData;
-        },
-        onSuccess: (data) => {
-            storeLogin(data.user.nickname);
-        },
-        onError: (error: AxiosError<{ message: string }>) => {
-            console.error(error);
         }
     })
 }
