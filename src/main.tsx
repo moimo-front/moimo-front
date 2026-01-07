@@ -7,7 +7,7 @@ import { queryClient } from "./lib/queryClient.ts";
 // import "pretendard/dist/web/static/pretendard.css";
 
 async function enableMocking() {
-  if (!import.meta.env.DEV) {
+  if (!import.meta.env.DEV || (import.meta.env.VITE_ENABLE_MOCK || 'true') !== 'true') {
     return;
   }
 
