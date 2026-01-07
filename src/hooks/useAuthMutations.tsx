@@ -11,6 +11,7 @@ import {
     googleLogin
 } from "@/api/auth.api";
 import { AxiosError } from "axios";
+import type { JoinFormValues } from "@/pages/user/Join";
 
 // 로그인 Mutation
 export const useLoginMutation = () => {
@@ -18,8 +19,8 @@ export const useLoginMutation = () => {
 
     return useMutation({
         mutationFn: async (data: LoginFormValues) => {
-            const response = await login(data);
-            return response;
+            const resData = await login(data);
+            return resData;
         },
         onSuccess: (data) => {
             // 로그인 성공 시 전역 상태 업데이트
@@ -32,11 +33,14 @@ export const useLoginMutation = () => {
 }
 
 // 회원가입 Muatation
-export const useSignupMutation = () => {
+export const useJoinMutation = () => {
     return useMutation({
-        mutationFn: async (data: any) => {
-            const response = await join(data);
-            return response;
+        mutationFn: async (data: JoinFormValues) => {
+            const resData = await join(data);
+            return resData;
+        },
+        onError: (error: AxiosError<{ message: string }>) => {
+            console.error(error);
         }
     })
 }
@@ -45,8 +49,8 @@ export const useSignupMutation = () => {
 export const useEmailCheckMutation = () => {
     return useMutation({
         mutationFn: async (email: string) => {
-            const response = await checkEmail({ email });
-            return response;
+            const resData = await checkEmail({ email });
+            return resData;
         },
         onSuccess: () => {
 
@@ -61,8 +65,8 @@ export const useEmailCheckMutation = () => {
 export const useNicknameCheckMutation = () => {
     return useMutation({
         mutationFn: async (nickname: string) => {
-            const response = await checkNickname({ nickname });
-            return response;
+            const resData = await checkNickname({ nickname });
+            return resData;
         },
         onSuccess: () => {
 
@@ -77,8 +81,8 @@ export const useNicknameCheckMutation = () => {
 export const useForgotPasswordMutation = () => {
     return useMutation({
         mutationFn: async (data: any) => {
-            const response = await findPassword(data);
-            return response;
+            const resData = await findPassword(data);
+            return resData;
         }
     })
 }
@@ -87,8 +91,8 @@ export const useForgotPasswordMutation = () => {
 export const useResetPasswordMutation = () => {
     return useMutation({
         mutationFn: async (data: any) => {
-            const response = await resetPassword(data);
-            return response;
+            const resData = await resetPassword(data);
+            return resData;
         }
     })
 }
@@ -98,13 +102,13 @@ export const useGoogleLoginMutation = () => {
     const { storeLogin } = useAuthStore();
     return useMutation({
         mutationFn: async (token: string) => {
-            const response = await googleLogin(token);
-            return response;
+            const resData = await googleLogin(token);
+            return resData;
         },
         onSuccess: (data) => {
             storeLogin(data.user.username);
         },
-        onError: (error) => {
+        onError: (error: AxiosError<{ message: string }>) => {
             console.error(error);
         }
     })

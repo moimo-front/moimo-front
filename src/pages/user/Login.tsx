@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { SiGoogle, SiKakaotalk, SiNaver } from "react-icons/si";
+import { FcGoogle } from "react-icons/fc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import * as z from "zod";
+import { GoogleLogin } from "@react-oauth/google";
 
 // zod schema 정의
 export const loginSchema = z.object({
@@ -28,7 +31,6 @@ const Login = () => {
     const { mutateAsync: loginMutation, isPending } = useLoginMutation();
     const navigate = useNavigate();
 
-    // react-hook-form 사용
     const {
         register,
         handleSubmit,
@@ -101,7 +103,7 @@ const Login = () => {
                                 />
                                 {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
                             </div>
-
+                            {errors.root && <p className="text-sm text-destructive">{errors.root.message}</p>}
                             <Button
                                 className="w-full h-12 mt-2 text-lg font-bold bg-primary hover:bg-primary/90 text-white shadow-sm border-none"
                                 disabled={isPending}
@@ -121,7 +123,10 @@ const Login = () => {
                     <div className="flex flex-col gap-6 pt-4">
                         <div className="flex justify-center gap-6">
                             {/* Social Login Buttons */}
-                            <button className="w-12 h-12 rounded-lg border border-input bg-white flex items-center justify-center hover:bg-accent transition-colors shadow-sm overflow-hidden">
+                            <FcGoogle size={24} />
+                            <SiNaver size={24} color="#03C75A" />
+                            <SiKakaotalk size={24} color="#FFEB3B" />
+                            {/* <button className="w-12 h-12 rounded-lg border border-input bg-white flex items-center justify-center hover:bg-accent transition-colors shadow-sm overflow-hidden">                                
                                 <svg className="w-6 h-6" viewBox="0 0 24 24">
                                     <path
                                         fill="#4285F4"
@@ -151,7 +156,7 @@ const Login = () => {
                             </button>
                             <button className="w-12 h-12 rounded-lg border border-input bg-[#03C75A] flex items-center justify-center hover:opacity-90 transition-opacity shadow-sm overflow-hidden text-white border-none">
                                 <span className="text-xl font-black">N</span>
-                            </button>
+                            </button> */}
                         </div>
                     </div>
                 </CardContent>

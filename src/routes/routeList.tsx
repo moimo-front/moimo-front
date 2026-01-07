@@ -5,12 +5,12 @@ import Join from "@/pages/user/Join";
 import FindPassword from "@/pages/user/FindPassword";
 import ResetPassword from "@/pages/user/ResetPassword";
 import ExtraInfo from "@/pages/user/ExtraInfo";
-import SelectInterests from "@/pages/user/SelectInterests";
 
 export const routeList = [
     {
         path: "/",
         element: <MainLayout />,
+        // errorElement: <Error />,
         children: [
             {
                 path: "/",
@@ -35,11 +35,7 @@ export const routeList = [
             {
                 path: "/extra-info",
                 element: <ExtraInfo />,
-            },
-            {
-                path: "/select-interests",
-                element: <SelectInterests />,
-            },
+            }
         ],
     },
 ];

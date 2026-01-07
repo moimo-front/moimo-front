@@ -2,10 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEmailCheckMutation, useJoinMutation, useNicknameCheckMutation } from "@/hooks/useAuthMutations";
 
 // zod schema 정의
 export const joinSchema = z
@@ -38,11 +39,17 @@ export const joinSchema = z
 export type JoinFormValues = z.infer<typeof joinSchema>;
 
 const Join = () => {
-    // react-hook-form 사용
+    const { mutateAsync: joinMutation, isPending } = useJoinMutation();
+    const emailCheckMutation = useEmailCheckMutation();
+    const nicknameCheckMutation = useNicknameCheckMutation();
+    const navigate = useNavigate();
+
     const {
         register,
         handleSubmit,
         setError,
+        clearErrors,
+        getValues,
         formState: { errors }
     } = useForm<JoinFormValues>({
         resolver: zodResolver(joinSchema),
@@ -53,9 +60,87 @@ const Join = () => {
         }
     });
 
-    const onSubmit = (data: JoinFormValues) => {
-        console.log(data);
+    const onSubmit = async (data: JoinFormValues) => {
+        // 이메일 중복 확인 여부 체크
+        if (!emailCheckMutation.isSuccess) {
+            alert("이메일 중복 확인을 해주세요.");
+            return;
+        }
+
+        // 닉네임 중복 확인 여부 체크
+        if (!nicknameCheckMutation.isSuccess) {
+            alert("닉네임 중복 확인을 해주세요.");
+            return;
+        }
+
+        try {
+            await joinMutation(data);
+            alert("회원가입이 완료되었습니다.");
+            navigate("/login");
+        } catch (error: any) {
+            console.error("회원가입 중 오류 발생: ", error);
+            setError("root", {
+                type: "manual",
+                message: error.response?.data?.message || "회원가입에 실패했습니다."
+            });
+        }
     };
+
+    // 이메일 중복 확인
+    const handleCheckEmail = async () => {
+        const email = getValues("email");
+
+        // 이메일 유효성 검사
+        if (!email) {
+            setError("email", {
+                type: "manual",
+                message: "이메일을 입력해주세요."
+            });
+            return;
+        }
+
+        // 이메일 형식 검사
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            setError("email", {
+                type: "manual",
+                message: "이메일 형식이 올바르지 않습니다."
+            });
+            return;
+        }
+
+        // 이메일 형식이 올바르면 react-hook-form 에러 클리어
+        clearErrors("email");
+
+        try {
+            await emailCheckMutation.mutateAsync(email)
+        } catch (error) {
+            // 에러는 mutation에서 자동으로 처리됨
+        }
+    }
+
+    // 닉네임 중복 확인
+    const handleCheckNickname = async () => {
+        const nickname = getValues("nickname");
+
+        // 닉네임 유효성 검사
+        if (!nickname) {
+            setError("nickname", {
+                type: "manual",
+                message: "닉네임을 입력해주세요."
+            });
+            return;
+        }
+
+        // 닉네임 형식이 올바르면 react-hook-form 에러 클리어
+        clearErrors("nickname");
+
+        try {
+            await nicknameCheckMutation.mutateAsync(nickname)
+        } catch (error) {
+            // 에러는 mutation에서 자동으로 처리됨
+        }
+    }
 
     return (
         <div className="flex min-h-full w-full flex-col items-center justify-center bg-transparent p-4">
@@ -84,16 +169,26 @@ const Join = () => {
                                     />
                                     <Button
                                         type="button"
+                                        onClick={handleCheckEmail}
+                                        disabled={emailCheckMutation.isPending}
                                         className="h-12 px-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-[8px] transition-colors shadow-none border-none shrink-0"
                                     >
-                                        중복확인
+                                        {emailCheckMutation.isPending ? "확인중..." : "중복확인"}
                                     </Button>
                                 </div>
-                                {errors.email && (
+                                {/* errors.email: react-hook-form의 유효성 검사 에러 (필수 입력, 이메일 형식)
+                                emailCheckMutation: 이메일 중복 확인 결과 (TanStack Query에서 관리) */}
+                                {errors.email ? (
+                                    <p className="text-sm text-destructive">{errors.email.message}</p>
+                                ) : emailCheckMutation.isError ? (
                                     <p className="text-sm text-destructive">
-                                        {errors.email.message}
+                                        {emailCheckMutation.error?.response?.data?.message || "이미 사용 중인 이메일입니다."}
                                     </p>
-                                )}
+                                ) : emailCheckMutation.isSuccess ? (
+                                    <p className="text-sm text-success">
+                                        {emailCheckMutation.data?.message || "사용 가능한 이메일입니다."}
+                                    </p>
+                                ) : null}
                             </div>
                             {/* 닉네임 입력 섹션 */}
                             <div className="grid gap-2">
@@ -112,14 +207,26 @@ const Join = () => {
                                     />
                                     <Button
                                         type="button"
+                                        onClick={handleCheckNickname}
+                                        disabled={nicknameCheckMutation.isPending}
                                         className="h-12 px-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-[8px] transition-colors shadow-none border-none shrink-0"
                                     >
-                                        중복확인
+                                        {nicknameCheckMutation.isPending ? "확인중..." : "중복확인"}
                                     </Button>
                                 </div>
                                 {errors.nickname && (
                                     <p className="text-sm text-destructive">
                                         {errors.nickname.message}
+                                    </p>
+                                )}
+                                {nicknameCheckMutation.isSuccess && (
+                                    <p className="text-sm text-success">
+                                        {nicknameCheckMutation.data?.message || "사용 가능한 닉네임입니다."}
+                                    </p>
+                                )}
+                                {nicknameCheckMutation.isError && (
+                                    <p className="text-sm text-destructive">
+                                        {nicknameCheckMutation.error?.response?.data?.message || "이미 사용 중인 닉네임입니다."}
                                     </p>
                                 )}
                             </div>
@@ -163,12 +270,14 @@ const Join = () => {
                                     </p>
                                 )}
                             </div>
+                            {errors.root && <p className="text-sm text-destructive">{errors.root.message}</p>}
                             {/* 회원가입 버튼 */}
                             <Button
                                 type="submit"
+                                disabled={isPending}
                                 className="w-full h-14 mt-2 text-lg font-bold bg-primary hover:bg-primary/90 text-white shadow-md border-none"
                             >
-                                회원가입하기
+                                {isPending ? "가입 중..." : "회원가입하기"}
                             </Button>
                         </div>
                     </form>
