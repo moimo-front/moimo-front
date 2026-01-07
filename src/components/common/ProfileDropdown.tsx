@@ -10,10 +10,18 @@ import {
 import { AiOutlineUser, AiOutlineTeam } from "react-icons/ai";
 import { LuLogOut } from "react-icons/lu";
 import { useAuthStore } from "@/store/authStore";
+import { useNavigate } from "react-router-dom";
 
 export const ProfileDropdown = () => {
-  const { username } = useAuthStore();
+  const { username, storeLogout } = useAuthStore();
+  const navigate = useNavigate();
   const userAvatarUrl = "";
+
+  const handleLogout = () => {
+    storeLogout();
+    navigate("/");
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -36,7 +44,7 @@ export const ProfileDropdown = () => {
           <AiOutlineTeam />내 모임
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex gap-1">
+        <DropdownMenuItem className="flex gap-1" onClick={handleLogout}>
           <LuLogOut />
           로그아웃
         </DropdownMenuItem>

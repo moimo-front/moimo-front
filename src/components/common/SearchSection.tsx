@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+// import { useNavigate } from "react-router-dom";
 
 function SearchSection() {
+  // const navigate = useNavigate();
   const [searchTopic, setSearchTopic] = useState("");
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
     if (!searchTopic.trim()) return;
     // TODO: 검색 로직 구현
+    // navigate(`/meetings?로직`);
   };
   return (
     <div className="py-16 text-center">
