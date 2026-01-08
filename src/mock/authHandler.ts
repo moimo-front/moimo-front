@@ -1,7 +1,6 @@
-import { INTEREST_CATEGORIES } from '@/constants/interests';
 import { http, HttpResponse, delay } from 'msw';
+import { httpUrl } from './mockData';
 
-const httpUrl = import.meta.env.VITE_API_URL || 'https://moimo-back.vercel.app';
 
 // 일반 로그인 핸들러
 export const login = http.post(`${httpUrl}/users/login`, async ({ request }) => {
@@ -103,17 +102,9 @@ export const checkNickname = http.post(`${httpUrl}/users/check-nickname`, async 
 
 // 추가정보 핸들러
 export const extraInfo = http.patch(`${httpUrl}/users/extraInfo`, async ({ request }) => {
-    // const { bio, interests } = (await request.json()) as any;
+    const { bio, interests } = (await request.json()) as any;
     await delay(1000);
-    return HttpResponse.json({ message: "추가정보가 완료되었습니다." },
-        { status: 200 }
-    );
-});
-
-// 관심사 조회 핸들러
-export const getInterests = http.get(`${httpUrl}/interests`, async () => {
-    await delay(1000);
-    return HttpResponse.json({ interests: INTEREST_CATEGORIES },
+    return HttpResponse.json({ user: { bio, interests } },
         { status: 200 }
     );
 });

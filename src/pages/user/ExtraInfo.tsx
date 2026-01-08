@@ -7,10 +7,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { INTEREST_CATEGORIES } from "@/constants/interests";
 import { cn } from "@/lib/utils";
+import { useInterestQuery } from "@/hooks/useInterestQuery";
 
 const ExtraInfo = () => {
     const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
     const navigate = useNavigate();
+
+    const { data: interests } = useInterestQuery();
 
     const toggleInterest = (interest: string) => {
         setSelectedInterests(prev => {
@@ -58,18 +61,18 @@ const ExtraInfo = () => {
                                 관심사 (최대 3개까지 선택해주세요)
                             </Label>
                             <div className="grid grid-cols-4 gap-3">
-                                {INTEREST_CATEGORIES.map((category) => (
+                                {interests?.map((interest) => (
                                     <button
-                                        key={category}
-                                        onClick={() => toggleInterest(category)}
+                                        key={interest.id}
+                                        onClick={() => toggleInterest(interest.name)}
                                         className={cn(
                                             "h-12 rounded-[8px] text-sm font-medium transition-all duration-200 border-none shadow-sm",
-                                            isSelected(category)
+                                            isSelected(interest.name)
                                                 ? "bg-primary text-white shadow-md transform scale-[0.98]"
                                                 : "bg-secondary/40 text-foreground hover:bg-secondary/60"
                                         )}
                                     >
-                                        {category}
+                                        {interest.name}
                                     </button>
                                 ))}
                             </div>

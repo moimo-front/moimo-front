@@ -11,6 +11,7 @@ export interface LoginResponse {
     isNewUser: boolean;
 }
 
+// 일반 로그인
 export const login = async (data: LoginFormValues): Promise<LoginResponse> => {
     try {
         const response = await apiClient.post("/users/login", data);
@@ -25,6 +26,7 @@ export const login = async (data: LoginFormValues): Promise<LoginResponse> => {
     }
 };
 
+// 구글 로그인
 export const googleLogin = async (data: { token: string; redirectUri: string }): Promise<LoginResponse> => {
     try {
         const response = await apiClient.post("/users/login/google", data);
@@ -50,6 +52,7 @@ export const logout = async () => {
     }
 }
 
+// 회원가입
 export const join = async (data: JoinFormValues): Promise<{ message: string }> => {
     try {
         const response = await apiClient.post("/users/register", data);
@@ -60,6 +63,7 @@ export const join = async (data: JoinFormValues): Promise<{ message: string }> =
     }
 };
 
+// 이메일 중복확인
 export const checkEmail = async (data: { email: string }) => {
     try {
         const response = await apiClient.post("/users/check-email", data);
@@ -70,6 +74,7 @@ export const checkEmail = async (data: { email: string }) => {
     }
 };
 
+// 닉네임 중복확인
 export const checkNickname = async (data: { nickname: string }) => {
     try {
         const response = await apiClient.post("/users/check-nickname", data);
@@ -80,6 +85,7 @@ export const checkNickname = async (data: { nickname: string }) => {
     }
 };
 
+// 비밀번호 찾기
 export const findPassword = async (data: { email: string }): Promise<{ message: string }> => {
     try {
         const response = await apiClient.post("/users/find-password", data);
@@ -90,6 +96,7 @@ export const findPassword = async (data: { email: string }): Promise<{ message: 
     }
 };
 
+// 비밀번호 재설정
 export const resetPassword = async (data: any): Promise<{ message: string }> => {
     try {
         const response = await apiClient.post("/users/reset-password", data);
