@@ -1,10 +1,10 @@
 import { Outlet } from "react-router-dom";
-import Header from "./Header";
-import Footer from "./Footer";
+import Header from "@/components/common/Header";
+import Footer from "@/components/common/Footer";
 
 function MainLayout() {
   return (
-    <div className="flex flex-col h-screen overflow-y-auto [scrollbar-gutter:stable]">
+    <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1">
         <Outlet />
