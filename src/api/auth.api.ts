@@ -1,5 +1,5 @@
 import type { LoginFormValues } from "@/pages/user/Login";
-import { apiClient } from "./client";
+import { apiClient } from "@/api/client";
 import type { JoinFormValues } from "@/pages/user/Join";
 
 export interface LoginResponse {
