@@ -61,17 +61,17 @@ const Join = () => {
     });
 
     const onSubmit = async (data: JoinFormValues) => {
-        // // 이메일 중복 확인 여부 체크
-        // if (!emailCheckMutation.isSuccess) {
-        //     alert("이메일 중복 확인을 해주세요.");
-        //     return;
-        // }
+        // 이메일 중복 확인 여부 체크
+        if (!emailCheckMutation.isSuccess) {
+            alert("이메일 중복 확인을 해주세요.");
+            return;
+        }
 
-        // // 닉네임 중복 확인 여부 체크
-        // if (!nicknameCheckMutation.isSuccess) {
-        //     alert("닉네임 중복 확인을 해주세요.");
-        //     return;
-        // }
+        // 닉네임 중복 확인 여부 체크
+        if (!nicknameCheckMutation.isSuccess) {
+            alert("닉네임 중복 확인을 해주세요.");
+            return;
+        }
 
         try {
             await joinMutation(data);

@@ -14,7 +14,11 @@ export interface LoginResponse {
 export const login = async (data: LoginFormValues): Promise<LoginResponse> => {
     try {
         const response = await apiClient.post("/users/login", data);
-        return response.data;
+        const accessToken = response.headers.authorization?.replace("Bearer ", "");
+        return {
+            ...response.data,
+            accessToken,
+        };
     } catch (error) {
         console.error("login error:", error);
         throw error;
@@ -24,7 +28,11 @@ export const login = async (data: LoginFormValues): Promise<LoginResponse> => {
 export const googleLogin = async (data: { token: string; redirectUri: string }): Promise<LoginResponse> => {
     try {
         const response = await apiClient.post("/users/login/google", data);
-        return response.data;
+        const accessToken = response.headers.authorization?.replace("Bearer ", "");
+        return {
+            ...response.data,
+            accessToken,
+        };
     } catch (error) {
         console.error("googleLogin error:", error);
         throw error;
@@ -91,3 +99,15 @@ export const resetPassword = async (data: any): Promise<{ message: string }> => 
         throw error;
     }
 };
+
+// 토큰 갱신
+export const refresh = async (): Promise<string | undefined> => {
+    try {
+        const response = await apiClient.post("/users/refresh");
+        const accessToken = response.headers.authorization?.replace("Bearer ", "");
+        return accessToken;
+    } catch (error) {
+        console.error("refresh error:", error);
+        throw error;
+    }
+}

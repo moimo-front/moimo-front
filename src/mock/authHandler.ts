@@ -14,7 +14,11 @@ export const login = http.post(`${httpUrl}/users/login`, async ({ request }) => 
                 email,
                 nickname: "테스터",
             },
-            accessToken: "mock-jwt-token",
+        }, {
+            headers: {
+                'Authorization': 'Bearer mock-jwt-token',
+                'Set-Cookie': 'refreshToken=mock-refresh-token; HttpOnly; Secure; SameSite=Strict'
+            }
         });
     }
 
@@ -34,12 +38,14 @@ export const googleLogin = http.post(`${httpUrl}/users/login/google`, async ({ r
             email: "google-user@email.com",
             nickname: "구글사용자",
         },
-        // accessToken: "mock-google-jwt-token",
-        accessToken: token,
         isNewUser: true,
-    },
-        { status: 200 }
-    );
+    }, {
+        status: 200,
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Set-Cookie': 'refreshToken=mock-refresh-token; HttpOnly; Secure; SameSite=Strict'
+        }
+    });
 });
 
 // 로그아웃 핸들러
@@ -122,4 +128,24 @@ export const resetPassword = http.post(`${httpUrl}/users/reset-password`, async 
     // const { email, code, newPassword } = (await request.json()) as any;
     await delay(1000);
     return HttpResponse.json({ message: "비밀번호가 성공적으로 변경되었습니다." });
+});
+
+// 토큰 갱신 핸들러
+export const refresh = http.post(`${httpUrl}/users/refresh`, async ({ request }) => {
+    const cookies = request.headers.get('cookie');
+    await delay(500);
+
+    if (cookies?.includes('refreshToken=mock-refresh-token')) {
+        return new HttpResponse(null, {
+            status: 200,
+            headers: {
+                'Authorization': 'Bearer new-mock-jwt-token',
+            }
+        });
+    }
+
+    return new HttpResponse(
+        JSON.stringify({ message: "유효하지 않은 리프레시 토큰입니다." }),
+        { status: 401 }
+    );
 });

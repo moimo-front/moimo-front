@@ -1,4 +1,4 @@
-// import { getToken, removeToken } from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 import axios, { type AxiosRequestConfig } from "axios";
 
 
@@ -14,24 +14,50 @@ export const createClient = (config?: AxiosRequestConfig) => {
 
     // 요청 인터셉터 : 매 요청마다 최신 토큰 헤더에 추가
     axiosInstance.interceptors.request.use((config) => {
-        // const token = getToken();
-        // if (token) {
-        //     config.headers.Authorization = `Bearer ${token}`;
-        // }
+        const { accessToken } = useAuthStore.getState();
+        if (accessToken) {
+            config.headers.Authorization = `Bearer ${accessToken}`;
+        }
         return config;
     })
 
-    // 응답 인터셉터 : 401 발생 시 로그아웃 처리
+    // 응답 인터셉터 : 401 발생 시 토큰 갱신 시도
     axiosInstance.interceptors.response.use(
         (response) => {
             return response;
         },
-        (error) => {
-            // 토큰이 없을 때
-            if (error.response && error.response.status === 401) {
-                // removeToken();
-                // window.location.href = '/login';
-                return Promise.reject(error);
+        async (error) => {
+            const originalRequest = error.config;
+
+            // 401 에러이고, 재시도한 적이 없는 요청일 때
+            if (error.response?.status === 401 && !originalRequest._retry) {
+                originalRequest._retry = true;
+
+                try {
+                    // /users/refresh API를 호출하여 새로운 토큰 시도
+                    // 주의: 무한 루프 방지를 위해 login, logout, refresh API는 제외할 수 있음
+                    if (originalRequest.url?.includes('/users/login') || originalRequest.url?.includes('/users/refresh')) {
+                        return Promise.reject(error);
+                    }
+
+                    const { refresh } = await import("./auth.api");
+                    const { setAccessToken } = useAuthStore.getState();
+
+                    const newToken = await refresh();
+
+                    if (newToken) {
+                        setAccessToken(newToken);
+                        // 새로운 토큰으로 헤더 교체 후 재발송
+                        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                        return axiosInstance(originalRequest);
+                    }
+                } catch (refreshError) {
+                    // 갱신 실패 시 로그아웃 처리
+                    const { storeLogout } = useAuthStore.getState();
+                    storeLogout();
+
+                    return Promise.reject(refreshError);
+                }
             }
             return Promise.reject(error);
         })
