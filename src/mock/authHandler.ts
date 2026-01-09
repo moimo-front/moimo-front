@@ -31,8 +31,8 @@ export const login = http.post(`${httpUrl}/users/login`, async ({ request }) => 
 // 구글 로그인
 export const googleLogin = http.post(`${httpUrl}/users/login/google`, async ({ request }) => {
     try {
-        const { token, redirectUri } = (await request.json()) as any;
-        console.log('google login request:', { token, redirectUri });
+        const { code, redirectUri } = (await request.json()) as any;
+        console.log('google login request:', { code, redirectUri });
         await delay(1000);
         return HttpResponse.json({
             user: {
@@ -43,7 +43,7 @@ export const googleLogin = http.post(`${httpUrl}/users/login/google`, async ({ r
         }, {
             status: 200,
             headers: {
-                'Authorization': `Bearer ${token}`,
+                'Authorization': `Bearer mock-jwt-token`,
                 'Set-Cookie': 'refreshToken=mock-refresh-token; HttpOnly; Secure; SameSite=Strict'
             }
         });
@@ -156,4 +156,17 @@ export const refresh = http.post(`${httpUrl}/users/refresh`, async ({ request })
         JSON.stringify({ message: "유효하지 않은 리프레시 토큰입니다." }),
         { status: 401 }
     );
+});
+
+// 사용자 인증 핸들러
+export const verify = http.get(`${httpUrl}/users/verify`, async () => {
+    await delay(1000);
+    return HttpResponse.json({
+        authenticated: true,
+        message: '인증이 완료되었습니다.',
+        user: {
+            email: "moimo@email.com",
+            nickname: "테스터",
+        }
+    });
 });
