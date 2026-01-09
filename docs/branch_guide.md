@@ -16,3 +16,12 @@
 
 ### 기타
 - 깃허브 브랜치를 로컬에 연결 : git checkout -t origin/[branch_name]
+
+
+### PR 넘버를 통해 fetch
+- git fetch origin pull/[PR_number]/head:[branch_name]
+- git checkout [branch_name]
+
+- 예시
+- git fetch origin pull/10/head:pr-10
+- git checkout pr-10
