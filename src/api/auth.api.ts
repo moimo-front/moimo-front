@@ -1,6 +1,7 @@
 import type { LoginFormValues } from "@/pages/user/Login";
 import { apiClient } from "@/api/client";
 import type { JoinFormValues } from "@/pages/user/Join";
+import type { User } from "@/models/user.model";
 
 export interface LoginResponse {
     user: {
@@ -52,11 +53,21 @@ export const logout = async () => {
     }
 }
 
+export interface JoinResponse {
+    message: string;
+    accessToken?: string;
+    user: User;
+}
+
 // 회원가입
-export const join = async (data: JoinFormValues): Promise<{ message: string }> => {
+export const join = async (data: JoinFormValues): Promise<JoinResponse> => {
     try {
         const response = await apiClient.post("/users/register", data);
-        return response.data;
+        const accessToken = response.headers.authorization?.replace("Bearer ", "");
+        return {
+            ...response.data,
+            accessToken,
+        };
     } catch (error) {
         console.error("join error:", error);
         throw error;

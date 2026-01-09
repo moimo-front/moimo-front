@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@radix-ui/react-label";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useInterestQuery } from "@/hooks/useInterestQuery";
 import * as z from "zod";
@@ -20,6 +20,8 @@ export type ExtraInfoFormValues = z.infer<typeof extraInfoSchema>;
 
 const ExtraInfo = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const { /*id, email, */ nickname } = location.state || {}; // id, email은 이제 토큰에서 처리, nickname은 환영 메시지용
     const { data: interests } = useInterestQuery();
     const extraInfoMutation = useExtraInfoMutation();
 
@@ -56,7 +58,12 @@ const ExtraInfo = () => {
 
     const onSubmit = async (data: ExtraInfoFormValues) => {
         try {
-            await extraInfoMutation.mutateAsync(data);
+            await extraInfoMutation.mutateAsync({
+                ...data,
+                // id,
+                // email,
+                nickname
+            });
             alert("프로필 등록이 완료되었습니다.");
             navigate("/");
         } catch (error) {
@@ -74,7 +81,9 @@ const ExtraInfo = () => {
             <Card className="w-full max-w-[500px] p-8 shadow-lg border-none bg-card rounded-[12px]">
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold text-center text-foreground mb-2">프로필 등록하기</CardTitle>
-                    <CardDescription className="text-center">프로필을 등록하여 모이모와 함께해요</CardDescription>
+                    <CardDescription className="text-center">
+                        {nickname ? `${nickname}님, ` : ""}프로필을 등록하여 모이모와 함께해요
+                    </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-8 p-0">
                     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">

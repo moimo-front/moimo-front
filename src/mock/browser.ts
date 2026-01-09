@@ -11,6 +11,7 @@ import {
     refresh
 } from './authHandler';
 import { getInterests } from './interestHandler';
+import { extraInfo } from './userInfoHandler';
 
 const handlers = [
     login,
@@ -22,6 +23,7 @@ const handlers = [
     googleLogin,
     logout,
     refresh,
-    getInterests
+    getInterests,
+    extraInfo
 ];
 export const worker = setupWorker(...handlers);
