@@ -23,7 +23,7 @@ function Header() {
           variant="ghost"
           className="cursor-pointer hover:bg-transparent"
         >
-          <Link to="/">모이머란?</Link>
+          <Link to="/moimer-intro">모이머란?</Link>
         </Button>
         <Button
           asChild
