@@ -50,11 +50,11 @@ const Login = () => {
         try {
             await loginMutation(data);
             navigate("/");
-        } catch (error: any) {
+        } catch (error) {
             setError("root",
                 {
                     type: "manual",
-                    message: error.response?.data?.message || "로그인에 실패했습니다"
+                    message: "로그인에 실패했습니다"
                 }
             );
         }
