@@ -1,7 +1,7 @@
 import { useState } from "react";
 import MeetingList from "@/components/common/MeetingList";
 import PaginationComponent from "@/components/common/PaginationComponent";
-import { useMeetingsQuery } from "@/hooks/useMeetingsQuery";
+import { useMeetingsQuery } from "@/hooks/useMeetingsQuery.ts";
 import { usePagination } from "@/hooks/usePagination";
 
 const MeetingsPage = () => {
@@ -25,21 +25,16 @@ const MeetingsPage = () => {
   const meetings = meetingsResponse?.data || [];
 
   return (
-    <div className="space-y-4">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold">원하는 모임 찾기</h1>
-        <p className="text-muted-foreground">
-          다양한 모임을 둘러보고 참여해보세요.
-        </p>
-      </div>
+    <div className="space-y-4 bg-card">
+      <h1 className="text-3xl font-bold p-4">원하는 모임 찾기</h1>
 
       {/* TODO: Filter section */}
-      <div className="flex justify-between items-center p-4 border rounded-md">
+      <div className="flex justify-between items-center px-4">
         <div>
-          <p>카테고리 | 날짜 | 지역 | 개수 (필터링 UI 위치)</p>
+          <p>카테고리 | 날짜 | 지역 | 개수</p>
         </div>
         <div className="flex items-center gap-2">
-          <p className="cursor-pointer font-semibold">인기순</p>
+          <p className="cursor-pointer">인기순</p>
           <p className="text-muted-foreground">|</p>
           <p className="cursor-pointer">최신순</p>
         </div>

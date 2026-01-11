@@ -1,5 +1,5 @@
 import MeetingCard from "../common/MeetingCard";
-import { useMeetingsQuery } from "@/hooks/useMeetingsQuery";
+import { useMeetingsQuery } from "@/hooks/useMeetingsQuery.ts";
 import type { Meeting } from "@/models/meeting.model";
 
 function PopularMeetingList() {
