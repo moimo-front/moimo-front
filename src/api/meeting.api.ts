@@ -4,8 +4,9 @@ import type { MeetingListResponse } from "@/models/meeting.model";
 export interface GetMeetingsParams {
   page?: number;
   limit?: number;
-  // TODO: 필터링 조건 추가하기
-  // interestName?: string;
+  sort?: SortType;
+  interestFilter?: InterestFilterType;
+  finishedFilter?: FinishedFilterType;
 }
 
 export const getMeetings = async (
