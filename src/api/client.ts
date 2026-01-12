@@ -32,6 +32,12 @@ export const createClient = (config?: AxiosRequestConfig) => {
         if (accessToken && !isPublicEndpoint) {
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
+
+        // FormData 전송 시 Content-Type 헤더 제거 (브라우저가 자동으로 boundary 포함하여 설정)
+        if (config.data instanceof FormData) {
+            delete config.headers['Content-Type'];
+        }
+
         return config;
     })
 

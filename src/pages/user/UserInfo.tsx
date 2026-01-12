@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@radix-ui/react-label";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useInterestQuery } from "@/hooks/useInterestQuery";
 import * as z from "zod";
@@ -56,7 +56,11 @@ const UserInfo = () => {
 
     const onSubmit = async (data: UserInfoFormValues) => {
         try {
-            await userUpdateMutation.mutateAsync(data);
+            const formData = new FormData();
+            formData.append("bio", data.bio);
+            formData.append("interests", JSON.stringify(data.interests));
+
+            await userUpdateMutation.mutateAsync(formData);
             alert("프로필 등록이 완료되었습니다.");
             navigate("/");
         } catch (error) {
