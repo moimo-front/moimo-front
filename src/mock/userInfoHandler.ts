@@ -1,7 +1,7 @@
 import { http, HttpResponse, delay } from 'msw';
 import { httpUrl } from './mockData';
 
-export const extraInfo = http.put(`${httpUrl}/users/extraInfo`, async ({ request }) => {
+export const extraInfo = http.put(`${httpUrl}/users/extra-info`, async ({ request }) => {
     // 추가 정보 핸들러
     // const { bio, interests, id, email, nickname } = (await request.json()) as any;
     // console.log("Joined User Extra Info:", { id, email, nickname, bio, interests });

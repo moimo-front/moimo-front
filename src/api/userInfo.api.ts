@@ -9,7 +9,7 @@ export interface ExtraInfoPayload extends ExtraInfoFormValues {
 
 export const extraInfo = async (data: ExtraInfoPayload) => {
     try {
-        return apiClient.put("/users/extraInfo", data)
+        return apiClient.put("/users/extra-info", data)
     } catch (error) {
         console.error("extraInfo error:", error)
         throw error
