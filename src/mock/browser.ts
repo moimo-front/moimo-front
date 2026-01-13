@@ -10,6 +10,8 @@ import {
     logout,
     refresh
 } from './authHandler';
+import { getInterests } from './interestHandler';
+import { userUpdate } from './userInfoHandler';
 
 const handlers = [
     login,
@@ -21,5 +23,7 @@ const handlers = [
     googleLogin,
     logout,
     refresh,
+    getInterests,
+    userUpdate
 ];
 export const worker = setupWorker(...handlers);

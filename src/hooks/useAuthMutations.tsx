@@ -72,6 +72,12 @@ export const useJoinMutation = () => {
         mutationFn: async (data: JoinFormValues) => {
             return await join(data);
         },
+        onSuccess: (data) => {
+            const { storeLogin } = useAuthStore.getState();
+            if (data.accessToken) {
+                storeLogin(data.user.nickname, data.accessToken);
+            }
+        },
         onError: (error: AxiosError<{ message: string }>) => {
             console.error(error);
         }
