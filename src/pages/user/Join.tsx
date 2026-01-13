@@ -78,11 +78,11 @@ const Join = () => {
             const { /* id, email, */ nickname } = joinInfo.user;
             alert("회원가입이 완료되었습니다.");
             navigate("/extra-info", { state: { /* id, email, */ nickname } });
-        } catch (error: any) {
+        } catch (error) {
             console.error("회원가입 중 오류 발생: ", error);
             setError("root", {
                 type: "manual",
-                message: error.response?.data?.message || "회원가입에 실패했습니다."
+                message: "회원가입에 실패했습니다."
             });
         }
     };

@@ -137,13 +137,28 @@ export const checkNickname = http.post(`${httpUrl}/users/check-nickname`, async 
     );
 });
 
+
+// 비밀번호 재설정 코드 저장소 (메모리 DB 역할)
+const resetCodeStore = new Map<string, { email: string; expiresAt: Date }>();
+
 // 비밀번호 찾기
 export const findPassword = http.post(`${httpUrl}/users/find-password`, async ({ request }) => {
     const { email } = (await request.json()) as any;
     await delay(1000);
 
     if (email === "moimo@email.com") {
-        return HttpResponse.json({ message: "비밀번호 재설정 이메일이 발송되었습니다." });
+        // 인증코드 생성 (6자리 숫자)
+        const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+        // 만료 시간 설정 (5분)
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+        // 저장소에 저장
+        resetCodeStore.set(resetCode, { email, expiresAt });
+        console.log(`[Mock] Reset Code Generated for ${email}: ${resetCode}, Expires at: ${expiresAt.toLocaleTimeString()}`);
+
+        return HttpResponse.json({ message: "비밀번호 재설정 이메일이 발송되었습니다.", resetCode },
+            { status: 200 }
+        );
     }
     return HttpResponse.json({ message: "이메일이 일치하지 않습니다." },
         { status: 404 }
@@ -151,11 +166,38 @@ export const findPassword = http.post(`${httpUrl}/users/find-password`, async ({
 });
 
 // 비밀번호 재설정
-export const resetPassword = http.post(`${httpUrl}/users/reset-password`, async ({ request }) => {
-    // const { email, code, newPassword } = (await request.json()) as any;
+export const resetPassword = http.put(`${httpUrl}/users/reset-password`, async ({ request }) => {
+    const { resetCode, newPassword } = (await request.json()) as any;
     await delay(1000);
-    return HttpResponse.json({ message: "비밀번호가 성공적으로 변경되었습니다." });
+
+    const storedData = resetCodeStore.get(resetCode);
+
+    if (!storedData) {
+        return new HttpResponse(
+            JSON.stringify({ message: "유효하지 않은 인증코드입니다." }),
+            { status: 400 }
+        );
+    }
+
+    if (storedData.expiresAt < new Date()) {
+        resetCodeStore.delete(resetCode); // 만료된 코드 삭제
+        return new HttpResponse(
+            JSON.stringify({ message: "인증코드가 만료되었습니다." }),
+            { status: 400 }
+        );
+    }
+
+    // 여기서 실제로는 비밀번호 변경 로직이 들어가야 함 (Mock에서는 성공으로 처리)
+    // 사용 완료된 코드 삭제
+    resetCodeStore.delete(resetCode);
+
+    return HttpResponse.json({ message: "비밀번호가 성공적으로 변경되었습니다." },
+        { status: 200 }
+    );
 });
+
+
+
 
 // 토큰 갱신 핸들러
 export const refresh = http.post(`${httpUrl}/users/refresh`, async ({ request }) => {

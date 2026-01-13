@@ -2,6 +2,8 @@ import type { LoginFormValues } from "@/pages/user/Login";
 import { apiClient } from "@/api/client";
 import type { JoinFormValues } from "@/pages/user/Join";
 import type { User } from "@/models/user.model";
+import type { FindPasswordFormValues } from "@/pages/user/FindPassword";
+import type { ResetPasswordFormValues } from "@/pages/user/ResetPassword";
 
 export interface LoginResponse {
     user: {
@@ -96,7 +98,7 @@ export const checkNickname = async (data: { nickname: string }) => {
 };
 
 // 비밀번호 찾기
-export const findPassword = async (data: { email: string }): Promise<{ message: string }> => {
+export const findPassword = async (data: FindPasswordFormValues) => {
     try {
         const response = await apiClient.post("/users/find-password", data);
         return response.data;
@@ -107,9 +109,9 @@ export const findPassword = async (data: { email: string }): Promise<{ message: 
 };
 
 // 비밀번호 재설정
-export const resetPassword = async (data: any): Promise<{ message: string }> => {
+export const resetPassword = async (data: ResetPasswordFormValues) => {
     try {
-        const response = await apiClient.post("/users/reset-password", data);
+        const response = await apiClient.put("/users/reset-password", data);
         return response.data;
     } catch (error) {
         console.error("resetPassword error:", error);

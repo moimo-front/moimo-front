@@ -64,7 +64,7 @@ const Login = () => {
             setError("root",
                 {
                     type: "manual",
-                    message: error.response?.data?.message || "로그인에 실패했습니다"
+                    message: "로그인에 실패했습니다"
                 }
             );
         }
