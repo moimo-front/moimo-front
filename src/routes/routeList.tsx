@@ -5,6 +5,7 @@ import Join from "@/pages/user/Join";
 import FindPassword from "@/pages/user/FindPassword";
 import ResetPassword from "@/pages/user/ResetPassword";
 import UserInfo from "@/pages/user/UserInfo";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export const routeList = [
     {

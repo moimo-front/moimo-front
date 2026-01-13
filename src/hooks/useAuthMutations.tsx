@@ -1,6 +1,6 @@
 import type { LoginFormValues } from "@/pages/user/Login";
 import { useAuthStore } from "@/store/authStore";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     login,
     join,
@@ -19,6 +19,7 @@ import type { ResetPasswordFormValues } from "@/pages/user/ResetPassword";
 // 로그인 Mutation
 export const useLoginMutation = () => {
     const { storeLogin } = useAuthStore();
+    const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async (data: LoginFormValues) => {
@@ -27,6 +28,8 @@ export const useLoginMutation = () => {
         onSuccess: (data) => {
             // 로그인 성공 시 전역 상태 업데이트
             storeLogin(data.user.nickname, data.accessToken);
+            // 인증 상태 쿼리 초기화
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
         },
         onError: (error) => {
             console.error(error);
@@ -37,12 +40,15 @@ export const useLoginMutation = () => {
 // 구글 로그인 Mutation
 export const useGoogleLoginMutation = () => {
     const { storeLogin } = useAuthStore();
+    const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: async (data: { code: string; redirectUri: string }) => {
             return await googleLogin(data);
         },
         onSuccess: (data) => {
             storeLogin(data.user.nickname, data.accessToken);
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
         },
         onError: (error: AxiosError<{ message: string }>) => {
             console.error(error);
@@ -53,6 +59,7 @@ export const useGoogleLoginMutation = () => {
 // 로그아웃 Mutation
 export const useLogoutMutation = () => {
     const { storeLogout } = useAuthStore();
+    const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async () => {
@@ -61,6 +68,7 @@ export const useLogoutMutation = () => {
         onSuccess: () => {
             // 로그아웃 성공 시 전역 상태 업데이트
             storeLogout();
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
         },
         onError: (error) => {
             console.error(error);
@@ -70,6 +78,8 @@ export const useLogoutMutation = () => {
 
 // 회원가입 Muatation
 export const useJoinMutation = () => {
+    const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: async (data: JoinFormValues) => {
             return await join(data);
@@ -78,6 +88,7 @@ export const useJoinMutation = () => {
             const { storeLogin } = useAuthStore.getState();
             if (data.accessToken) {
                 storeLogin(data.user.nickname, data.accessToken);
+                queryClient.invalidateQueries({ queryKey: ["authUser"] });
             }
         },
         onError: (error: AxiosError<{ message: string }>) => {
