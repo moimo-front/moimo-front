@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type {
   FinishedFilterType,
   InterestFilterType,
@@ -42,15 +42,20 @@ export const MeetingFilterControls = ({
     useState<boolean>(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState<boolean>(false);
 
-  const selectedInterestName =
-    filters.interestFilter === "ALL"
-      ? "카테고리"
-      : interestsData?.find((i) => i.id.toString() === filters.interestFilter)
-          ?.name || "카테고리";
+  const selectedInterestName = useMemo(() => {
+    if (filters.interestFilter === "ALL") return "카테고리";
+    const found = interestsData?.find(
+      (i) => i.id.toString() === filters.interestFilter
+    );
+    return found ? found.name : "카테고리";
+  }, [filters.interestFilter, interestsData]);
 
-  const selectedSortLabel =
-    sortOptions.find((option) => option.value === filters.sort)?.label ||
-    "정렬";
+  const selectedSortLabel = useMemo(() => {
+    return (
+      sortOptions.find((option) => option.value === filters.sort)?.label ||
+      "정렬"
+    );
+  }, [filters.sort]);
 
   return (
     <div className="flex justify-between items-center px-4">

@@ -21,7 +21,9 @@ export const getMeetings = async (
       params: {
         page: params?.page ?? 1,
         limit: params?.limit ?? 10,
-        ...params, // 나머지 필터 조건들 포함
+        sort: params?.sort ?? "NEW",
+        interestFilter: params?.interestFilter,
+        finishedFilter: params?.finishedFilter,
       },
     });
     return response.data;

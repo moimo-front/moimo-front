@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MeetingList from "@/components/common/MeetingList";
 import PaginationComponent from "@/components/common/PaginationComponent";
 import { useMeetingsQuery } from "@/hooks/useMeetingsQuery";
 import { usePagination } from "@/hooks/usePagination";
 import { useMeetingFilter } from "@/hooks/useMeetingFilter";
 import { MeetingFilterControls } from "@/components/features/meetings/MeetingFilterControls";
+import type {
+  FinishedFilterType,
+  InterestFilterType,
+  SortType,
+} from "@/api/meeting.api";
 
 const MeetingsPage = () => {
   const [page, setPage] = useState<number>(1);
@@ -17,6 +22,18 @@ const MeetingsPage = () => {
     handleFinishedFilterChange,
   } = useMeetingFilter();
 
+  const onFilterChange = <T extends SortType | InterestFilterType | FinishedFilterType>(
+    updater: (value: T) => void,
+    value: T
+  ) => {
+    updater(value);
+    setPage(1);
+  };
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page]);
+
   const {
     data: meetingsResponse,
     isLoading,
@@ -27,7 +44,13 @@ const MeetingsPage = () => {
   const interestsData = [];
   const isInterestsLoading = false;
 
-  const { totalPages, goToNextPage, goToPreviousPage } = usePagination({
+  const {
+    totalPages,
+    goToNextPage,
+    goToPreviousPage,
+    isFirstPage,
+    isLastPage,
+  } = usePagination({
     page,
     setPage,
     limit,
@@ -45,9 +68,13 @@ const MeetingsPage = () => {
         filters={filters}
         interestsData={interestsData}
         isInterestsLoading={isInterestsLoading}
-        handleSortChange={handleSortChange}
-        handleInterestFilterChange={handleInterestFilterChange}
-        handleFinishedFilterChange={handleFinishedFilterChange}
+        handleSortChange={(v) => onFilterChange(handleSortChange, v)}
+        handleInterestFilterChange={(v) =>
+          onFilterChange(handleInterestFilterChange, v)
+        }
+        handleFinishedFilterChange={(v) =>
+          onFilterChange(handleFinishedFilterChange, v)
+        }
       />
 
       {isLoading && <p className="text-center">로딩 중...</p>}
@@ -71,6 +98,8 @@ const MeetingsPage = () => {
             setPage={setPage}
             goToNextPage={goToNextPage}
             goToPreviousPage={goToPreviousPage}
+            isFirstPage={isFirstPage}
+            isLastPage={isLastPage}
           />
         )}
       </div>

@@ -23,7 +23,8 @@ function MeetingListSection({
   } = useMeetingsQuery(queryOptions);
 
   const meetings = meetingsResponse?.data || [];
-  const finalTitle = title.replace("{nickname}", nickname || "");
+  const safeNickname = nickname || "예비 모이머";
+  const finalTitle = title.replace("{nickname}", safeNickname);
 
   return (
     <div className="w-full max-w-6xl mx-auto py-8">

@@ -5,7 +5,7 @@ import { getMeetings } from "@/api/meeting.api";
 export const useMeetingsQuery = (params: GetMeetingsParams) => {
   const meetingsResponse = useQuery({
     queryKey: ["meetings", params],
-    queryFn: async () => await getMeetings(params),
+    queryFn: () => getMeetings(params),
   });
 
   return meetingsResponse;

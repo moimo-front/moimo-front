@@ -14,6 +14,8 @@ interface PaginationComponentProps {
   setPage: (page: number) => void;
   goToNextPage: () => void;
   goToPreviousPage: () => void;
+  isFirstPage?: boolean;
+  isLastPage?: boolean;
 }
 
 const PaginationComponent = ({
@@ -22,77 +24,55 @@ const PaginationComponent = ({
   setPage,
   goToNextPage,
   goToPreviousPage,
+  isFirstPage = false,
+  isLastPage = false,
 }: PaginationComponentProps) => {
-  const handlePageClick = (pageNumber: number) => {
-    setPage(pageNumber);
-  };
+  const renderPageItems = () => {
+    const pageItems = [];
 
-  const renderPageLinks = () => {
-    const pageNumbers = [];
+    const createLink = (p: number) => (
+      <PaginationItem key={p}>
+        <PaginationLink
+          href="#"
+          isActive={p === page}
+          onClick={(e) => {
+            e.preventDefault();
+            setPage(p);
+          }}
+        >
+          {p}
+        </PaginationLink>
+      </PaginationItem>
+    );
 
     // 5페이지 이하인 경우: 링크 전부 보여줌
     if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              href="#"
-              isActive={i === page}
-              onClick={(e) => {
-                e.preventDefault();
-                handlePageClick(i);
-              }}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
+        pageItems.push(createLink(i));
       }
-      return pageNumbers;
+      return pageItems;
     }
 
-    // 5페이지 초과인 경우: 1, 2, 3, ... n-1, n
-    for (let i = 1; i <= 3; i++) {
-      pageNumbers.push(
-        <PaginationItem key={i}>
-          <PaginationLink
-            href="#"
-            isActive={i === page}
-            onClick={(e) => {
-              e.preventDefault();
-              handlePageClick(i);
-            }}
-          >
-            {i}
-          </PaginationLink>
-        </PaginationItem>
-      );
+    const startPage = Math.max(1, page - 2);
+    const endPage = Math.min(totalPages, page + 2);
+
+    if (startPage > 1) {
+      pageItems.push(createLink(1));
+      if (startPage > 2)
+        pageItems.push(<PaginationEllipsis key="start-ellipsis" />);
     }
 
-    pageNumbers.push(
-      <PaginationItem key="ellipsis">
-        <PaginationEllipsis />
-      </PaginationItem>
-    );
-
-    for (let i = totalPages - 1; i <= totalPages; i++) {
-      pageNumbers.push(
-        <PaginationItem key={i}>
-          <PaginationLink
-            href="#"
-            isActive={i === page}
-            onClick={(e) => {
-              e.preventDefault();
-              handlePageClick(i);
-            }}
-          >
-            {i}
-          </PaginationLink>
-        </PaginationItem>
-      );
+    for (let i = startPage; i <= endPage; i++) {
+      pageItems.push(createLink(i));
     }
 
-    return pageNumbers;
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1)
+        pageItems.push(<PaginationEllipsis key="end-ellipsis" />);
+      pageItems.push(createLink(totalPages));
+    }
+
+    return pageItems;
   };
 
   return (
@@ -103,29 +83,27 @@ const PaginationComponent = ({
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              goToPreviousPage();
+              if (!isFirstPage) goToPreviousPage();
             }}
-            aria-disabled={page === 1}
+            aria-disabled={isFirstPage}
             className={
-              page === 1 ? "pointer-events-none text-muted-foreground" : ""
+              isFirstPage ? "pointer-events-none text-muted-foreground" : ""
             }
           />
         </PaginationItem>
 
-        {renderPageLinks()}
+        {renderPageItems()}
 
         <PaginationItem>
           <PaginationNext
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              goToNextPage();
+              if (!isLastPage) goToNextPage();
             }}
-            aria-disabled={page === totalPages}
+            aria-disabled={isLastPage}
             className={
-              page === totalPages
-                ? "pointer-events-none text-muted-foreground"
-                : ""
+              isLastPage ? "pointer-events-none text-muted-foreground" : ""
             }
           />
         </PaginationItem>
