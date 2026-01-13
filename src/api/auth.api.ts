@@ -7,11 +7,11 @@ import type { ResetPasswordFormValues } from "@/pages/user/ResetPassword";
 
 export interface LoginResponse {
     user: {
+        isNewUser: boolean;
         email: string;
         nickname: string;
     };
     accessToken: string;
-    isNewUser: boolean;
 }
 
 // 일반 로그인

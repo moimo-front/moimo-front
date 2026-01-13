@@ -183,11 +183,11 @@ const Join = () => {
                                     <p className="text-sm text-destructive">{errors.email.message}</p>
                                 ) : emailCheckMutation.isError ? (
                                     <p className="text-sm text-destructive">
-                                        {emailCheckMutation.error?.response?.data?.message || "이미 사용 중인 이메일입니다."}
+                                        {"이미 사용 중인 이메일입니다."}
                                     </p>
                                 ) : emailCheckMutation.isSuccess ? (
                                     <p className="text-sm text-success">
-                                        {emailCheckMutation.data?.message || "사용 가능한 이메일입니다."}
+                                        {"사용 가능한 이메일입니다."}
                                     </p>
                                 ) : null}
                             </div>
@@ -222,12 +222,12 @@ const Join = () => {
                                 )}
                                 {nicknameCheckMutation.isSuccess && (
                                     <p className="text-sm text-success">
-                                        {nicknameCheckMutation.data?.message || "사용 가능한 닉네임입니다."}
+                                        {"사용 가능한 닉네임입니다."}
                                     </p>
                                 )}
                                 {nicknameCheckMutation.isError && (
                                     <p className="text-sm text-destructive">
-                                        {nicknameCheckMutation.error?.response?.data?.message || "이미 사용 중인 닉네임입니다."}
+                                        {"이미 사용 중인 닉네임입니다."}
                                     </p>
                                 )}
                             </div>

@@ -2,28 +2,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@radix-ui/react-label";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useInterestQuery } from "@/hooks/useInterestQuery";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useExtraInfoMutation } from "@/hooks/useUserInfoMutations";
+import { useUserUpdateMutation } from "@/hooks/useUserInfoMutations";
 
 // zod schema 정의
-const extraInfoSchema = z.object({
+const userInfoSchema = z.object({
     bio: z.string().max(100, "자기소개는 100자 이내로 입력해주세요."),
     interests: z.array(z.string()).min(3, "관심사를 3개 이상 선택해주세요."),
 });
 
-export type ExtraInfoFormValues = z.infer<typeof extraInfoSchema>;
+export type UserInfoFormValues = z.infer<typeof userInfoSchema>;
 
-const ExtraInfo = () => {
+const UserInfo = () => {
     const navigate = useNavigate();
-    const location = useLocation();
-    const { /*id, email, */ nickname } = location.state || {}; // id, email은 이제 토큰에서 처리, nickname은 환영 메시지용
     const { data: interests } = useInterestQuery();
-    const extraInfoMutation = useExtraInfoMutation();
+    const userUpdateMutation = useUserUpdateMutation();
 
     const {
         register,
@@ -32,8 +30,8 @@ const ExtraInfo = () => {
         setValue,
         watch,
         formState: { errors, isValid }
-    } = useForm<ExtraInfoFormValues>({
-        resolver: zodResolver(extraInfoSchema),
+    } = useForm<UserInfoFormValues>({
+        resolver: zodResolver(userInfoSchema),
         mode: "onChange",
         defaultValues: {
             bio: "",
@@ -56,14 +54,13 @@ const ExtraInfo = () => {
         setValue("interests", currentInterests, { shouldValidate: true });
     };
 
-    const onSubmit = async (data: ExtraInfoFormValues) => {
+    const onSubmit = async (data: UserInfoFormValues) => {
         try {
-            await extraInfoMutation.mutateAsync({
-                ...data,
-                // id,
-                // email,
-                nickname
-            });
+            const formData = new FormData();
+            formData.append("bio", data.bio);
+            formData.append("interests", JSON.stringify(data.interests));
+
+            await userUpdateMutation.mutateAsync(formData);
             alert("프로필 등록이 완료되었습니다.");
             navigate("/");
         } catch (error) {
@@ -82,7 +79,7 @@ const ExtraInfo = () => {
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold text-center text-foreground mb-2">프로필 등록하기</CardTitle>
                     <CardDescription className="text-center">
-                        {nickname ? `${nickname}님, ` : ""}프로필을 등록하여 모이모와 함께해요
+                        프로필을 등록하여 모이모와 친해져요
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-8 p-0">
@@ -155,4 +152,4 @@ const ExtraInfo = () => {
     );
 };
 
-export default ExtraInfo;
+export default UserInfo;

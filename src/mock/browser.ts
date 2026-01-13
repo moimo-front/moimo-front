@@ -11,7 +11,7 @@ import {
     refresh
 } from './authHandler';
 import { getInterests } from './interestHandler';
-import { extraInfo } from './userInfoHandler';
+import { userUpdate } from './userInfoHandler';
 
 const handlers = [
     login,
@@ -24,6 +24,6 @@ const handlers = [
     logout,
     refresh,
     getInterests,
-    extraInfo
+    userUpdate
 ];
 export const worker = setupWorker(...handlers);

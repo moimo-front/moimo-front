@@ -1,9 +1,9 @@
-import JoinedMeetingsList from "@/components/common/JoinedMeetingsList";
-import PendingMeetingsList from "@/components/common/PendingMeetingsList";
-import PopularMeetingList from "@/components/common/PopularMeetingList";
-import SearchSection from "@/components/common/SearchSection";
-import TopicSection from "@/components/common/TopicSection";
-import { useAuthStore } from "@/store/authStore";
+import JoinedMeetingsList from "@features/meetings/JoinedMeetingsList";
+import PendingMeetingsList from "@features/meetings/PendingMeetingsList";
+import PopularMeetingList from "@features/meetings/PopularMeetingList";
+import SearchSection from "@features/search/SearchSection";
+import TopicSection from "@features/topics/TopicSection";
+import { useAuthStore } from "@store/authStore";
 
 function Home() {
   const { isLoggedIn } = useAuthStore();

@@ -1,17 +1,10 @@
-import type { ExtraInfoFormValues } from "@/pages/user/ExtraInfo"
 import { apiClient } from "./client"
 
-export interface ExtraInfoPayload extends ExtraInfoFormValues {
-    // id: number;
-    // email: string;
-    nickname: string;
-}
-
-export const extraInfo = async (data: ExtraInfoPayload) => {
+export const userInfoUpdate = async (data: FormData) => {
     try {
-        return apiClient.put("/users/extraInfo", data)
+        return apiClient.put("/users/user-update", data);
     } catch (error) {
-        console.error("extraInfo error:", error)
-        throw error
+        console.error("userInfoUpdate error:", error);
+        throw error;
     }
 }
