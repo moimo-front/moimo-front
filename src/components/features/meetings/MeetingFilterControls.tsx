@@ -23,20 +23,24 @@ interface MeetingFilterControlsProps {
     interestFilter: InterestFilterType;
     finishedFilter: FinishedFilterType;
   };
+  limit: number;
   interestsData: Interest[] | undefined;
   isInterestsLoading: boolean;
   handleSortChange: (newSort: SortType) => void;
   handleInterestFilterChange: (newInterest: InterestFilterType) => void;
   handleFinishedFilterChange: (checked: FinishedFilterType) => void;
+  handleLimitChange: (newLimit: number) => void;
 }
 
 export const MeetingFilterControls = ({
   filters,
+  limit,
   interestsData,
   isInterestsLoading,
   handleSortChange,
   handleInterestFilterChange,
   handleFinishedFilterChange,
+  handleLimitChange,
 }: MeetingFilterControlsProps) => {
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] =
     useState<boolean>(false);
@@ -128,10 +132,22 @@ export const MeetingFilterControls = ({
           {filters.finishedFilter ? "마감된 모임 포함" : "모집중인 모임"}
         </Button>
 
-        {/* TODO: 개수 버튼 구현 */}
-        <Button variant="outline" disabled>
-          개수
-        </Button>
+        {/* 개수 버튼 */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">{`${limit}개씩 보기`}</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuRadioGroup
+              value={limit.toString()}
+              onValueChange={(value) => handleLimitChange(Number(value))}
+            >
+              <DropdownMenuRadioItem value="10">10개</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="20">20개</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="50">50개</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="flex items-center gap-2 text-sm">

@@ -17,15 +17,19 @@ export const getMeetings = async (
   params?: GetMeetingsParams
 ): Promise<MeetingListResponse> => {
   try {
-    const response = await apiClient.get<MeetingListResponse>("/meetings", {
-      params: {
-        page: params?.page ?? 1,
-        limit: params?.limit ?? 10,
-        sort: params?.sort ?? "NEW",
-        interestFilter: params?.interestFilter,
-        finishedFilter: params?.finishedFilter,
-      },
-    });
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+    }
+    // url에 쿼리 적용
+    const queryString = queryParams.toString();
+    const url = queryString ? `/meetings?${queryString}` : "/meetings";
+
+    const response = await apiClient.get<MeetingListResponse>(url);
     return response.data;
   } catch (error) {
     console.error("getMeetings error:", error);

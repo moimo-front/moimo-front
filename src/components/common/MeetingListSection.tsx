@@ -3,6 +3,7 @@ import type { GetMeetingsParams } from "@/api/meeting.api";
 import { useAuthStore } from "@/store/authStore";
 import { Link } from "react-router-dom";
 import MeetingList from "@/components/common/MeetingList";
+import { Skeleton } from "../ui/skeleton";
 
 interface MeetingListSectionProps {
   title: string;
@@ -34,7 +35,13 @@ function MeetingListSection({
           전체보기
         </Link>
       </div>
-      {isLoading && <p className="text-center">로딩 중...</p>}
+      {isLoading && (
+        <div className="grid grid-cols-4 gap-4 justify-items-center">
+          {[...Array(8)].map((_, index) => (
+            <Skeleton key={index} className="w-48 h-60 rounded-lg" />
+          ))}
+        </div>
+      )}
       {isError && (
         <p className="text-center text-red-500">
           모임을 불러오는 중 에러가 발생했습니다.

@@ -1,37 +1,11 @@
-import type {
-  FinishedFilterType,
-  InterestFilterType,
-  SortType,
-} from "@/api/meeting.api";
-import { useState } from "react";
+import type { SortType } from "@/api/meeting.api";
 
-export const useMeetingFilter = () => {
-  const [sort, setSort] = useState<SortType>("NEW");
-  const [interestFilter, setInterestFilter] =
-    useState<InterestFilterType>("ALL");
-  const [finishedFilter, setFinishedFilter] =
-    useState<FinishedFilterType>(false);
-
-  const handleSortChange = (newSort: SortType) => {
-    setSort(newSort);
-  };
-
-  const handleInterestFilterChange = (
-    newInterestFilter: InterestFilterType
-  ) => {
-    setInterestFilter(newInterestFilter);
-  };
-
-  const handleFinishedFilterChange = (
-    newFinishedFilter: FinishedFilterType
-  ) => {
-    setFinishedFilter(newFinishedFilter);
-  };
+export const useMeetingFilter = (searchParams: URLSearchParams) => {
+  const sort = (searchParams.get("sort") as SortType) || "NEW";
+  const interestFilter = searchParams.get("interestFilter") || "ALL";
+  const finishedFilter = searchParams.get("finishedFilter") === "true";
 
   return {
     filters: { sort, interestFilter, finishedFilter },
-    handleSortChange,
-    handleInterestFilterChange,
-    handleFinishedFilterChange,
   };
 };
