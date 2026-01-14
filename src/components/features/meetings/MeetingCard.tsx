@@ -3,24 +3,17 @@ import { Card, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { IoLocationOutline } from "react-icons/io5";
 import { AiOutlineTeam } from "react-icons/ai";
 import { Link } from "react-router-dom";
+import type { Meeting } from "@/models/meeting.model";
 
 interface MeetingCardProps {
-  title: string;
+  meeting: Meeting;
   imageUrl?: string;
-  location: string;
-  participantsCount: number;
-  href: string; // TODO: 모임 구현 시 사용하는 곳마다 href 추가
   className?: string;
 }
 
-function MeetingCard({
-  title,
-  imageUrl,
-  location,
-  participantsCount,
-  href,
-  className,
-}: MeetingCardProps) {
+function MeetingCard({ meeting, imageUrl, className }: MeetingCardProps) {
+  const { meetingId, title, address, currentParticipants } = meeting;
+  const href = `/meetings/${meetingId}`;
   return (
     <Link
       to={href}
@@ -60,11 +53,11 @@ function MeetingCard({
         <CardFooter className="p-3 pt-0 flex gap-4 items-center text-sm text-muted-foreground">
           <div className="flex items-center">
             <IoLocationOutline />
-            <span>{location}</span>
+            <span>{address}</span>
           </div>
           <div className="flex items-center">
             <AiOutlineTeam />
-            <span>{participantsCount} 명</span>
+            <span>{currentParticipants} 명</span>
           </div>
         </CardFooter>
       </Card>

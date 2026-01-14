@@ -5,7 +5,7 @@ export interface User {
     bio?: string;
     resetCode?: string;
     refreshToken?: string;
-    profileImage?: string;
+    image?: string;
     createdAt: Date;
     updatedAt?: Date;
 }

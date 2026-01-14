@@ -146,3 +146,24 @@ export const refresh = async (): Promise<string | undefined> => {
         throw error;
     }
 }
+
+interface VerifyUserResponse {
+    authenticated: boolean;
+    accessToken: string;
+    message: string;
+    user: {
+        nickname: string;
+        email: string;
+    };
+}
+
+// 사용자 인증
+export const verifyUser = async () => {
+    try {
+        const response = await apiClient.get<VerifyUserResponse>("/users/verify");
+        return response.data;
+    } catch (error) {
+        console.error("verify error:", error);
+        throw error;
+    }
+}
