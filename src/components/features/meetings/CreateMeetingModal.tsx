@@ -3,16 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Slider } from "@/components/ui/slider";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import FormField from "@components/common/FormField";
+import DateTimePicker from "@components/common/DateTimePicker";
 import { useCreateMeetingMutation } from "@/hooks/useMeetingMutations";
 import { TOPIC_CATEGORIES } from "@/constants/topics";
-import { format } from "date-fns";
-import { ko } from "date-fns/locale";
-import { CalendarIcon, Upload, X } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CreateMeetingModalProps {
@@ -24,6 +21,9 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
   const [meetingName, setMeetingName] = useState("");
   const [meetingIntro, setMeetingIntro] = useState("");
   const [meetingDate, setMeetingDate] = useState<Date>();
+  const [meetingHour, setMeetingHour] = useState("3");
+  const [meetingMinute, setMeetingMinute] = useState("00");
+  const [meetingPeriod, setMeetingPeriod] = useState<"AM" | "PM">("PM");
   const [location, setLocation] = useState("");
   const [maxParticipants, setMaxParticipants] = useState([15]);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -74,13 +74,24 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
         imageUrl = await uploadImage(selectedImage);
       }
 
-      // 2단계: 모임 생성 (이미지 URL 포함)
+      // 2단계: 날짜와 시간 결합 (Date 객체를 위해 12시간 형식을 24시간으로 변환)
+      const combinedDateTime = new Date(meetingDate);
+      let hour24 = parseInt(meetingHour);
+      if (meetingPeriod === "PM" && hour24 !== 12) {
+        hour24 += 12;
+      } else if (meetingPeriod === "AM" && hour24 === 12) {
+        hour24 = 0;
+      }
+      combinedDateTime.setHours(hour24);
+      combinedDateTime.setMinutes(parseInt(meetingMinute));
+
+      // 3단계: 모임 생성 (이미지 URL 포함)
       await createMeetingMutation.mutateAsync({
         title: meetingName,
         description: meetingIntro,
         interestIds: selectedInterests,
         maxParticipants: maxParticipants[0],
-        meetingDate: meetingDate.toISOString(),
+        meetingDate: combinedDateTime.toISOString(),
         address: location,
         imageUrl, // 클라우드 URL
       });
@@ -91,6 +102,9 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
       setMeetingName("");
       setMeetingIntro("");
       setMeetingDate(undefined);
+      setMeetingHour("3");
+      setMeetingMinute("00");
+      setMeetingPeriod("PM");
       setLocation("");
       setMaxParticipants([15]);
       setSelectedImage(null);
@@ -189,35 +203,16 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
 
           {/* 모임 날짜 및 시간 */}
           <FormField label="모임 날짜 및 시간" description="모임이 진행될 날짜와 시간을 선택해주세요">
-            <div className="space-y-3">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full h-12 justify-start text-left font-normal ",
-                    !meetingDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {meetingDate ? (
-                    format(meetingDate, "PPP", { locale: ko })
-                  ) : (
-                    <span>날짜를 선택하세요</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-35 p-0 " align="start">
-                <Calendar
-                  mode="single"
-                  selected={meetingDate}
-                  onSelect={setMeetingDate}
-                  disabled={(date) => date < new Date()}
-                />
-              </PopoverContent>
-            </Popover>
-            {/* 시간 선택 기능 추가예정 */}
-            </div>
+            <DateTimePicker
+              date={meetingDate}
+              hour={meetingHour}
+              minute={meetingMinute}
+              period={meetingPeriod}
+              onDateChange={setMeetingDate}
+              onHourChange={setMeetingHour}
+              onMinuteChange={setMeetingMinute}
+              onPeriodChange={setMeetingPeriod}
+            />
           </FormField>
 
           {/* 모임 장소 (카카오 API로 리펙토링할 예정) */}
