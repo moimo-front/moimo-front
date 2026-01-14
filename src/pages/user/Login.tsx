@@ -48,13 +48,23 @@ const Login = () => {
 
     const onSubmit = async (data: LoginFormValues) => {
         try {
-            await loginMutation(data);
-            navigate("/");
+            const loginInfo = await loginMutation(data);
+
+            if (loginInfo.user.isNewUser) {
+                navigate("/extra-info", {
+                    state: {
+                        accessToken: loginInfo.accessToken,
+                        user: loginInfo.user
+                    }
+                });
+            } else {
+                navigate("/");
+            }
         } catch (error: any) {
             setError("root",
                 {
                     type: "manual",
-                    message: error.response?.data?.message || "로그인에 실패했습니다"
+                    message: "로그인에 실패했습니다"
                 }
             );
         }
@@ -65,17 +75,17 @@ const Login = () => {
     const handleGoogleCodeSuccess = async (codeResponse: CodeResponse) => {
         try {
             // codeResponse.code가 Authorization Code
-            const res = await googleLoginMutation.mutateAsync({
+            const loginInfo = await googleLoginMutation.mutateAsync({
                 code: codeResponse.code,
                 redirectUri: 'postmessage' // Auth Code 방식에서는 'postmessage' 고정
             });
-            console.log(res);
+            console.log(loginInfo);
 
-            if (res.isNewUser) {
+            if (loginInfo.user.isNewUser) {
                 navigate("/extra-info", {
                     state: {
-                        accessToken: res.accessToken,
-                        user: res.user
+                        accessToken: loginInfo.accessToken,
+                        user: loginInfo.user
                     }
                 });
             } else {
@@ -134,7 +144,8 @@ const Login = () => {
                 {/* 테스트 계정 - 추후 제거 */}
                 <div className="flex flex-col items-center border border-muted-foreground bg-background rounded-[12px] p-2 gap-1 mb-6">
                     <p className="text-[11px] font-medium text-muted-foreground italic">테스트 계정</p>
-                    <p className="text-[11px] text-muted-foreground italic">moimo@email.com / 12345678</p>
+                    <p className="text-[11px] text-muted-foreground italic">기존: moimo@email.com / 12345678</p>
+                    <p className="text-[11px] text-muted-foreground italic">신규: newuser@email.com / 12345678</p>
                 </div>
                 <CardContent className="flex flex-col gap-8 p-0">
                     <form onSubmit={handleSubmit(onSubmit)}>

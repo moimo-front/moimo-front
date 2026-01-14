@@ -1,7 +1,6 @@
-import { INTEREST_CATEGORIES } from '@/constants/interests';
 import { http, HttpResponse, delay } from 'msw';
+import { httpUrl } from './mockData';
 
-const httpUrl = import.meta.env.VITE_API_URL || 'https://moimo-back.vercel.app';
 
 // 일반 로그인 핸들러
 export const login = http.post(`${httpUrl}/users/login`, async ({ request }) => {
@@ -11,6 +10,7 @@ export const login = http.post(`${httpUrl}/users/login`, async ({ request }) => 
     if (email === "moimo@email.com" && password === "12345678") {
         return HttpResponse.json({
             user: {
+                isNewUser: false, // 기존 유저는 메인으로 이동
                 email,
                 nickname: "테스터",
             },
@@ -18,6 +18,21 @@ export const login = http.post(`${httpUrl}/users/login`, async ({ request }) => 
             headers: {
                 'Authorization': 'Bearer mock-jwt-token',
                 'Set-Cookie': 'refreshToken=mock-refresh-token; HttpOnly; Secure; SameSite=Strict'
+            }
+        });
+    }
+
+    if (email === "newuser@email.com" && password === "12345678") {
+        return HttpResponse.json({
+            user: {
+                isNewUser: true, // 신규 유저는 추가 정보 입력 페이지로 이동
+                email,
+                nickname: "신규유저",
+            },
+        }, {
+            headers: {
+                'Authorization': 'Bearer mock-jwt-token-new',
+                'Set-Cookie': 'refreshToken=mock-refresh-token-new; HttpOnly; Secure; SameSite=Strict'
             }
         });
     }
@@ -36,10 +51,10 @@ export const googleLogin = http.post(`${httpUrl}/users/login/google`, async ({ r
         await delay(1000);
         return HttpResponse.json({
             user: {
+                isNewUser: true,
                 email: "google-user@email.com",
                 nickname: "구글사용자",
             },
-            isNewUser: true,
         }, {
             status: 200,
             headers: {
@@ -63,9 +78,30 @@ export const logout = http.post(`${httpUrl}/users/logout`, async () => {
 });
 
 // 회원가입 핸들러
-export const join = http.post(`${httpUrl}/users/register`, async () => {
+export const join = http.post(`${httpUrl}/users/register`, async ({ request }) => {
+    const { email, password, nickname } = (await request.json()) as any;
     await delay(1000);
-    return HttpResponse.json({ message: "회원가입이 완료되었습니다." });
+    return HttpResponse.json({
+        "message": "회원가입 성공",
+        "user": {
+            "id": 3,
+            "email": email,
+            "password": password,
+            "nickname": nickname,
+            "bio": null,
+            "resetCode": null,
+            "refreshToken": null,
+            "createdAt": "2026-01-07T08:11:07.000Z",
+            "updatedAt": "2026-01-07T08:11:07.000Z"
+        }
+    },
+        {
+            headers: {
+                'Authorization': 'Bearer mock-jwt-token',
+                'Set-Cookie': 'refreshToken=mock-refresh-token; HttpOnly; Secure; SameSite=Strict'
+            }
+        }
+    );
 });
 
 // 이메일 중복 확인
@@ -101,22 +137,9 @@ export const checkNickname = http.post(`${httpUrl}/users/check-nickname`, async 
     );
 });
 
-// 추가정보 핸들러
-export const extraInfo = http.patch(`${httpUrl}/users/extraInfo`, async ({ request }) => {
-    // const { bio, interests } = (await request.json()) as any;
-    await delay(1000);
-    return HttpResponse.json({ message: "추가정보가 완료되었습니다." },
-        { status: 200 }
-    );
-});
 
-// 관심사 조회 핸들러
-export const getInterests = http.get(`${httpUrl}/interests`, async () => {
-    await delay(1000);
-    return HttpResponse.json({ interests: INTEREST_CATEGORIES },
-        { status: 200 }
-    );
-});
+// 비밀번호 재설정 코드 저장소 (메모리 DB 역할)
+const resetCodeStore = new Map<string, { email: string; expiresAt: Date }>();
 
 // 비밀번호 찾기
 export const findPassword = http.post(`${httpUrl}/users/find-password`, async ({ request }) => {
@@ -124,7 +147,18 @@ export const findPassword = http.post(`${httpUrl}/users/find-password`, async ({
     await delay(1000);
 
     if (email === "moimo@email.com") {
-        return HttpResponse.json({ message: "비밀번호 재설정 이메일이 발송되었습니다." });
+        // 인증코드 생성 (6자리 숫자)
+        const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+        // 만료 시간 설정 (5분)
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+        // 저장소에 저장
+        resetCodeStore.set(resetCode, { email, expiresAt });
+        console.log(`[Mock] Reset Code Generated for ${email}: ${resetCode}, Expires at: ${expiresAt.toLocaleTimeString()}`);
+
+        return HttpResponse.json({ message: "비밀번호 재설정 이메일이 발송되었습니다.", resetCode },
+            { status: 200 }
+        );
     }
     return HttpResponse.json({ message: "이메일이 일치하지 않습니다." },
         { status: 404 }
@@ -132,11 +166,38 @@ export const findPassword = http.post(`${httpUrl}/users/find-password`, async ({
 });
 
 // 비밀번호 재설정
-export const resetPassword = http.post(`${httpUrl}/users/reset-password`, async ({ request }) => {
-    // const { email, code, newPassword } = (await request.json()) as any;
+export const resetPassword = http.put(`${httpUrl}/users/reset-password`, async ({ request }) => {
+    const { resetCode, newPassword } = (await request.json()) as any;
     await delay(1000);
-    return HttpResponse.json({ message: "비밀번호가 성공적으로 변경되었습니다." });
+
+    const storedData = resetCodeStore.get(resetCode);
+
+    if (!storedData) {
+        return new HttpResponse(
+            JSON.stringify({ message: "유효하지 않은 인증코드입니다." }),
+            { status: 400 }
+        );
+    }
+
+    if (storedData.expiresAt < new Date()) {
+        resetCodeStore.delete(resetCode); // 만료된 코드 삭제
+        return new HttpResponse(
+            JSON.stringify({ message: "인증코드가 만료되었습니다." }),
+            { status: 400 }
+        );
+    }
+
+    // 여기서 실제로는 비밀번호 변경 로직이 들어가야 함 (Mock에서는 성공으로 처리)
+    // 사용 완료된 코드 삭제
+    resetCodeStore.delete(resetCode);
+
+    return HttpResponse.json({ message: "비밀번호가 성공적으로 변경되었습니다." },
+        { status: 200 }
+    );
 });
+
+
+
 
 // 토큰 갱신 핸들러
 export const refresh = http.post(`${httpUrl}/users/refresh`, async ({ request }) => {

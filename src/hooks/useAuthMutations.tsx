@@ -13,6 +13,8 @@ import {
 } from "@/api/auth.api";
 import { AxiosError } from "axios";
 import type { JoinFormValues } from "@/pages/user/Join";
+import type { FindPasswordFormValues } from "@/pages/user/FindPassword";
+import type { ResetPasswordFormValues } from "@/pages/user/ResetPassword";
 
 // 로그인 Mutation
 export const useLoginMutation = () => {
@@ -72,6 +74,12 @@ export const useJoinMutation = () => {
         mutationFn: async (data: JoinFormValues) => {
             return await join(data);
         },
+        onSuccess: (data) => {
+            const { storeLogin } = useAuthStore.getState();
+            if (data.accessToken) {
+                storeLogin(data.user.nickname, data.accessToken);
+            }
+        },
         onError: (error: AxiosError<{ message: string }>) => {
             console.error(error);
         }
@@ -109,10 +117,13 @@ export const useNicknameCheckMutation = () => {
 }
 
 // 비밀번호 찾기 Mutation
-export const useForgotPasswordMutation = () => {
+export const useFindPasswordMutation = () => {
     return useMutation({
-        mutationFn: async (data: any) => {
+        mutationFn: async (data: FindPasswordFormValues) => {
             return await findPassword(data);
+        },
+        onError: (error: AxiosError<{ message: string }>) => {
+            console.error(error);
         }
     })
 }
@@ -120,8 +131,11 @@ export const useForgotPasswordMutation = () => {
 // 비밀번호 재설정 Mutation
 export const useResetPasswordMutation = () => {
     return useMutation({
-        mutationFn: async (data: any) => {
+        mutationFn: async (data: ResetPasswordFormValues) => {
             return await resetPassword(data);
+        },
+        onError: (error: AxiosError<{ message: string }>) => {
+            console.error(error);
         }
     })
 }

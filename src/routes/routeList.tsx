@@ -5,7 +5,8 @@ import Login from "@/pages/user/Login";
 import Join from "@/pages/user/Join";
 import FindPassword from "@/pages/user/FindPassword";
 import ResetPassword from "@/pages/user/ResetPassword";
-import ExtraInfo from "@/pages/user/ExtraInfo";
+import MoimerIntro from "@/pages/moimer/MoimerIntro";
+import UserInfo from "@/pages/user/UserInfo";
 
 export const routeList = [
   {
@@ -39,8 +40,12 @@ export const routeList = [
       },
       {
         path: "/extra-info",
-        element: <ExtraInfo />,
+        element: <UserInfo />,
       },
+      {
+        path: "/moimer-intro",
+        element: <MoimerIntro />,
+      }
     ],
   },
 ];
