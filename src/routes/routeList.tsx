@@ -21,55 +21,58 @@ export const routeList = [
     children: [
       {
         path: "/",
-        element: <MainLayout />,
-        // errorElement: <Error />,
+        element: <Home />,
+      },
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "/join",
+        element: <Join />,
+      },
+      {
+        path: "/find-password",
+        element: <FindPassword />,
+      },
+      {
+        path: "/reset-password",
+        element: <ResetPassword />,
+      },
+      {
+        path: "/user-info",
+        element: <UserInfo />,
+      },
+      {
+        path: "/moimer-info",
+        element: <MoimerIntro />,
+      },
+      {
+        path: "/mypage",
+        element: <MypageSession />,
         children: [
-            {
-                path: "/",
-                element: <Home />,
-            },
-            {
-                path: "/login",
-                element: <Login />,
-            },
-            {
-                path: "/join",
-                element: <Join />,
-            },
-            {
-                path: "/find-password",
-                element: <FindPassword />,
-            },
-            {
-                path: "/reset-password",
-                element: <ResetPassword />,
-            },
-            {
-                path: "/user-info",
-                element: <UserInfo />,
-            },
-            {
-                path: "/mypage",
-                element: <MypageSession />,
-                children: [
-                    {
-                        index: true,
-                        element: <Navigate to="profile" replace />,
-                    },
-                    {
-                        path: "profile",
-                        element: <Profile />,
-                    },
-                    {
-                        path: "meetings/join",
-                        element: <JoinedMeeting />,
-                    },
-                    {
-                        path: "meetings/hosting",
-                        element: <HostMeeting />,
-                    },
-                ]
-            }
+          {
+            index: true,
+            element: <Navigate to="profile" replace />,
+          },
+          {
+            path: "profile",
+            element: <Profile />,
+          },
+          {
+            path: "meetings/join",
+            element: <JoinedMeeting />,
+          },
+          {
+            path: "meetings/hosting",
+            element: <HostMeeting />,
+          },
         ],
-    },
+      },
+      {
+        path: "/meetings",
+        element: <MeetingsPage />,
+      },
+    ],
+  },
 ];
