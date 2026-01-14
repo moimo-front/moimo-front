@@ -1,16 +1,38 @@
 // 모임 데이터 모델 (백엔드에서 조회 시)
 export interface Meeting {
-    id: number;
-    title: string;
-    description: string;
-    maxParticipants: number;
-    meetingDate: Date;
-    address: string;
-    latitude: number;
-    longitude: number;
-    hostId: number;
-    createdAt: Date;
-    updatedAt?: Date;
+  meetingId: number;
+  title: string;
+  interestName: string;
+  maxParticipants: number;
+  currentParticipants: number;
+  address: string;
+  meetingDate: string;
+}
+
+export interface MeetingMeta {
+  totalCount: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface MeetingListResponse {
+  data: Meeting[];
+  meta: MeetingMeta;
+}
+
+export interface MeetingDetail {
+  id: number;
+  title: string;
+  description: string;
+  maxParticipants: number;
+  meetingDate: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  hostId: number;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 // 모임 생성 API 요청 타입

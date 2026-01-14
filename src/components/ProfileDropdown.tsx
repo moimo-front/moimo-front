@@ -13,7 +13,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useNavigate } from "react-router-dom";
 
 export const ProfileDropdown = () => {
-  const { username, storeLogout } = useAuthStore();
+  const { nickname, storeLogout } = useAuthStore();
   const navigate = useNavigate();
   const userAvatarUrl = "";
 
@@ -33,7 +33,7 @@ export const ProfileDropdown = () => {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
-        <DropdownMenuLabel>{username} 님</DropdownMenuLabel>
+        <DropdownMenuLabel>{nickname} 님</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="flex gap-1">
           <AiOutlineUser />

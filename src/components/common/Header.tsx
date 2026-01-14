@@ -31,7 +31,7 @@ function Header() {
           variant="ghost"
           className="cursor-pointer hover:bg-transparent"
         >
-          <Link to="/">원하는 모임 찾기</Link>
+          <Link to="/meetings">원하는 모임 찾기</Link>
         </Button>
       </div>
       {isLoggedIn ? (
