@@ -12,6 +12,7 @@ import HostMeeting from "@/pages/mypage/HostMeeting";
 import { Navigate } from "react-router-dom";
 import MoimerIntro from "@/pages/moimer/MoimerIntro";
 import UserInfo from "@/pages/user/UserInfo";
+import Chatting from "@/pages/chat/Chatting";
 
 export const routeList = [
   {
@@ -72,6 +73,10 @@ export const routeList = [
       {
         path: "/meetings",
         element: <MeetingsPage />,
+      },
+      {
+        path: "/chats",
+        element: <Chatting />,
       },
     ],
   },
