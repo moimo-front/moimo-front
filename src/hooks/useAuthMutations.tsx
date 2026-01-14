@@ -9,7 +9,8 @@ import {
     findPassword,
     resetPassword,
     googleLogin,
-    logout
+    logout,
+    verifyResetCode
 } from "@/api/auth.api";
 import { AxiosError } from "axios";
 import type { JoinFormValues } from "@/pages/user/Join";
@@ -121,6 +122,18 @@ export const useFindPasswordMutation = () => {
     return useMutation({
         mutationFn: async (data: FindPasswordFormValues) => {
             return await findPassword(data);
+        },
+        onError: (error: AxiosError<{ message: string }>) => {
+            console.error(error);
+        }
+    })
+}
+
+// 비밀번호 코드 인증 Mutation
+export const useVerifyResetCodeMutation = () => {
+    return useMutation({
+        mutationFn: async (data: { email: string; code: string }) => {
+            return await verifyResetCode(data);
         },
         onError: (error: AxiosError<{ message: string }>) => {
             console.error(error);

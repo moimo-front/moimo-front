@@ -43,7 +43,7 @@ const FindPassword = () => {
         findPassword(data, {
             onSuccess: () => {
                 alert("이메일로 인증코드가 전송되었습니다.");
-                navigate("/reset-password");
+                navigate("/reset-password", { state: { email: data.email } });
             },
             onError: (error: AxiosError) => {
                 if (error.response?.status === 404) {

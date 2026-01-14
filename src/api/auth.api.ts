@@ -100,7 +100,7 @@ export const checkNickname = async (data: { nickname: string }) => {
 // 비밀번호 찾기
 export const findPassword = async (data: FindPasswordFormValues) => {
     try {
-        const response = await apiClient.post("/users/find-password", data);
+        const response = await apiClient.post("/users/password-reset/request", data);
         return response.data;
     } catch (error) {
         console.error("findPassword error:", error);
@@ -108,10 +108,26 @@ export const findPassword = async (data: FindPasswordFormValues) => {
     }
 };
 
+export interface VerifyResetCodeResponse {
+    message: string;
+    resetToken: string;
+}
+
+// 비밀번호 인증코드 확인
+export const verifyResetCode = async (data: { email: string; code: string }): Promise<VerifyResetCodeResponse> => {
+    try {
+        const response = await apiClient.post("/users/password-reset/verify", data);
+        return response.data;
+    } catch (error) {
+        console.error("verifyResetCode error:", error);
+        throw error;
+    }
+};
+
 // 비밀번호 재설정
 export const resetPassword = async (data: ResetPasswordFormValues) => {
     try {
-        const response = await apiClient.put("/users/reset-password", data);
+        const response = await apiClient.put("/users/password-reset/confirm", data);
         return response.data;
     } catch (error) {
         console.error("resetPassword error:", error);

@@ -3,9 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { useResetPasswordMutation } from "@/hooks/useAuthMutations";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useResetPasswordMutation, useVerifyResetCodeMutation } from "@/hooks/useAuthMutations";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,6 +22,9 @@ export const resetPasswordSchema = z
         newPasswordConfirm: z
             .string()
             .min(8, "비밀번호는 최소 8자 이상이어야 합니다."),
+        resetToken: z
+            .string()
+            .optional(),
     })
     .refine(
         (data) => data.newPassword === data.newPasswordConfirm,
@@ -36,38 +38,86 @@ export const resetPasswordSchema = z
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
 const ResetPassword = () => {
+    const verifyResetCode = useVerifyResetCodeMutation();
     const { mutate: resetPassword, isPending } = useResetPasswordMutation();
     const navigate = useNavigate();
+    const { state } = useLocation();
+    const { email } = state || {};
 
     const {
         register,
         handleSubmit,
         setError,
+        clearErrors,
+        getValues,
+        setValue,
         formState: { errors },
     } = useForm<ResetPasswordFormValues>({
         resolver: zodResolver(resetPasswordSchema),
     });
 
+    // 인증확인
+    const handleVerify = async () => {
+        const resetCode = getValues("resetCode");
+
+        // 인증코드 유효성 검사
+        if (!resetCode) {
+            setError("resetCode", {
+                type: "manual",
+                message: "인증코드를 입력해주세요."
+            });
+            return;
+        }
+
+        // 인증코드 형식이 올바르면 react-hook-form 에러 클리어
+        clearErrors("resetCode");
+
+        // 인증코드 확인
+        try {
+            const verifyInfo = await verifyResetCode.mutateAsync({
+                email,
+                code: resetCode,
+            });
+
+            // resetToken을 form에 저장
+            setValue("resetToken", verifyInfo.resetToken);
+
+        } catch (error) {
+            console.error("인증코드 확인 중 오류 발생: ", error);
+        }
+    }
+
+
     const onSubmit = (data: ResetPasswordFormValues) => {
-        resetPassword(data, {
-            onSuccess: () => {
-                alert("비밀번호 변경이 완료되었습니다.");
-                navigate("/login");
-            },
-            onError: (error: AxiosError) => {
-                if (error.response?.status === 400) {
-                    setError("resetCode", { message: "인증코드가 유효하지 않거나 만료되었습니다." });
-                    return;
-                }
-                setError(
-                    "root",
-                    {
-                        type: "manual",
-                        message: "비밀번호 변경에 실패했습니다.",
+        // resetToken이 data에 포함되어 있는지 확인
+        if (!data.resetToken) {
+            setError("resetCode", { message: "먼저 인증확인을 완료해주세요." });
+            return;
+        }
+
+        // data를 그대로 전달 (resetToken이 이미 포함되어 있음)
+        resetPassword(
+            data,
+            {
+                onSuccess: () => {
+                    alert("비밀번호 변경이 완료되었습니다.");
+                    navigate("/login");
+                },
+                onError: (error: AxiosError) => {
+                    if (error.response?.status === 400) {
+                        setError("resetCode", { message: "인증코드가 유효하지 않거나 만료되었습니다." });
+                        return;
                     }
-                );
+                    setError(
+                        "root",
+                        {
+                            type: "manual",
+                            message: "비밀번호 변경에 실패했습니다.",
+                        }
+                    );
+                }
             }
-        });
+        );
     };
 
     return (
@@ -88,13 +138,33 @@ const ResetPassword = () => {
                                 >
                                     인증코드
                                 </Label>
-                                <Input
-                                    {...register("resetCode")}
-                                    type="text"
-                                    placeholder="인증코드"
-                                    className="h-12 border-input focus-visible:ring-primary flex-1"
-                                />
-                                {errors.resetCode && <p className="text-sm text-destructive">{errors.resetCode.message}</p>}
+                                <div className="flex gap-2">
+                                    <Input
+                                        {...register("resetCode")}
+                                        type="text"
+                                        placeholder="인증코드"
+                                        className="h-12 border-input focus-visible:ring-primary flex-1"
+                                    />
+                                    <Button
+                                        type="button"
+                                        onClick={handleVerify}
+                                        disabled={verifyResetCode.isPending}
+                                        className="h-12 px-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-[8px] transition-colors shadow-none border-none shrink-0"
+                                    >
+                                        {verifyResetCode.isPending ? "확인 중..." : "인증확인"}
+                                    </Button>
+                                </div>
+                                {errors.resetCode ? (
+                                    <p className="text-sm text-destructive">{errors.resetCode.message}</p>
+                                ) : verifyResetCode.isError ? (
+                                    <p className="text-sm text-destructive">
+                                        {"기한이 만료되었거나 유효하지 않은 인증코드입니다."}
+                                    </p>
+                                ) : verifyResetCode.isSuccess ? (
+                                    <p className="text-sm text-success">
+                                        {"인증코드 확인이 완료되었습니다."}
+                                    </p>
+                                ) : null}
                             </div>
                             {/* 새로운 비밀번호 입력 섹션 */}
                             <div className="grid gap-2">
