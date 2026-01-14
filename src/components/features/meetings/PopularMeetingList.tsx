@@ -9,14 +9,14 @@ function PopularMeetingList() {
         <div className="text-sm cursor-pointer">전체보기</div>
       </div>
       <div className="grid grid-cols-4 gap-4 justify-items-center">
-        {MEETING_CATEGORIES.slice(0, 8).map((topic) => (
+        {MEETING_CATEGORIES.slice(0, 8).map((meeting) => (
           <MeetingCard
-            key={topic.id}
-            title={topic.name}
-            location={topic.location}
-            participantsCount={topic.participantsCount}
-            imageUrl={topic.imageUrl}
-            href=""
+            key={meeting.id}
+            title={meeting.name}
+            location={meeting.location}
+            participantsCount={meeting.participantsCount}
+            imageUrl={meeting.imageUrl}
+            href={`/meetings/${meeting.id}`}
           />
         ))}
       </div>
