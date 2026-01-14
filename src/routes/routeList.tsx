@@ -12,6 +12,7 @@ import HostMeeting from "@/pages/mypage/HostMeeting";
 import { Navigate } from "react-router-dom";
 import MoimerIntro from "@/pages/moimer/MoimerIntro";
 import UserInfo from "@/pages/user/UserInfo";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export const routeList = [
   {

@@ -28,7 +28,8 @@ const handlers = [
     resetPassword,
     googleLogin,
     logout,
-    refresh
+    refresh,
+    verifyUser
 } from './authHandler';
 import { getInterests } from './interestHandler';
 import { userUpdate } from './userInfoHandler';
@@ -44,6 +45,7 @@ const handlers = [
     googleLogin,
     logout,
     refresh,
+    verifyUser,
     getInterests,
     userUpdate
 ];
