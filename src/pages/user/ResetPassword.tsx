@@ -83,13 +83,22 @@ const ResetPassword = () => {
             setValue("resetToken", verifyInfo.resetToken);
 
         } catch (error) {
+            const axiosError = error as AxiosError;
+            if (axiosError.response?.status === 400) {
+                setError("resetCode", { message: "유효하지 않은 인증코드입니다." });
+                return;
+            }
+            if (axiosError.response?.status === 410) {
+                setError("resetCode", { message: "인증코드가 만료되었습니다." });
+                return;
+            }
             console.error("인증코드 확인 중 오류 발생: ", error);
         }
     }
 
 
     const onSubmit = (data: ResetPasswordFormValues) => {
-        // resetToken이 data에 포함되어 있는지 확인
+        // 인증코드 확인이 성공했는지 체크
         if (!data.resetToken) {
             setError("resetCode", { message: "먼저 인증확인을 완료해주세요." });
             return;
@@ -140,7 +149,12 @@ const ResetPassword = () => {
                                 </Label>
                                 <div className="flex gap-2">
                                     <Input
-                                        {...register("resetCode")}
+                                        {...register("resetCode", {
+                                            onChange: () => {
+                                                setValue("resetToken", "");
+                                                verifyResetCode.reset();
+                                            }
+                                        })}
                                         type="text"
                                         placeholder="인증코드"
                                         className="h-12 border-input focus-visible:ring-primary flex-1"
@@ -156,10 +170,6 @@ const ResetPassword = () => {
                                 </div>
                                 {errors.resetCode ? (
                                     <p className="text-sm text-destructive">{errors.resetCode.message}</p>
-                                ) : verifyResetCode.isError ? (
-                                    <p className="text-sm text-destructive">
-                                        {"기한이 만료되었거나 유효하지 않은 인증코드입니다."}
-                                    </p>
                                 ) : verifyResetCode.isSuccess ? (
                                     <p className="text-sm text-success">
                                         {"인증코드 확인이 완료되었습니다."}
