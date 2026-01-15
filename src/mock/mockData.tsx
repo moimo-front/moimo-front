@@ -139,7 +139,7 @@ export const myMeetings: MyMeetingsResponse[] = [
   },
   {
     id: 103,
-    title: "내가 만든 모임",
+    title: "내가 만든 모임1",
     address: "우리집",
     meetingDate: "2024-01-06T19:00:00Z",
     currentParticipants: 12,
@@ -169,5 +169,16 @@ export const myMeetings: MyMeetingsResponse[] = [
     status: "ACCEPTED",
     isHost: false,
     isCompleted: true
+  },
+  {
+    id: 106,
+    title: "내가 만든 모임2",
+    address: "우리집",
+    currentParticipants: 12,
+    maxParticipants: 20,
+    meetingDate: "2024-01-26T19:00:00Z",
+    status: "ACCEPTED" as const,
+    isHost: true,
+    isCompleted: false,
   }
 ];

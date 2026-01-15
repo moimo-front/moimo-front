@@ -22,6 +22,7 @@ import { useMeQuery } from "@/hooks/useMeQuery";
 import { Calendar, MapPin, Users } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import SmallMeetingCard from "@/components/features/mypage/SmallMeetingCard";
 
 const JoinedMeeting = () => {
     const [filter, setFilter] = useState("all");
@@ -55,43 +56,16 @@ const JoinedMeeting = () => {
                 ) : (
                     <>
                         {joinedMeetings.map((meeting) => (
-                            <Card
-                                key={meeting.id}
-                                className={`flex items-center p-6 transition-shadow border-none shadow-none ${(meeting.status === 'PENDING' || meeting.isCompleted)
-                                    ? 'bg-gray-100'
-                                    : 'bg-white border border-gray-100 shadow-sm'
-                                    }`}
-                            >
-                                <div className="flex-1">
-                                    <Link to={`/meetings/${meeting.id}`}>
-                                        <h3 className="text-lg font-bold text-gray-900 mb-3">{meeting.title}</h3>
-                                    </Link>
-                                    <div className="flex items-center gap-4 text-gray-500 text-sm">
-                                        <div className="flex items-center gap-1">
-                                            <MapPin className="w-4 h-4" />
-                                            {meeting.address}
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Users className="w-4 h-4" />
-                                            {meeting.currentParticipants}/{meeting.maxParticipants}명
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Calendar className="w-4 h-4" />
-                                            {meeting.meetingDate}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <>
-                                        {meeting.status === 'PENDING' && (
-                                            <Button disabled className="bg-orange-200 text-white hover:bg-orange-200 border-none shadow-none disabled:opacity-100 disabled:bg-orange-200">승인 대기중</Button>
-                                        )}
-                                        {(meeting.status === 'ACCEPTED' || meeting.isCompleted) && (
-                                            <Button className="bg-yellow-400 hover:bg-yellow-500 text-white border-none shadow-none">채팅</Button>
-                                        )}
-                                    </>
-                                </div>
-                            </Card>
+                            <SmallMeetingCard key={meeting.id} meeting={meeting}>
+                                <>
+                                    {meeting.status === 'PENDING' && (
+                                        <Button disabled className="bg-orange-200 text-white hover:bg-orange-200 border-none shadow-none disabled:opacity-100 disabled:bg-orange-200">승인 대기중</Button>
+                                    )}
+                                    {(meeting.status === 'ACCEPTED' || meeting.isCompleted) && (
+                                        <Button className="bg-yellow-400 hover:bg-yellow-500 text-white border-none shadow-none">채팅</Button>
+                                    )}
+                                </>
+                            </SmallMeetingCard>
                         ))}
 
                         {/* Empty State */}

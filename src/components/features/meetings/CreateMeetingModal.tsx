@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,18 +9,23 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Badge } from "@/components/ui/badge";
 import FormField from "@components/common/FormField";
 import { useCreateMeetingMutation } from "@/hooks/useMeetingMutations";
+import { useMeetingQuery } from "@/hooks/useMeetingQuery";
 import { TOPIC_CATEGORIES } from "@/constants/topics";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { CalendarIcon, Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Meeting } from "@/models/meeting.model";
+import type { MyMeetingsResponse } from "@/api/me.api";
+import LoadingSpinner from "@components/common/LoadingSpinner"; // Ensure this exists or use text
 
 interface CreateMeetingModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  meeting?: Meeting | MyMeetingsResponse;
 }
 
-function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
+function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalProps) {
   const [meetingName, setMeetingName] = useState("");
   const [meetingIntro, setMeetingIntro] = useState("");
   const [meetingDate, setMeetingDate] = useState<Date>();
@@ -28,6 +33,38 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
   const [maxParticipants, setMaxParticipants] = useState([15]);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedInterests, setSelectedInterests] = useState<number[]>([]);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const { data: meetingDetail, isLoading: isMeetingLoading } = useMeetingQuery(
+    open && meeting ? (meeting as any).id || (meeting as any).meetingId : undefined
+  );
+
+  useEffect(() => {
+    if (open) {
+      if (meeting && meetingDetail) {
+        setMeetingName(meetingDetail.title);
+        setMeetingIntro(meetingDetail.description || "");
+        setMeetingDate(meetingDetail.meetingDate ? new Date(meetingDetail.meetingDate) : undefined);
+        setLocation(meetingDetail.address);
+        setMaxParticipants([meetingDetail.maxParticipants]);
+        // Cast to any because MeetingDetail might not officially have interestIds/imageUrl yet (pending backend update)
+        // But our mock returns them.
+        setSelectedInterests((meetingDetail as any).interestIds || []);
+        setPreviewUrl((meetingDetail as any).imageUrl || null);
+        setSelectedImage(null);
+      } else if (!meeting) {
+        // Reset for new meeting
+        setMeetingName("");
+        setMeetingIntro("");
+        setMeetingDate(undefined);
+        setLocation("");
+        setMaxParticipants([15]);
+        setSelectedImage(null);
+        setSelectedInterests([]);
+        setPreviewUrl(null);
+      }
+    }
+  }, [open, meeting, meetingDetail]);
 
   const createMeetingMutation = useCreateMeetingMutation();
 
@@ -107,171 +144,182 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">모이머 신청하기</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">
+            {meeting ? "모임 정보 수정" : "모이머 신청하기"}
+          </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
-          {/* 모임명 */}
-          <FormField label="모임명" htmlFor="meetingName">
-            <Input
-              id="meetingName"
-              placeholder="표현하고 싶은 모임명을 입력하세요!"
-              value={meetingName}
-              onChange={(e) => setMeetingName(e.target.value)}
-              className="h-12"
-              required
-            />
-          </FormField>
+        {isMeetingLoading ? (
+          <div className="flex h-[400px] items-center justify-center">
+            <LoadingSpinner />
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+            {/* 모임명 */}
+            <FormField label="모임명" htmlFor="meetingName">
+              <Input
+                id="meetingName"
+                placeholder="표현하고 싶은 모임명을 입력하세요!"
+                value={meetingName}
+                onChange={(e) => setMeetingName(e.target.value)}
+                className="h-12"
+                required
+              />
+            </FormField>
 
-          {/* 모임 소개글 */}
-          <FormField label="모임 소개글" htmlFor="meetingIntro">
-            <Textarea
-              id="meetingIntro"
-              placeholder="모임에 대해 자유롭게 설명해주세요!&#10;ex) 모임의 개성적인 특징, 모임의 의의, 참여자가 가지면 좋은 마인드, 지켜야 할 사항"
-              value={meetingIntro}
-              onChange={(e) => setMeetingIntro(e.target.value)}
-              className="min-h-[120px] resize-none"
-              required
-            />
-          </FormField>
+            {/* 모임 소개글 */}
+            <FormField label="모임 소개글" htmlFor="meetingIntro">
+              <Textarea
+                id="meetingIntro"
+                placeholder="모임에 대해 자유롭게 설명해주세요!&#10;ex) 모임의 개성적인 특징, 모임의 의의, 참여자가 가지면 좋은 마인드, 지켜야 할 사항"
+                value={meetingIntro}
+                onChange={(e) => setMeetingIntro(e.target.value)}
+                className="min-h-[120px] resize-none"
+                required
+              />
+            </FormField>
 
-          {/* 관심사 선택 */}
-          <FormField
-            label="관심사"
-            description="모임과 관련된 관심사를 선택해주세요 (최소 1개)"
-          >
-            <div className="flex flex-wrap gap-2">
-              {TOPIC_CATEGORIES.map((interest) => (
-                <Badge
-                  key={interest.id}
-                  variant={selectedInterests.includes(interest.id) ? "default" : "outline"}
-                  className={cn(
-                    "cursor-pointer transition-colors px-4 py-2 text-sm",
-                    selectedInterests.includes(interest.id)
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "hover:bg-secondary"
-                  )}
-                  onClick={() => toggleInterest(interest.id)}
+            {/* 관심사 선택 */}
+            <FormField
+              label="관심사"
+              description="모임과 관련된 관심사를 선택해주세요 (최소 1개)"
+            >
+              <div className="flex flex-wrap gap-2">
+                {TOPIC_CATEGORIES.map((interest) => (
+                  <Badge
+                    key={interest.id}
+                    variant={selectedInterests.includes(interest.id) ? "default" : "outline"}
+                    className={cn(
+                      "cursor-pointer transition-colors px-4 py-2 text-sm",
+                      selectedInterests.includes(interest.id)
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "hover:bg-secondary"
+                    )}
+                    onClick={() => toggleInterest(interest.id)}
+                  >
+                    {interest.name}
+                    {selectedInterests.includes(interest.id) && (
+                      <X className="ml-1 h-3 w-3" />
+                    )}
+                  </Badge>
+                ))}
+              </div>
+            </FormField>
+
+            {/* 모임 대표 사진 */}
+            <FormField label="모임 대표 사진" htmlFor="meetingImage" description="모임과 관련된 사진을 선택해주세요">
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-12 px-6 bg-primary hover:bg-primary/90 text-primary-foreground border-none"
+                  onClick={() => document.getElementById('meetingImage')?.click()}
                 >
-                  {interest.name}
-                  {selectedInterests.includes(interest.id) && (
-                    <X className="ml-1 h-3 w-3" />
-                  )}
-                </Badge>
-              ))}
-            </div>
-          </FormField>
+                  <Upload className="mr-2 h-4 w-4" />
+                  이미지 찾기
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  {selectedImage ? selectedImage.name : (previewUrl ? "기존 이미지 유지" : "선택된 파일 없음")}
+                </span>
+                <input
+                  id="meetingImage"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </div>
+            </FormField>
 
-          {/* 모임 대표 사진 */}
-          <FormField label="모임 대표 사진" htmlFor="meetingImage" description="모임과 관련된 사진을 선택해주세요">
-            <div className="flex items-center gap-3">
+            {/* 모임 날짜 및 시간 */}
+            <FormField label="모임 날짜 및 시간" description="모임이 진행될 날짜와 시간을 선택해주세요">
+              <div className="space-y-3">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full h-12 justify-start text-left font-normal ",
+                        !meetingDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {meetingDate ? (
+                        format(meetingDate, "PPP", { locale: ko })
+                      ) : (
+                        <span>날짜를 선택하세요</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-35 p-0 " align="start">
+                    <Calendar
+                      mode="single"
+                      selected={meetingDate}
+                      onSelect={setMeetingDate}
+                      disabled={(date) => date < new Date()}
+                    />
+                  </PopoverContent>
+                </Popover>
+                {/* 시간 선택 기능 추가예정 */}
+              </div>
+            </FormField>
+
+            {/* 모임 장소 (카카오 API로 리펙토링할 예정) */}
+            <FormField label="모임 장소 (카카오 API로 리팩토링예정)" htmlFor="location">
+              <Input
+                id="location"
+                placeholder="초행길인 사람도 이해하기 쉽도록 장소를 가능한 상세하게 설명해주세요."
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="h-12"
+                required
+              />
+            </FormField>
+
+            {/* 최대 인원수 */}
+            <FormField
+              label="최대 인원수"
+              description="수용할 수 있는 인원수 만큼만 받는게 중요해요!"
+            >
+              <div className="space-y-4">
+                <Slider
+                  value={maxParticipants}
+                  onValueChange={setMaxParticipants}
+                  max={50}
+                  min={2}
+                  step={1}
+                  className="w-full"
+                />
+                <p className="text-lg font-semibold text-foreground">
+                  {maxParticipants[0]}명
+                </p>
+              </div>
+            </FormField>
+
+            {/* 승인 버튼 */}
+            <div className="flex gap-3 pt-4">
               <Button
                 type="button"
                 variant="outline"
-                className="h-12 px-6 bg-primary hover:bg-primary/90 text-primary-foreground border-none"
-                onClick={() => document.getElementById('meetingImage')?.click()}
+                onClick={() => onOpenChange(false)}
+                className="flex-1 h-12"
+                disabled={createMeetingMutation.isPending}
               >
-                <Upload className="mr-2 h-4 w-4" />
-                이미지 찾기
+                취소
               </Button>
-              <span className="text-sm text-muted-foreground">
-                {selectedImage ? selectedImage.name : "선택된 파일 없음"}
-              </span>
-              <input
-                id="meetingImage"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
+              <Button
+                type="submit"
+                className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground"
+                disabled={createMeetingMutation.isPending}
+              >
+                {meeting ?
+                  (createMeetingMutation.isPending ? "수정 중..." : "수정하기") :
+                  (createMeetingMutation.isPending ? "신청 중..." : "신청하기")
+                }
+              </Button>
             </div>
-          </FormField>
-
-          {/* 모임 날짜 및 시간 */}
-          <FormField label="모임 날짜 및 시간" description="모임이 진행될 날짜와 시간을 선택해주세요">
-            <div className="space-y-3">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full h-12 justify-start text-left font-normal ",
-                      !meetingDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {meetingDate ? (
-                      format(meetingDate, "PPP", { locale: ko })
-                    ) : (
-                      <span>날짜를 선택하세요</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-35 p-0 " align="start">
-                  <Calendar
-                    mode="single"
-                    selected={meetingDate}
-                    onSelect={setMeetingDate}
-                    disabled={(date) => date < new Date()}
-                  />
-                </PopoverContent>
-              </Popover>
-              {/* 시간 선택 기능 추가예정 */}
-            </div>
-          </FormField>
-
-          {/* 모임 장소 (카카오 API로 리펙토링할 예정) */}
-          <FormField label="모임 장소 (카카오 API로 리팩토링예정)" htmlFor="location">
-            <Input
-              id="location"
-              placeholder="초행길인 사람도 이해하기 쉽도록 장소를 가능한 상세하게 설명해주세요."
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="h-12"
-              required
-            />
-          </FormField>
-
-          {/* 최대 인원수 */}
-          <FormField
-            label="최대 인원수"
-            description="수용할 수 있는 인원수 만큼만 받는게 중요해요!"
-          >
-            <div className="space-y-4">
-              <Slider
-                value={maxParticipants}
-                onValueChange={setMaxParticipants}
-                max={50}
-                min={2}
-                step={1}
-                className="w-full"
-              />
-              <p className="text-lg font-semibold text-foreground">
-                {maxParticipants[0]}명
-              </p>
-            </div>
-          </FormField>
-
-          {/* 승인 버튼 */}
-          <div className="flex gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="flex-1 h-12"
-              disabled={createMeetingMutation.isPending}
-            >
-              취소
-            </Button>
-            <Button
-              type="submit"
-              className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground"
-              disabled={createMeetingMutation.isPending}
-            >
-              {createMeetingMutation.isPending ? "신청 중..." : "신청하기"}
-            </Button>
-          </div>
-        </form>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
