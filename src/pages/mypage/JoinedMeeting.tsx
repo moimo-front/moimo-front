@@ -1,3 +1,4 @@
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -5,7 +6,6 @@ import {
 import {
     Pagination,
     PaginationContent,
-    PaginationEllipsis,
     PaginationItem,
     PaginationLink,
     PaginationNext,
@@ -18,170 +18,128 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { useMeQuery } from "@/hooks/useMeQuery";
 import { Calendar, MapPin, Users } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-// Mock Data
-const meetings = [
-    {
-        id: 101,
-        title: "같이 축구보고 게임해요!",
-        address: "이태원",
-        meetingDate: "2024-01-15T19:00:00Z",
-        currentParticipants: 2,
-        maxParticipants: 52,
-        status: "ACCEPTED",
-        isHost: true,
-        isCompleted: false
-    },
-    {
-        id: 102,
-        title: "보라매공원 경찰과 도둑 할 사람",
-        address: "보라매공원",
-        meetingDate: "2024-01-07T19:00:00Z",
-        currentParticipants: 12,
-        maxParticipants: 52,
-        status: "PENDING",
-        isHost: false,
-        isCompleted: false
-    },
-    {
-        id: 103,
-        title: "내가 만든 모임",
-        address: "우리집",
-        meetingDate: "2024-01-06T19:00:00Z",
-        currentParticipants: 12,
-        maxParticipants: 52,
-        status: "APPROVED",
-        isHost: true,
-    },
-    {
-        id: 104,
-        title: "크리스마스 기념 정모",
-        address: "이태원",
-        meetingDate: "2023-12-25T19:00:00Z",
-        currentParticipants: 12,
-        maxParticipants: 52,
-        status: "COMPLETED",
-        isHost: false,
-    },
-    {
-        id: 105,
-        title: "크리스마스 기념 정모",
-        address: "이태원",
-        meetingDate: "2023-12-25T19:00:00Z",
-        currentParticipants: 12,
-        maxParticipants: 52,
-        status: "COMPLETED",
-        isHost: false,
-    }
-];
-
 const JoinedMeeting = () => {
     const [filter, setFilter] = useState("all");
+    const [page, setPage] = useState(1);
+    const { meetings: joinedMeetings, totalPages, isLoading } = useMeQuery('joined', filter, page, 5);
+
+    const handlePageChange = (newPage: number) => {
+        setPage(newPage);
+    };
 
     return (
         <div className="w-full h-full p-10 bg-white overflow-y-auto">
             <div className="flex justify-between items-start mb-8">
                 <h1 className="text-2xl font-bold text-gray-900">참여 모임</h1>
-                <Select value={filter} onValueChange={setFilter}>
+                <Select value={filter} onValueChange={(value) => { setFilter(value); setPage(1); }}>
                     <SelectTrigger className="w-[120px]">
                         <SelectValue placeholder="전체" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">전체</SelectItem>
                         <SelectItem value="pending">승인대기</SelectItem>
-                        <SelectItem value="approved">참석예정</SelectItem>
+                        <SelectItem value="accepted">참석예정</SelectItem>
                         <SelectItem value="completed">참석완료</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
 
             <div className="space-y-4 mb-10">
-                {meetings.map((meeting) => (
-                    <Card
-                        key={meeting.id}
-                        className={`flex items-center p-6 transition-shadow border-none shadow-none ${(meeting.status === 'PENDING' || meeting.status === 'COMPLETED')
-                            ? 'bg-gray-100'
-                            : 'bg-white border border-gray-100 shadow-sm'
-                            }`}
-                    >
-                        <div className="flex-1">
-                            <h3 className="text-lg font-bold text-gray-900 mb-3">{meeting.title}</h3>
-                            <div className="flex items-center gap-4 text-gray-500 text-sm">
-                                <div className="flex items-center gap-1">
-                                    <MapPin className="w-4 h-4" />
-                                    {meeting.location}
+                {isLoading ? (
+                    <LoadingSpinner />
+                ) : (
+                    <>
+                        {joinedMeetings.map((meeting) => (
+                            <Card
+                                key={meeting.id}
+                                className={`flex items-center p-6 transition-shadow border-none shadow-none ${(meeting.status === 'PENDING' || meeting.isCompleted)
+                                    ? 'bg-gray-100'
+                                    : 'bg-white border border-gray-100 shadow-sm'
+                                    }`}
+                            >
+                                <div className="flex-1">
+                                    <Link to={`/meetings/${meeting.id}`}>
+                                        <h3 className="text-lg font-bold text-gray-900 mb-3">{meeting.title}</h3>
+                                    </Link>
+                                    <div className="flex items-center gap-4 text-gray-500 text-sm">
+                                        <div className="flex items-center gap-1">
+                                            <MapPin className="w-4 h-4" />
+                                            {meeting.address}
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <Users className="w-4 h-4" />
+                                            {meeting.currentParticipants}/{meeting.maxParticipants}명
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <Calendar className="w-4 h-4" />
+                                            {meeting.meetingDate}
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                    <Users className="w-4 h-4" />
-                                    {meeting.currentUsers}명
+                                <div className="flex gap-2">
+                                    <>
+                                        {meeting.status === 'PENDING' && (
+                                            <Button disabled className="bg-orange-200 text-white hover:bg-orange-200 border-none shadow-none disabled:opacity-100 disabled:bg-orange-200">승인 대기중</Button>
+                                        )}
+                                        {(meeting.status === 'ACCEPTED' || meeting.isCompleted) && (
+                                            <Button className="bg-yellow-400 hover:bg-yellow-500 text-white border-none shadow-none">채팅</Button>
+                                        )}
+                                    </>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                    <Calendar className="w-4 h-4" />
-                                    {meeting.date}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex gap-2">
-                            {meeting.isHost ? (
-                                <>
-                                    <Button className="bg-orange-100 text-orange-400 hover:bg-orange-200 border-none shadow-none">관리</Button>
-                                    <Button className="bg-yellow-400 hover:bg-yellow-500 text-white border-none shadow-none">채팅</Button>
-                                </>
-                            ) : (
-                                <>
-                                    {meeting.status === 'PENDING' && (
-                                        <Button disabled className="bg-orange-200 text-white hover:bg-orange-200 border-none shadow-none disabled:opacity-100 disabled:bg-orange-200">승인 대기중</Button>
-                                    )}
-                                    {meeting.status === 'APPROVED' && (
-                                        <Button className="bg-yellow-400 hover:bg-yellow-500 text-white border-none shadow-none">채팅</Button>
-                                    )}
-                                    {meeting.status === 'COMPLETED' && (
-                                        <Button className="bg-yellow-400 hover:bg-yellow-500 text-white border-none shadow-none">채팅</Button>
-                                    )}
-                                </>
-                            )}
+                            </Card>
+                        ))}
 
-                        </div>
-                    </Card>
-                ))}
+                        {/* Empty State */}
+                        {(!joinedMeetings || joinedMeetings.length === 0) && (
+                            <div className="flex flex-col items-center justify-center py-20 text-center">
+                                <h3 className="text-2xl font-bold text-gray-900 mb-4">아직 참여한 모임이 없어요 :&lt;</h3>
+                                <Link to="/meetings" className="text-gray-900 font-bold flex items-center hover:underline">
+                                    첫번째 모임을 찾아볼까요? &gt;
+                                </Link>
+                            </div>
+                        )}
+                    </>
+                )}
             </div>
 
-            {/* Empty State (Hidden if meetings exist, but coded for reference) */}
-            {meetings.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">아직 참여한 모임이 없어요 :&lt;</h3>
-                    <Link to="/meetings" className="text-gray-900 font-bold flex items-center hover:underline">
-                        첫번째 모임을 찾아볼까요? &gt;
-                    </Link>
-                </div>
+            {totalPages > 0 && (
+                <Pagination>
+                    <PaginationContent>
+                        <PaginationItem>
+                            <PaginationPrevious
+                                href="#"
+                                onClick={(e) => { e.preventDefault(); if (page > 1) handlePageChange(page - 1); }}
+                                className={page === 1 ? 'pointer-events-none opacity-50' : ''}
+                            />
+                        </PaginationItem>
+
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                            <PaginationItem key={pageNum}>
+                                <PaginationLink
+                                    href="#"
+                                    isActive={page === pageNum}
+                                    onClick={(e) => { e.preventDefault(); handlePageChange(pageNum); }}
+                                >
+                                    {pageNum}
+                                </PaginationLink>
+                            </PaginationItem>
+                        ))}
+
+                        <PaginationItem>
+                            <PaginationNext
+                                href="#"
+                                onClick={(e) => { e.preventDefault(); if (page < totalPages) handlePageChange(page + 1); }}
+                                className={page === totalPages ? 'pointer-events-none opacity-50' : ''}
+                            />
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination>
             )}
-
-
-            <Pagination>
-                <PaginationContent>
-                    <PaginationItem>
-                        <PaginationPrevious href="#" />
-                    </PaginationItem>
-                    <PaginationItem>
-                        <PaginationLink href="#" isActive>1</PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                        <PaginationLink href="#">2</PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                        <PaginationLink href="#">3</PaginationLink>
-                    </PaginationItem>
-                    <PaginationItem>
-                        <PaginationEllipsis />
-                    </PaginationItem>
-                    <PaginationItem>
-                        <PaginationNext href="#" />
-                    </PaginationItem>
-                </PaginationContent>
-            </Pagination>
         </div>
     )
 }

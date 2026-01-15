@@ -1,3 +1,4 @@
+import type { MyMeetingsResponse } from "@/api/me.api";
 import type { Interest } from "@/models/interest.model";
 import type { Meeting } from "@/models/meeting.model"; // Meeting 타입 import
 
@@ -112,3 +113,61 @@ export const mockMeetings: Meeting[] = Array.from({ length: 25 }, (_, i) => ({
   address: `서울시 강남구 역삼동 ${i + 1}번지`,
   meetingDate: `2024-03-${(i % 28) + 1}T1${i % 9}:00:00`,
 }));
+
+export const myMeetings: MyMeetingsResponse[] = [
+  {
+    id: 101,
+    title: "같이 축구보고 게임해요!",
+    address: "이태원",
+    meetingDate: "2024-01-15T19:00:00Z",
+    currentParticipants: 2,
+    maxParticipants: 52,
+    status: "ACCEPTED",
+    isHost: false,
+    isCompleted: false
+  },
+  {
+    id: 102,
+    title: "보라매공원 경찰과 도둑 할 사람",
+    address: "보라매공원",
+    meetingDate: "2024-01-07T19:00:00Z",
+    currentParticipants: 12,
+    maxParticipants: 52,
+    status: "PENDING",
+    isHost: false,
+    isCompleted: false
+  },
+  {
+    id: 103,
+    title: "내가 만든 모임",
+    address: "우리집",
+    meetingDate: "2024-01-06T19:00:00Z",
+    currentParticipants: 12,
+    maxParticipants: 52,
+    status: "ACCEPTED",
+    isHost: true,
+    isCompleted: true
+  },
+  {
+    id: 104,
+    title: "크리스마스 기념 정모",
+    address: "이태원",
+    meetingDate: "2023-12-25T19:00:00Z",
+    currentParticipants: 12,
+    maxParticipants: 52,
+    status: "ACCEPTED",
+    isHost: false,
+    isCompleted: true
+  },
+  {
+    id: 105,
+    title: "크리스마스 기념 정모",
+    address: "이태원",
+    meetingDate: "2023-12-25T19:00:00Z",
+    currentParticipants: 12,
+    maxParticipants: 52,
+    status: "ACCEPTED",
+    isHost: false,
+    isCompleted: true
+  }
+];

@@ -15,6 +15,7 @@ import {
 import { meetingHandler } from "./meetingHandler";
 import { getInterests } from './interestHandler';
 import { getUserInfo, userUpdate } from './userInfoHandler';
+import { getMyMeetings } from './meHandler';
 
 const handlers = [
   login,
@@ -31,6 +32,7 @@ const handlers = [
   getInterests,
   getUserInfo,
   userUpdate,
+  getMyMeetings,
   ...meetingHandler
 ];
 export const worker = setupWorker(...handlers);

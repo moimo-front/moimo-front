@@ -40,7 +40,7 @@ export const ProfileDropdown = () => {
           마이페이지
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex gap-1" onClick={() => navigate("/mypage/joined-meetings")}>
+        <DropdownMenuItem className="flex gap-1" onClick={() => navigate("/mypage/meetings/join")}>
           <AiOutlineTeam />내 모임
         </DropdownMenuItem>
         <DropdownMenuSeparator />
