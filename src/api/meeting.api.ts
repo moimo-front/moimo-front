@@ -60,20 +60,19 @@ export const uploadImage = async (file: File): Promise<string> => {
 };
 
 // 모임 생성 API (JSON 형식)
-export const createMeeting = async (data: CreateMeetingRequest): Promise<CreateMeetingResponse> => {
+export const createMeeting = async (
+  data: CreateMeetingRequest
+): Promise<CreateMeetingResponse> => {
   try {
-    const response = await apiClient.post<CreateMeetingResponse>(
-      "/meetings",
-      {
-        title: data.title,
-        description: data.description,
-        interestIds: data.interestIds, // 배열 그대로
-        maxParticipants: data.maxParticipants, // 숫자 그대로
-        meetingDate: data.meetingDate,
-        address: data.address,
-        imageUrl: data.imageUrl, // 클라우드 URL
-      }
-    );
+    const response = await apiClient.post<CreateMeetingResponse>("/meetings", {
+      title: data.title,
+      description: data.description,
+      interestIds: data.interestIds, // 배열 그대로
+      maxParticipants: data.maxParticipants, // 숫자 그대로
+      meetingDate: data.meetingDate,
+      address: data.address,
+      imageUrl: data.imageUrl, // 클라우드 URL
+    });
 
     return response.data;
   } catch (error) {
