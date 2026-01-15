@@ -1,9 +1,5 @@
 import { apiClient } from "@/api/client";
-import type {
-  MeetingListResponse,
-  CreateMeetingRequest,
-  CreateMeetingResponse,
-} from "@/models/meeting.model";
+import type { MeetingListResponse, CreateMeetingRequest, CreateMeetingResponse } from "@/models/meeting.model";
 
 export type SortType = "NEW" | "UPDATE" | "DEADLINE" | "POPULAR";
 export type InterestFilterType = string;
@@ -40,7 +36,6 @@ export const getMeetings = async (
     throw error;
   }
 };
-
 // 이미지 업로드 API (클라우드 업로드)
 export const uploadImage = async (file: File): Promise<string> => {
   try {

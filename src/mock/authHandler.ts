@@ -44,7 +44,7 @@ export const login = http.post(`${httpUrl}/users/login`, async ({ request }) => 
 });
 
 // 구글 로그인
-export const googleLogin = http.post(`${httpUrl}/users/login/google`, async ({ request }) => {
+export const googleLogin = http.post(`${httpUrl}/users/login / google`, async ({ request }) => {
     try {
         const { code, redirectUri } = (await request.json()) as any;
         console.log('google login request:', { code, redirectUri });
@@ -58,7 +58,7 @@ export const googleLogin = http.post(`${httpUrl}/users/login/google`, async ({ r
         }, {
             status: 200,
             headers: {
-                'Authorization': `Bearer mock-jwt-token`,
+                'Authorization': `Bearer mock - jwt - token`,
                 'Set-Cookie': 'refreshToken=mock-refresh-token; HttpOnly; Secure; SameSite=Strict'
             }
         });
@@ -78,7 +78,7 @@ export const logout = http.post(`${httpUrl}/users/logout`, async () => {
 });
 
 // 회원가입 핸들러
-export const join = http.post(`${httpUrl}/users/register`, async ({ request }) => {
+export const join = http.post(`${httpUrl} /users/register`, async ({ request }) => {
     const { email, password, nickname } = (await request.json()) as any;
     await delay(1000);
     return HttpResponse.json({
@@ -156,7 +156,7 @@ export const findPassword = http.post(`${httpUrl}/users/password-reset/request`,
 
         // 저장소에 저장
         resetCodeStore.set(resetCode, { email, expiresAt });
-        console.log(`[Mock] Reset Code Generated for ${email}: ${resetCode}, Expires at: ${expiresAt.toLocaleTimeString()}`);
+        console.log(`[Mock] Reset Code Generated for ${email}: ${resetCode}, Expires at: ${expiresAt.toLocaleTimeString()} `);
 
         return HttpResponse.json({ message: "비밀번호 재설정 이메일이 발송되었습니다.", resetCode },
             { status: 200 }
@@ -186,7 +186,7 @@ export const verifyResetCode = http.post(`${httpUrl}/users/password-reset/verify
     if (storedData.email !== email) {
         return new HttpResponse(
             JSON.stringify({ message: "이메일이 일치하지 않습니다." }),
-            { status: 400 }
+            { status: 404 }
         );
     }
 
@@ -195,7 +195,7 @@ export const verifyResetCode = http.post(`${httpUrl}/users/password-reset/verify
         resetCodeStore.delete(code);
         return new HttpResponse(
             JSON.stringify({ message: "인증코드가 만료되었습니다." }),
-            { status: 400 }
+            { status: 410 }
         );
     }
 
@@ -240,7 +240,7 @@ export const resetPassword = http.put(`${httpUrl}/users/password-reset/confirm`,
         resetTokenStore.delete(resetToken);
         return new HttpResponse(
             JSON.stringify({ message: "토큰이 만료되었습니다." }),
-            { status: 400 }
+            { status: 410 }
         );
     }
 
@@ -277,8 +277,19 @@ export const refresh = http.post(`${httpUrl}/users/refresh`, async ({ request })
 });
 
 // 사용자 인증 핸들러
-export const verify = http.get(`${httpUrl}/users/verify`, async () => {
+export const verifyUser = http.get(`${httpUrl}/users/verify`, async ({ request }) => {
+    const token = request.headers.get('Authorization');
     await delay(1000);
+
+    if (!token) {
+        return HttpResponse.json({
+            authenticated: false,
+            message: '인증토큰이 없습니다.',
+        },
+            { status: 200 }
+        );
+    }
+
     return HttpResponse.json({
         authenticated: true,
         message: '인증이 완료되었습니다.',
@@ -286,5 +297,7 @@ export const verify = http.get(`${httpUrl}/users/verify`, async () => {
             email: "moimo@email.com",
             nickname: "테스터",
         }
-    });
+    },
+        { status: 200 }
+    );
 });

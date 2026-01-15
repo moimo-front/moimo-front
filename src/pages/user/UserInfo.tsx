@@ -13,7 +13,7 @@ import { useUserUpdateMutation } from "@/hooks/useUserInfoMutations";
 // zod schema 정의
 const userInfoSchema = z.object({
     bio: z.string().max(100, "자기소개는 100자 이내로 입력해주세요."),
-    interests: z.array(z.string()).min(3, "관심사를 3개 이상 선택해주세요."),
+    interests: z.array(z.number()).min(3, "관심사를 3개 이상 선택해주세요."),
 });
 
 export type UserInfoFormValues = z.infer<typeof userInfoSchema>;
@@ -41,14 +41,14 @@ const UserInfo = () => {
 
     const selectedInterests = watch("interests");
 
-    const toggleInterest = (interestName: string) => {
+    const toggleInterest = (interestId: number) => {
         const currentInterests = [...selectedInterests];
-        const index = currentInterests.indexOf(interestName);
+        const index = currentInterests.indexOf(interestId);
 
         if (index > -1) {
             currentInterests.splice(index, 1);
         } else {
-            currentInterests.push(interestName);
+            currentInterests.push(interestId);
         }
 
         setValue("interests", currentInterests, { shouldValidate: true });
@@ -113,10 +113,10 @@ const UserInfo = () => {
                                     <button
                                         key={interest.id}
                                         type="button"
-                                        onClick={() => toggleInterest(interest.name)}
+                                        onClick={() => toggleInterest(interest.id)}
                                         className={cn(
                                             "h-12 rounded-[8px] text-sm font-medium transition-all duration-200 border-none shadow-sm",
-                                            selectedInterests.includes(interest.name)
+                                            selectedInterests.includes(interest.id)
                                                 ? "bg-primary text-white shadow-md transform scale-[0.98]"
                                                 : "bg-secondary/40 text-foreground hover:bg-secondary/60"
                                         )}

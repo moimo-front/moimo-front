@@ -51,7 +51,7 @@ const Login = () => {
             const loginInfo = await loginMutation(data);
 
             if (loginInfo.user.isNewUser) {
-                navigate("/extra-info", {
+                navigate("/user-info", {
                     state: {
                         accessToken: loginInfo.accessToken,
                         user: loginInfo.user
@@ -82,7 +82,7 @@ const Login = () => {
             console.log(loginInfo);
 
             if (loginInfo.user.isNewUser) {
-                navigate("/extra-info", {
+                navigate("/user-info", {
                     state: {
                         accessToken: loginInfo.accessToken,
                         user: loginInfo.user
@@ -114,7 +114,7 @@ const Login = () => {
 
             if (res.isNewUser) {
                 // 신규 유저인 경우 추가 정보 입력 페이지로 이동
-                navigate("/extra-info", {
+                navigate("/user-info", {
                     state: {
                         accessToken: res.accessToken,
                         user: res.user

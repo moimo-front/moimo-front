@@ -11,14 +11,16 @@ import { AiOutlineUser, AiOutlineTeam } from "react-icons/ai";
 import { LuLogOut } from "react-icons/lu";
 import { useAuthStore } from "@/store/authStore";
 import { useNavigate } from "react-router-dom";
+import { useLogoutMutation } from "@/hooks/useAuthMutations";
 
 export const ProfileDropdown = () => {
   const { nickname, storeLogout } = useAuthStore();
+  const logoutMutation = useLogoutMutation();
   const navigate = useNavigate();
   const userAvatarUrl = "";
 
-  const handleLogout = () => {
-    storeLogout();
+  const handleLogout = async () => {
+    await logoutMutation.mutateAsync();
     navigate("/");
   };
 
