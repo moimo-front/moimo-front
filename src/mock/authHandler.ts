@@ -186,7 +186,7 @@ export const verifyResetCode = http.post(`${httpUrl}/users/password-reset/verify
     if (storedData.email !== email) {
         return new HttpResponse(
             JSON.stringify({ message: "이메일이 일치하지 않습니다." }),
-            { status: 400 }
+            { status: 404 }
         );
     }
 
@@ -195,7 +195,7 @@ export const verifyResetCode = http.post(`${httpUrl}/users/password-reset/verify
         resetCodeStore.delete(code);
         return new HttpResponse(
             JSON.stringify({ message: "인증코드가 만료되었습니다." }),
-            { status: 400 }
+            { status: 410 }
         );
     }
 
@@ -240,7 +240,7 @@ export const resetPassword = http.put(`${httpUrl}/users/password-reset/confirm`,
         resetTokenStore.delete(resetToken);
         return new HttpResponse(
             JSON.stringify({ message: "토큰이 만료되었습니다." }),
-            { status: 400 }
+            { status: 410 }
         );
     }
 
