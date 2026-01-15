@@ -53,10 +53,6 @@ export const routeList = [
                 path: "/moimer-intro",
                 element: <MoimerIntro />,
             },
-            // {
-            //     path: "/sample",
-            //     element: <SampleComp />,
-            // },
             {
                 path: "/mypage",
                 element:
