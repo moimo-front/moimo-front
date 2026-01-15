@@ -4,6 +4,7 @@ import { IoLocationOutline } from "react-icons/io5";
 import { AiOutlineTeam } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import type { Meeting } from "@/models/meeting.model";
+import { getDistrictFromAddress } from "@/lib/formatAddress";
 
 interface MeetingCardProps {
   meeting: Meeting;
@@ -53,7 +54,7 @@ function MeetingCard({ meeting, imageUrl, className }: MeetingCardProps) {
         <CardFooter className="p-3 pt-0 flex gap-4 items-center text-sm text-muted-foreground">
           <div className="flex items-center">
             <IoLocationOutline />
-            <span>{address}</span>
+            <span>{getDistrictFromAddress(address)}</span>
           </div>
           <div className="flex items-center">
             <AiOutlineTeam />

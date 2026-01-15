@@ -7,10 +7,12 @@ import { usePagination } from "@/hooks/usePagination";
 import { useMeetingFilter } from "@/hooks/useMeetingFilter";
 import { MeetingFilterControls } from "@/components/features/meetings/MeetingFilterControls";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useInterestQuery } from "@/hooks/useInterestQuery";
 import type {
   FinishedFilterType,
   InterestFilterType,
   SortType,
+  GetMeetingsParams,
 } from "@/api/meeting.api";
 
 const MeetingsPage = () => {
@@ -22,23 +24,39 @@ const MeetingsPage = () => {
   const limit = Number(searchParams.get("limit") || "10");
 
   // URL 업데이트 로직
-  const updateSearchParams = (newParams: Record<string, string>) => {
-    const updated = new URLSearchParams(searchParams);
-    for (const [key, value] of Object.entries(newParams)) {
-      updated.set(key, value);
-    }
-    setSearchParams(updated);
+  const updateUrlParams = (newValues: Partial<GetMeetingsParams>) => {
+    const updatedState = {
+      limit,
+      page,
+      sort: filters.sort,
+      interestFilter: filters.interestFilter,
+      finishedFilter: filters.finishedFilter,
+      ...newValues,
+    };
+
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.set("limit", String(updatedState.limit));
+    newSearchParams.set("page", String(updatedState.page));
+    newSearchParams.set("sort", updatedState.sort);
+    newSearchParams.set("interestFilter", updatedState.interestFilter);
+    newSearchParams.set("finishedFilter", String(updatedState.finishedFilter));
+
+    setSearchParams(newSearchParams);
   };
 
   const handleFilterChange = (
-    key: string,
+    key: "sort" | "interestFilter" | "finishedFilter" | "limit",
     value: string | number | boolean
   ) => {
-    updateSearchParams({ [key]: String(value), page: "1" });
+    // 페이지를 1로 초기화하며 필터 변경
+    updateUrlParams({
+      [key]: value,
+      page: 1,
+    } as Partial<GetMeetingsParams>);
   };
 
   const setPage = (newPage: number) => {
-    updateSearchParams({ page: String(newPage) });
+    updateUrlParams({ page: newPage });
   };
 
   useEffect(() => {
@@ -51,9 +69,8 @@ const MeetingsPage = () => {
     isError,
   } = useMeetingsQuery({ page, limit, ...filters });
 
-  // TODO: useInterestQuery 사용하기
-  const interestsData = [];
-  const isInterestsLoading = false;
+  const { data: interestsData, isLoading: isInterestsLoading } =
+    useInterestQuery();
 
   const { totalPages, isFirstPage, isLastPage } = usePagination({
     page,
@@ -109,7 +126,9 @@ const MeetingsPage = () => {
       )}
 
       {!isLoading && !isError && meetings.length > 0 && (
-        <MeetingList meetings={meetings} />
+        <div className="max-w-6xl mx-auto">
+          <MeetingList meetings={meetings} />
+        </div>
       )}
 
       {!isLoading && !isError && meetings.length === 0 && (
