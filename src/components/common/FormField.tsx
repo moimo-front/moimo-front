@@ -15,12 +15,13 @@ function FormField({ label, htmlFor, children, description, required }: FormFiel
         {label}
         {required && <span className="text-destructive ml-1">*</span>}
       </Label>
-      {children}
       {description && (
         <p className="text-sm text-muted-foreground">
           {description}
         </p>
       )}
+      {children}
+
     </div>
   );
 }
