@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import type {
   FinishedFilterType,
   InterestFilterType,
@@ -6,15 +5,13 @@ import type {
 } from "@/api/meeting.api";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Interest } from "@/models/interest.model";
-import React from "react";
 import { sortOptions } from "@/constants/sort";
 
 interface MeetingFilterControlsProps {
@@ -42,87 +39,47 @@ export const MeetingFilterControls = ({
   handleFinishedFilterChange,
   handleLimitChange,
 }: MeetingFilterControlsProps) => {
-  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] =
-    useState<boolean>(false);
-  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState<boolean>(false);
-
-  const selectedInterestName = useMemo(() => {
-    if (filters.interestFilter === "ALL") return "카테고리";
-    const found = interestsData?.find(
-      (i) => i.id.toString() === filters.interestFilter
-    );
-    return found ? found.name : "카테고리";
-  }, [filters.interestFilter, interestsData]);
-
-  const selectedSortLabel = useMemo(() => {
-    return (
-      sortOptions.find((option) => option.value === filters.sort)?.label ||
-      "정렬"
-    );
-  }, [filters.sort]);
-
   return (
     <div className="flex justify-between items-center px-4">
       <div className="flex items-center gap-2">
         {/* 카테고리 필터 */}
-        <DropdownMenu
-          open={isCategoryDropdownOpen}
-          onOpenChange={setIsCategoryDropdownOpen}
+        <Select
+          value={filters.interestFilter}
+          onValueChange={handleInterestFilterChange}
         >
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-1">
-              {selectedInterestName}
-              {isCategoryDropdownOpen ? " ∧" : " ∨"}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <DropdownMenuLabel>관심사</DropdownMenuLabel>
-            <DropdownMenuRadioGroup
-              value={filters.interestFilter}
-              onValueChange={handleInterestFilterChange}
-            >
-              <DropdownMenuRadioItem value="ALL">전체</DropdownMenuRadioItem>
-              {isInterestsLoading ? (
-                <DropdownMenuLabel>로딩 중...</DropdownMenuLabel>
-              ) : (
-                interestsData?.map((interest) => (
-                  <DropdownMenuRadioItem
-                    key={interest.id}
-                    value={interest.id.toString()}
-                  >
-                    {interest.name}
-                  </DropdownMenuRadioItem>
-                ))
-              )}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <SelectTrigger className="w-[180px] bg-secondary text-primary-foreground">
+            <SelectValue placeholder="카테고리" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">전체</SelectItem>
+            {isInterestsLoading ? (
+              <p className="p-2 text-sm">로딩 중...</p>
+            ) : (
+              interestsData?.map((interest) => (
+                <SelectItem key={interest.id} value={interest.id.toString()}>
+                  {interest.name}
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
 
         {/* 정렬 필터 */}
-        <DropdownMenu
-          open={isSortDropdownOpen}
-          onOpenChange={setIsSortDropdownOpen}
+        <Select
+          value={filters.sort}
+          onValueChange={(value) => handleSortChange(value as SortType)}
         >
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-1">
-              {selectedSortLabel}
-              {isSortDropdownOpen ? " ∧" : " ∨"}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>정렬</DropdownMenuLabel>
-            <DropdownMenuRadioGroup
-              value={filters.sort}
-              onValueChange={(value) => handleSortChange(value as SortType)}
-            >
-              {sortOptions.map((option) => (
-                <DropdownMenuRadioItem key={option.value} value={option.value}>
-                  {option.label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <SelectTrigger className="w-[120px] bg-secondary text-primary-foreground">
+            <SelectValue placeholder="정렬" />
+          </SelectTrigger>
+          <SelectContent>
+            {sortOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         {/* 모집 여부 필터 */}
         <Button
@@ -133,38 +90,19 @@ export const MeetingFilterControls = ({
         </Button>
 
         {/* 개수 버튼 */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">{`${limit}개씩 보기`}</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuRadioGroup
-              value={limit.toString()}
-              onValueChange={(value) => handleLimitChange(Number(value))}
-            >
-              <DropdownMenuRadioItem value="10">10개</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="20">20개</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="50">50개</DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      <div className="flex items-center gap-2 text-sm">
-        {sortOptions.map((option, index) => (
-          <React.Fragment key={option.value}>
-            <p
-              className={`cursor-pointer ${filters.sort === option.value ? "" : "text-muted-foreground"
-                }`}
-              onClick={() => handleSortChange(option.value)}
-            >
-              {option.label}
-            </p>
-            {index < sortOptions.length - 1 && (
-              <p className="text-muted-foreground">|</p>
-            )}
-          </React.Fragment>
-        ))}
+        <Select
+          value={limit.toString()}
+          onValueChange={(value) => handleLimitChange(Number(value))}
+        >
+          <SelectTrigger className="w-[110px] bg-secondary text-primary-foreground">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">10개씩</SelectItem>
+            <SelectItem value="20">20개씩</SelectItem>
+            <SelectItem value="50">50개씩</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

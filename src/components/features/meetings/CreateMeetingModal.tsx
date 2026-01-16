@@ -3,16 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Slider } from "@/components/ui/slider";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import FormField from "@components/common/FormField";
+import DateTimePicker from "@components/common/DateTimePicker";
 import { useCreateMeetingMutation } from "@/hooks/useMeetingMutations";
 import { TOPIC_CATEGORIES } from "@/constants/topics";
-import { format } from "date-fns";
-import { ko } from "date-fns/locale";
-import { CalendarIcon, Upload, X } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CreateMeetingModalProps {
@@ -24,10 +21,13 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
   const [meetingName, setMeetingName] = useState("");
   const [meetingIntro, setMeetingIntro] = useState("");
   const [meetingDate, setMeetingDate] = useState<Date>();
+  const [meetingHour, setMeetingHour] = useState("3");
+  const [meetingMinute, setMeetingMinute] = useState("00");
+  const [meetingPeriod, setMeetingPeriod] = useState<"AM" | "PM">("PM");
   const [location, setLocation] = useState("");
   const [maxParticipants, setMaxParticipants] = useState([15]);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedInterests, setSelectedInterests] = useState<number[]>([]);
+  const [selectedInterest, setSelectedInterest] = useState<number | null>(null);
 
   const createMeetingMutation = useCreateMeetingMutation();
 
@@ -37,12 +37,8 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
     }
   };
 
-  const toggleInterest = (interestId: number) => {
-    setSelectedInterests((prev) =>
-      prev.includes(interestId)
-        ? prev.filter((id) => id !== interestId)
-        : [...prev, interestId]
-    );
+  const selectInterest = (interestId: number) => {
+    setSelectedInterest(interestId === selectedInterest ? null : interestId);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,8 +49,8 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
       return;
     }
 
-    if (selectedInterests.length === 0) {
-      alert("관심사를 최소 1개 이상 선택해주세요.");
+    if (!selectedInterest) {
+      alert("관심사를 선택해주세요.");
       return;
     }
 
@@ -74,13 +70,24 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
         imageUrl = await uploadImage(selectedImage);
       }
 
-      // 2단계: 모임 생성 (이미지 URL 포함)
+      // 2단계: 날짜와 시간 결합 (Date 객체를 위해 12시간 형식을 24시간으로 변환)
+      const combinedDateTime = new Date(meetingDate);
+      let hour24 = parseInt(meetingHour);
+      if (meetingPeriod === "PM" && hour24 !== 12) {
+        hour24 += 12;
+      } else if (meetingPeriod === "AM" && hour24 === 12) {
+        hour24 = 0;
+      }
+      combinedDateTime.setHours(hour24);
+      combinedDateTime.setMinutes(parseInt(meetingMinute));
+
+      // 3단계: 모임 생성 (이미지 URL 포함)
       await createMeetingMutation.mutateAsync({
         title: meetingName,
         description: meetingIntro,
-        interestIds: selectedInterests,
+        interestIds: [selectedInterest], 
         maxParticipants: maxParticipants[0],
-        meetingDate: meetingDate.toISOString(),
+        meetingDate: combinedDateTime.toISOString(),
         address: location,
         imageUrl, // 클라우드 URL
       });
@@ -91,11 +98,14 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
       setMeetingName("");
       setMeetingIntro("");
       setMeetingDate(undefined);
+      setMeetingHour("3");
+      setMeetingMinute("00");
+      setMeetingPeriod("PM");
       setLocation("");
       setMaxParticipants([15]);
       setSelectedImage(null);
-      setSelectedInterests([]);
-
+      setSelectedInterest(null);
+      
       // 모달 닫기
       onOpenChange(false);
     } catch (error: any) {
@@ -105,19 +115,21 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden bg-card flex flex-col p-0">
+        <DialogHeader className="sticky top-0 bg-card pb-4 pt-6 px-6 border-b border-border">
           <DialogTitle className="text-2xl font-bold">모이머 신청하기</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+        <div className="overflow-y-auto flex-1 px-6 scrollbar-hide">
+          <form onSubmit={handleSubmit} className="space-y-6 mt-4 pb-6">
           {/* 모임명 */}
           <FormField label="모임명" htmlFor="meetingName">
             <Input
               id="meetingName"
-              placeholder="표현하고 싶은 모임명을 입력하세요!"
+              placeholder="표현하고 싶은 모임명을 입력하세요!(100자 이내)"
               value={meetingName}
               onChange={(e) => setMeetingName(e.target.value)}
+              maxLength={100}
               className="h-12"
               required
             />
@@ -127,40 +139,41 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
           <FormField label="모임 소개글" htmlFor="meetingIntro">
             <Textarea
               id="meetingIntro"
-              placeholder="모임에 대해 자유롭게 설명해주세요!&#10;ex) 모임의 개성적인 특징, 모임의 의의, 참여자가 가지면 좋은 마인드, 지켜야 할 사항"
+              placeholder="모임에 대해 자유롭게 설명해주세요!(4000자 이내)&#10;ex) 모임의 개성적인 특징, 모임의 의의, 참여자가 가지면 좋은 마인드, 지켜야 할 사항"
               value={meetingIntro}
               onChange={(e) => setMeetingIntro(e.target.value)}
+              maxLength={4000}
               className="min-h-[120px] resize-none"
               required
             />
           </FormField>
 
-          {/* 관심사 선택 */}
-          <FormField
-            label="관심사"
-            description="모임과 관련된 관심사를 선택해주세요 (최소 1개)"
-          >
-            <div className="flex flex-wrap gap-2">
-              {TOPIC_CATEGORIES.map((interest) => (
-                <Badge
-                  key={interest.id}
-                  variant={selectedInterests.includes(interest.id) ? "default" : "outline"}
-                  className={cn(
-                    "cursor-pointer transition-colors px-4 py-2 text-sm",
-                    selectedInterests.includes(interest.id)
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "hover:bg-secondary"
-                  )}
-                  onClick={() => toggleInterest(interest.id)}
-                >
-                  {interest.name}
-                  {selectedInterests.includes(interest.id) && (
-                    <X className="ml-1 h-3 w-3" />
-                  )}
-                </Badge>
-              ))}
-            </div>
-          </FormField>
+            {/* 관심사 선택 */}
+            <FormField 
+              label="관심사" 
+              description="모임과 관련된 관심사를 하나 선택해주세요"
+            >
+              <div className="flex flex-wrap gap-2">
+                {TOPIC_CATEGORIES.map((interest) => (
+                  <Badge
+                    key={interest.id}
+                    variant={selectedInterest === interest.id ? "default" : "outline"}
+                    className={cn(
+                      "cursor-pointer transition-colors px-4 py-2 text-sm",
+                      selectedInterest === interest.id
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "hover:bg-secondary"
+                    )}
+                    onClick={() => selectInterest(interest.id)}
+                  >
+                    {interest.name}
+                    {selectedInterest === interest.id && (
+                      <X className="ml-1 h-3 w-3" />
+                    )}
+                  </Badge>
+                ))}
+              </div>
+            </FormField>
 
           {/* 모임 대표 사진 */}
           <FormField label="모임 대표 사진" htmlFor="meetingImage" description="모임과 관련된 사진을 선택해주세요">
@@ -189,35 +202,16 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
 
           {/* 모임 날짜 및 시간 */}
           <FormField label="모임 날짜 및 시간" description="모임이 진행될 날짜와 시간을 선택해주세요">
-            <div className="space-y-3">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full h-12 justify-start text-left font-normal ",
-                      !meetingDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {meetingDate ? (
-                      format(meetingDate, "PPP", { locale: ko })
-                    ) : (
-                      <span>날짜를 선택하세요</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-35 p-0 " align="start">
-                  <Calendar
-                    mode="single"
-                    selected={meetingDate}
-                    onSelect={setMeetingDate}
-                    disabled={(date) => date < new Date()}
-                  />
-                </PopoverContent>
-              </Popover>
-              {/* 시간 선택 기능 추가예정 */}
-            </div>
+            <DateTimePicker
+              date={meetingDate}
+              hour={meetingHour}
+              minute={meetingMinute}
+              period={meetingPeriod}
+              onDateChange={setMeetingDate}
+              onHourChange={setMeetingHour}
+              onMinuteChange={setMeetingMinute}
+              onPeriodChange={setMeetingPeriod}
+            />
           </FormField>
 
           {/* 모임 장소 (카카오 API로 리펙토링할 예정) */}
@@ -270,8 +264,9 @@ function CreateMeetingModal({ open, onOpenChange }: CreateMeetingModalProps) {
             >
               {createMeetingMutation.isPending ? "신청 중..." : "신청하기"}
             </Button>
-          </div>
-        </form>
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

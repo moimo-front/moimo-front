@@ -10,4 +10,5 @@ const handlers = [
   ...userInfoHandler,
   ...meetingHandler
 ];
+
 export const worker = setupWorker(...handlers);

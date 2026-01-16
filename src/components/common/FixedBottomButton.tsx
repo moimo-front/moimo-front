@@ -15,7 +15,7 @@ function FixedBottomButton({
   disabled 
 }: FixedBottomButtonProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-primary p-4 shadow-lg z-40">
+    <div className="sticky bottom-0 left-0 right-0 bg-primary p-4 shadow-lg z-40 mt-auto">
       <div className="max-w-7xl mx-auto">
         <Button
           onClick={onClick}

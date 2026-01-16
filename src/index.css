@@ -10,7 +10,7 @@
   --radius: 0.625rem;
 
   /* Palette 1: Warmth, Casual & Palette 2: Softness */
-  --background: #fff9ee;
+  --background: #ffffff;
   /* Warm White */
   --foreground: #2e2e2e;
   /* Text Main */
@@ -152,5 +152,16 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
   }
 }
