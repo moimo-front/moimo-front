@@ -61,11 +61,16 @@ export const routeList = [
         element: <MoimerIntro />,
       },
       {
+        path: "/chats",
+        element: <Chatting />,
+      },
+      {
         path: "/mypage",
-        element:
+        element: (
           <ProtectedRoute>
             <MypageSession />,
-          </ProtectedRoute>,
+          </ProtectedRoute>
+        ),
         children: [
           {
             index: true,
