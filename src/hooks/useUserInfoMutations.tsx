@@ -11,7 +11,8 @@ export const useUserUpdateMutation = () => {
             return await userInfoUpdate(data);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["user-info"] });
+            // users/verify와 통합되었으므로 authUser 쿼리를 invalidate
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
         },
         onError: (error: AxiosError<{ message: string }>) => {
             console.error(error);

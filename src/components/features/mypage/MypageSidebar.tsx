@@ -1,6 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUserInfoQuery } from "@/hooks/useUserInfoQuery";
-import type { UserInfo } from "@/models/user.model";
 import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -16,7 +15,7 @@ export const MypageSidebar = () => {
             <div className="flex flex-col items-center mb-10 w-full px-4">
                 <div className="relative mb-4">
                     <Avatar className="w-24 h-24 border-2 border-gray-100">
-                        <AvatarImage src={user.image} alt={user.nickname || "user"} />
+                        <AvatarImage src={user.profile_image} alt={user.nickname || "user"} />
                         <AvatarFallback>{user.nickname?.[0] || "U"}</AvatarFallback>
                     </Avatar>
                 </div>

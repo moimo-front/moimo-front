@@ -19,7 +19,7 @@ import type { UserInfo } from "@/models/user.model";
 
 const profileSchema = z.object({
     bio: z.string().max(100, "자기소개는 100자 이내로 입력해주세요."),
-    interests: z.array(z.string()).min(3, "관심사를 3개 이상 선택해주세요!"),
+    interests: z.array(z.number()).min(3, "관심사를 3개 이상 선택해주세요!"),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -56,22 +56,22 @@ const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
         if (userInfo) {
             reset({
                 bio: userInfo.bio || "",
-                interests: userInfo.interests?.map(i => i.name) || [],
+                interests: userInfo.interests?.map(i => i.id) || [],
             });
-            setPreviewImage(userInfo.image || null);
+            setPreviewImage(userInfo.profile_image || null);
         }
     }, [userInfo, reset, isOpen]);
 
     const selectedInterests = watch("interests");
 
-    const toggleInterest = (interestName: string) => {
+    const toggleInterest = (interestId: number) => {
         const currentInterests = [...selectedInterests];
-        const index = currentInterests.indexOf(interestName);
+        const index = currentInterests.indexOf(interestId);
 
         if (index > -1) {
             currentInterests.splice(index, 1);
         } else {
-            currentInterests.push(interestName);
+            currentInterests.push(interestId);
         }
 
         setValue("interests", currentInterests, { shouldValidate: true });
@@ -95,7 +95,7 @@ const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
             formData.append("interests", JSON.stringify(data.interests));
 
             if (fileInputRef.current?.files?.[0]) {
-                formData.append("image", fileInputRef.current.files[0]);
+                formData.append("file", fileInputRef.current.files[0]);
             }
 
             await userUpdateMutation.mutateAsync(formData);
@@ -146,7 +146,7 @@ const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
                                 onChange={handleImageChange}
                                 className="hidden"
                                 accept="image/*"
-                                name="image"
+                                name="profile_image"
                             />
                         </div>
                         <h2 className="text-xl font-bold text-gray-900">
@@ -177,10 +177,10 @@ const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
                                 <button
                                     key={interest.id}
                                     type="button"
-                                    onClick={() => toggleInterest(interest.name)}
+                                    onClick={() => toggleInterest(interest.id)}
                                     className={cn(
                                         "h-10 text-[11px] font-medium rounded-lg transition-all border shadow-sm",
-                                        selectedInterests.includes(interest.name)
+                                        selectedInterests.includes(interest.id)
                                             ? "bg-yellow-400 border-yellow-400 text-white shadow-md"
                                             : "bg-[#FFF4D9]/50 border-transparent text-[#6B7280] hover:bg-[#FFF4D9]"
                                     )}
