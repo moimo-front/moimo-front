@@ -10,3 +10,11 @@ export interface Participation {
     createdAt: Date;
     updatedAt?: Date;
 }
+
+export interface Participant {
+    participationId: number;
+    userId: number;
+    nickname: string;
+    profileImage: string;
+    status: ParticipationStatus;
+}

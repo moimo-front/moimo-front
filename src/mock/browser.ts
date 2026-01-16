@@ -4,13 +4,15 @@ import { meetingHandler } from "./meetingHandler";
 import { getInterests } from './interestHandler';
 import { getMyMeetings } from './meHandler';
 import { userInfoHandler } from './userInfoHandler';
+import { participationHandlers } from "./participationHandler";
 
 const handlers = [
   ...authHandler,
   getInterests,
   getMyMeetings,
   ...userInfoHandler,
-  ...meetingHandler
+  ...meetingHandler,
+  ...participationHandlers,
 ];
 
 export const worker = setupWorker(...handlers);

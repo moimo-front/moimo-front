@@ -33,7 +33,7 @@ const HostMeeting = () => {
                             <SmallMeetingCard key={meeting.meetingId} meeting={meeting}>
                                 <div className="flex gap-2">
                                     <Link to={`/mypage/meetings/hosting/${meeting.meetingId}/participations`}>
-                                        <Button variant="outline" className="border-yellow-400 text-gray-900 shadow-none">멤버 관리</Button>
+                                        <Button variant="outline" className="border-yellow-400 text-gray-900 shadow-none">모이미 관리</Button>
                                     </Link>
                                     <Button
                                         variant="outline"

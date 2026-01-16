@@ -1,6 +1,7 @@
 import type { MyMeetingsResponse } from "@/api/me.api";
 import type { Interest } from "@/models/interest.model";
 import type { Meeting } from "@/models/meeting.model";
+import type { Participant } from "@/models/participation.model";
 
 export const httpUrl =
   import.meta.env.VITE_API_URL || "https://moimo-back.vercel.app";
@@ -200,3 +201,45 @@ export const myMeetings: MyMeetingsResponse[] = [
     isCompleted: false,
   }
 ];
+
+export const mockParticipants: Record<number, Participant[]> = {
+  1: [
+    {
+      participationId: 1,
+      userId: 10,
+      nickname: "러너K",
+      profileImage: "https://picsum.photos/200?random=10",
+      status: "ACCEPTED",
+    },
+    {
+      participationId: 2,
+      userId: 11,
+      nickname: "마라톤왕",
+      profileImage: "https://picsum.photos/200?random=11",
+      status: "PENDING",
+    },
+    {
+      participationId: 3,
+      userId: 12,
+      nickname: "달리기조아",
+      profileImage: "https://picsum.photos/200?random=12",
+      status: "PENDING",
+    },
+  ],
+  106: [
+    {
+      participationId: 4,
+      userId: 20,
+      nickname: "게이머A",
+      profileImage: "https://picsum.photos/200?random=20",
+      status: "ACCEPTED",
+    },
+    {
+      participationId: 5,
+      userId: 21,
+      nickname: "축구팬B",
+      profileImage: "https://picsum.photos/200?random=21",
+      status: "PENDING",
+    },
+  ]
+};
