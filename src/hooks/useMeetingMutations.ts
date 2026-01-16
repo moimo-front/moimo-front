@@ -7,7 +7,7 @@ export const useCreateMeetingMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateMeetingRequest) => createMeeting(data),
+    mutationFn: (data: FormData) => createMeeting(data),
     onSuccess: () => {
       // 성공 시 모임 목록 다시 가져오기
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
@@ -23,7 +23,7 @@ export const useUpdateMeetingMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: CreateMeetingRequest }) =>
+    mutationFn: ({ id, data }: { id: number; data: FormData }) =>
       updateMeeting(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["meetings"] });

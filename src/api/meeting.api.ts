@@ -65,7 +65,7 @@ export const uploadImage = async (file: File): Promise<string> => {
     formData.append("image", file);
 
     const response = await apiClient.post<{ imageUrl: string }>(
-      "/upload/image", // 클라우드 업로드 API라고 가정
+      "/upload/image", // 클라우드 업로드 API
       formData,
       {
         headers: {
@@ -81,22 +81,14 @@ export const uploadImage = async (file: File): Promise<string> => {
   }
 };
 
-// 모임 생성 API (JSON 형식)
+// 모임 생성 API (multipart/form-data 형식)
 export const createMeeting = async (
-  data: CreateMeetingRequest
+  data: FormData
 ): Promise<CreateMeetingResponse> => {
   try {
     const response = await apiClient.post<CreateMeetingResponse>(
       "/meetings",
-      {
-        title: data.title,
-        description: data.description,
-        interestId: data.interestId,
-        maxParticipants: data.maxParticipants, // 숫자 그대로
-        meetingDate: data.meetingDate,
-        address: data.address,
-        meetingImage: data.meetingImage, // 클라우드 URL
-      }
+      data
     );
 
     return response.data;
@@ -106,23 +98,15 @@ export const createMeeting = async (
   }
 };
 
-// 모임 수정 API
+// 모임 수정 API (multipart/form-data 형식)
 export const updateMeeting = async (
   meetingId: number,
-  data: CreateMeetingRequest
+  data: FormData
 ): Promise<CreateMeetingResponse> => {
   try {
     const response = await apiClient.put<CreateMeetingResponse>(
       `/meetings/${meetingId}`,
-      {
-        title: data.title,
-        description: data.description,
-        interestId: data.interestId,
-        maxParticipants: data.maxParticipants,
-        meetingDate: data.meetingDate,
-        address: data.address,
-        meetingImage: data.meetingImage,
-      }
+      data
     );
     return response.data;
   } catch (error) {
