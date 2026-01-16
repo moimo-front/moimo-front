@@ -12,6 +12,7 @@ import type {
   FinishedFilterType,
   InterestFilterType,
   SortType,
+  GetMeetingsParams,
 } from "@/api/meeting.api";
 
 const MeetingsPage = () => {
@@ -23,23 +24,28 @@ const MeetingsPage = () => {
   const limit = Number(searchParams.get("limit") || "10");
 
   // URL 업데이트 로직
-  const updateSearchParams = (newParams: Record<string, string>) => {
-    const updated = new URLSearchParams(searchParams);
-    for (const [key, value] of Object.entries(newParams)) {
-      updated.set(key, value);
-    }
-    setSearchParams(updated);
+  const updateUrlParams = (newValues: Partial<GetMeetingsParams>) => {
+    const newSearchParams = new URLSearchParams(searchParams);
+    Object.entries(newValues).forEach(([key, value]) => {
+      newSearchParams.set(key, String(value));
+    });
+
+    setSearchParams(newSearchParams);
   };
 
   const handleFilterChange = (
-    key: string,
+    key: "sort" | "interestFilter" | "finishedFilter" | "limit",
     value: string | number | boolean
   ) => {
-    updateSearchParams({ [key]: String(value), page: "1" });
+    // 페이지를 1로 초기화하며 필터 변경
+    updateUrlParams({
+      [key]: value,
+      page: 1,
+    } as Partial<GetMeetingsParams>);
   };
 
   const setPage = (newPage: number) => {
-    updateSearchParams({ page: String(newPage) });
+    updateUrlParams({ page: newPage });
   };
 
   useEffect(() => {
@@ -111,7 +117,9 @@ const MeetingsPage = () => {
       )}
 
       {!isLoading && !isError && meetings.length > 0 && (
-        <MeetingList meetings={meetings} />
+        <div className="max-w-6xl mx-auto">
+          <MeetingList meetings={meetings} />
+        </div>
       )}
 
       {!isLoading && !isError && meetings.length === 0 && (
