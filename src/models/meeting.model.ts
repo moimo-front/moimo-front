@@ -37,12 +37,19 @@ export interface MeetingDetail {
   description: string;
   interestName: string;
   maxParticipants: number;
-  currentParticipants?: number;
+  currentParticipants: number;
   meetingDate: string;
-  location: Location;
-  host: Host;
-  participants?: Participant[];
-  imageUrl?: string;
+  meetingImage?: string;
+  location: {
+    address: string;
+    lat: number;
+    lng: number;
+  };
+  host: {
+    nickname: string;
+    bio: string;
+    hostImage: string | null;
+  };
 }
 
 export interface MeetingMeta {
@@ -55,27 +62,6 @@ export interface MeetingMeta {
 export interface MeetingListResponse {
   data: Meeting[];
   meta: MeetingMeta;
-}
-
-export interface MeetingDetail {
-  id: number;
-  title: string;
-  meetingImage?: string;
-  description: string;
-  interestName: string;
-  maxParticipants: number;
-  currentParticipants: number;
-  meetingDate: string;
-  location: {
-    address: string;
-    lat: number;
-    lng: number;
-  };
-  host: {
-    nickname: string;
-    bio: string;
-    hostImage?: string;
-  };
 }
 
 // 모임 생성 API 요청 타입

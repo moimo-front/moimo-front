@@ -1,5 +1,6 @@
 import MainLayout from "@/components/common/MainLayout";
 import Home from "@/pages/Home";
+import MeetingDetailPage from "@/pages/meetings/MeetingDetail";
 import MeetingsPage from "@/pages/meetings/MeetingsPage";
 import Login from "@/pages/user/Login";
 import Join from "@/pages/user/Join";
@@ -30,6 +31,10 @@ export const routeList = [
       {
         path: "/meetings",
         element: <MeetingsPage />,
+      },
+      {
+        path: "/meetings/:meetingId",
+        element: <MeetingDetailPage />,
       },
       {
         path: "/login",
