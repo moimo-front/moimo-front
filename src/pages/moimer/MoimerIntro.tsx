@@ -57,7 +57,7 @@ function MoimerIntro() {
     ))}
   </div>
 </section>
-      <FixedBottomButton onClick={() => setIsModalOpen(true)}>모이모 시작하기</FixedBottomButton>
+      <FixedBottomButton onClick={() => setIsModalOpen(true)}>모이머 신청하기</FixedBottomButton>
       
       <MoimerApplicationModal 
         open={isModalOpen} 

@@ -153,12 +153,17 @@ export const refresh = async (): Promise<string | undefined> => {
 
 interface VerifyUserResponse {
     authenticated: boolean;
+    isNewUser: boolean;
+    id: number;
+    email: string;
+    nickname: string;
+    bio: string;
+    profile_image: string;
+    interests: {
+        id: number;
+        name: string;
+    }[];
     accessToken: string;
-    message: string;
-    user: {
-        nickname: string;
-        email: string;
-    };
 }
 
 // 사용자 인증

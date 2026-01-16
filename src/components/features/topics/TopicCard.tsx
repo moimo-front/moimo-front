@@ -1,17 +1,49 @@
+import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
+
 interface TopicCardProps {
   topicName: string;
+  to: string;
   imageUrl?: string;
-  onClick?: () => void;
+  size?: "sm" | "md";
 }
 
-function TopicCard({ topicName, imageUrl, onClick }: TopicCardProps) {
+function TopicCard({
+  topicName,
+  to,
+  imageUrl,
+  size = "md",
+}: TopicCardProps) {
+  const sizeStyles = {
+    sm: {
+      padding: "p-1",
+      imageDimensions: "w-16 h-16",
+      textSize: "text-sm",
+      initialSize: "text-lg",
+    },
+    md: {
+      padding: "p-8",
+      imageDimensions: "w-24 h-24",
+      textSize: "text-base",
+      initialSize: "text-xl",
+    },
+  };
+
+  const { padding, imageDimensions, textSize, initialSize } = sizeStyles[size];
+
   return (
-    <div
-      className="flex flex-col items-center justify-center p-8 rounded-lg transition-colors"
-      onClick={onClick}
+    <Link
+      to={to}
+      className={cn(
+        "flex flex-col items-center justify-center rounded-lg transition-colors cursor-pointer hover:bg-accent/50",
+        padding
+      )}
     >
       <div
-        className="w-24 h-24 rounded-full bg-secondary flex items-center justify-center overflow-hidden cursor-pointer mb-2 border border-black"
+        className={cn(
+          "rounded-full bg-secondary flex items-center justify-center overflow-hidden mb-3 border border-black",
+          imageDimensions
+        )}
         style={
           imageUrl
             ? {
@@ -23,13 +55,15 @@ function TopicCard({ topicName, imageUrl, onClick }: TopicCardProps) {
         }
       >
         {!imageUrl && (
-          <span className="text-xl font-bold text-primary-foreground">
+          <span
+            className={cn("font-bold text-primary-foreground", initialSize)}
+          >
             {topicName.charAt(0)}
           </span>
         )}
       </div>
-      <p className="text-base font-medium text-center">{topicName}</p>
-    </div>
+      <p className={cn("font-medium text-center", textSize)}>{topicName}</p>
+    </Link>
   );
 }
 

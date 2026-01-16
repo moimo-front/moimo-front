@@ -1,6 +1,3 @@
-import { Loader2 } from "lucide-react";
-import { Skeleton } from "../ui/skeleton";
-import { FaSpinner } from "react-icons/fa";
 
 const LoadingSpinner = () => {
     return (

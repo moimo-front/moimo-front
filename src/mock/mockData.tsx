@@ -1,6 +1,6 @@
 import type { MyMeetingsResponse } from "@/api/me.api";
 import type { Interest } from "@/models/interest.model";
-import type { Meeting } from "@/models/meeting.model"; // Meeting 타입 import
+import type { Meeting } from "@/models/meeting.model";
 
 export const httpUrl =
   import.meta.env.VITE_API_URL || "https://moimo-back.vercel.app";

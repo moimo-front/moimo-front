@@ -3,17 +3,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Slider } from "@/components/ui/slider";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import FormField from "@components/common/FormField";
 import { useCreateMeetingMutation, useUpdateMeetingMutation } from "@/hooks/useMeetingMutations";
 import { useMeetingQuery } from "@/hooks/useMeetingQuery";
+import DateTimePicker from "@components/common/DateTimePicker";
 import { TOPIC_CATEGORIES } from "@/constants/topics";
-import { format } from "date-fns";
-import { ko } from "date-fns/locale";
-import { CalendarIcon, Upload, X } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Meeting } from "@/models/meeting.model";
 import type { MyMeetingsResponse } from "@/api/me.api";
@@ -29,6 +26,9 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
   const [meetingName, setMeetingName] = useState("");
   const [meetingIntro, setMeetingIntro] = useState("");
   const [meetingDate, setMeetingDate] = useState<Date>();
+  const [meetingHour, setMeetingHour] = useState("3");
+  const [meetingMinute, setMeetingMinute] = useState("00");
+  const [meetingPeriod, setMeetingPeriod] = useState<"AM" | "PM">("PM");
   const [location, setLocation] = useState("");
   const [maxParticipants, setMaxParticipants] = useState([15]);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -123,7 +123,7 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
         description: meetingIntro,
         interestId: selectedInterestId!,
         maxParticipants: maxParticipants[0],
-        meetingDate: meetingDate.toISOString(),
+        meetingDate: combinedDateTime.toISOString(),
         address: location,
         meetingImage,
       };
@@ -145,6 +145,9 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
       setMeetingName("");
       setMeetingIntro("");
       setMeetingDate(undefined);
+      setMeetingHour("3");
+      setMeetingMinute("00");
+      setMeetingPeriod("PM");
       setLocation("");
       setMaxParticipants([15]);
       setSelectedImage(null);
@@ -247,6 +250,19 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
                 />
               </div>
             </FormField>
+          {/* 모임 날짜 및 시간 */}
+<!--           <FormField label="모임 날짜 및 시간" description="모임이 진행될 날짜와 시간을 선택해주세요">
+            <DateTimePicker
+              date={meetingDate}
+              hour={meetingHour}
+              minute={meetingMinute}
+              period={meetingPeriod}
+              onDateChange={setMeetingDate}
+              onHourChange={setMeetingHour}
+              onMinuteChange={setMeetingMinute}
+              onPeriodChange={setMeetingPeriod}
+            />
+          </FormField> -->
 
             {/* 모임 날짜 및 시간 */}
             <FormField label="모임 날짜 및 시간" description="모임이 진행될 날짜와 시간을 선택해주세요">

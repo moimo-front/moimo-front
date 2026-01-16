@@ -82,7 +82,9 @@ export const uploadImage = async (file: File): Promise<string> => {
 };
 
 // 모임 생성 API (JSON 형식)
-export const createMeeting = async (data: CreateMeetingRequest): Promise<CreateMeetingResponse> => {
+export const createMeeting = async (
+  data: CreateMeetingRequest
+): Promise<CreateMeetingResponse> => {
   try {
     const response = await apiClient.post<CreateMeetingResponse>(
       "/meetings",

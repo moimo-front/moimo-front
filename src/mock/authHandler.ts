@@ -1,9 +1,23 @@
 import { http, HttpResponse, delay } from 'msw';
 import { httpUrl } from './mockData';
 
+// Mock 사용자 정보 상태 관리 (userInfoHandler에서 이동)
+let mockUserInfo = {
+    id: 3,
+    email: "moimo@email.com",
+    nickname: "테스터",
+    bio: "소개글입니다",
+    interests: [
+        { id: 1, name: "인간관계(친목)" },
+        { id: 2, name: "술" },
+        { id: 3, name: "자기계발/공부" }
+    ],
+    profile_image: "https://picsum.photos/id/111/300/300"
+};
+
 
 // 일반 로그인 핸들러
-export const login = http.post(`${httpUrl}/users/login`, async ({ request }) => {
+const login = http.post(`${httpUrl}/users/login`, async ({ request }) => {
     const { email, password } = (await request.json()) as any;
     await delay(1000);
 
@@ -47,7 +61,7 @@ export const login = http.post(`${httpUrl}/users/login`, async ({ request }) => 
 });
 
 // 구글 로그인
-export const googleLogin = http.post(`${httpUrl}/users/login/google`, async ({ request }) => {
+const googleLogin = http.post(`${httpUrl}/users/login/google`, async ({ request }) => {
     try {
         const { code, redirectUri } = (await request.json()) as any;
         console.log('google login request:', { code, redirectUri });
@@ -76,13 +90,13 @@ export const googleLogin = http.post(`${httpUrl}/users/login/google`, async ({ r
 });
 
 // 로그아웃 핸들러
-export const logout = http.post(`${httpUrl}/users/logout`, async () => {
+const logout = http.post(`${httpUrl}/users/logout`, async () => {
     await delay(1000);
     return HttpResponse.json({ message: "로그아웃이 완료되었습니다." });
 });
 
 // 회원가입 핸들러
-export const join = http.post(`${httpUrl}/users/register`, async ({ request }) => {
+const join = http.post(`${httpUrl}/users/register`, async ({ request }) => {
     const { email, password, nickname } = (await request.json()) as any;
     await delay(1000);
     return HttpResponse.json({
@@ -110,7 +124,7 @@ export const join = http.post(`${httpUrl}/users/register`, async ({ request }) =
 });
 
 // 이메일 중복 확인
-export const checkEmail = http.post(`${httpUrl}/users/check-email`, async ({ request }) => {
+const checkEmail = http.post(`${httpUrl}/users/check-email`, async ({ request }) => {
     const { email } = (await request.json()) as any;
     await delay(500);
 
@@ -127,7 +141,7 @@ export const checkEmail = http.post(`${httpUrl}/users/check-email`, async ({ req
 });
 
 // 닉네임 중복 확인
-export const checkNickname = http.post(`${httpUrl}/users/check-nickname`, async ({ request }) => {
+const checkNickname = http.post(`${httpUrl}/users/check-nickname`, async ({ request }) => {
     const { nickname } = (await request.json()) as any;
     await delay(500);
 
@@ -149,7 +163,7 @@ const resetCodeStore = new Map<string, { email: string; expiresAt: Date }>();
 const resetTokenStore = new Map<string, { email: string; resetCode: string; expiresAt: Date }>();
 
 // 비밀번호 찾기
-export const findPassword = http.post(`${httpUrl}/users/password-reset/request`, async ({ request }) => {
+const findPassword = http.post(`${httpUrl}/users/password-reset/request`, async ({ request }) => {
     const { email } = (await request.json()) as any;
     await delay(1000);
 
@@ -173,7 +187,7 @@ export const findPassword = http.post(`${httpUrl}/users/password-reset/request`,
 });
 
 // 비밀번호 인증코드 확인
-export const verifyResetCode = http.post(`${httpUrl}/users/password-reset/verify`, async ({ request }) => {
+const verifyResetCode = http.post(`${httpUrl}/users/password-reset/verify`, async ({ request }) => {
     const { email, code } = (await request.json()) as any;
     await delay(1000);
 
@@ -191,7 +205,7 @@ export const verifyResetCode = http.post(`${httpUrl}/users/password-reset/verify
     if (storedData.email !== email) {
         return new HttpResponse(
             JSON.stringify({ message: "이메일이 일치하지 않습니다." }),
-            { status: 400 }
+            { status: 404 }
         );
     }
 
@@ -200,7 +214,7 @@ export const verifyResetCode = http.post(`${httpUrl}/users/password-reset/verify
         resetCodeStore.delete(code);
         return new HttpResponse(
             JSON.stringify({ message: "인증코드가 만료되었습니다." }),
-            { status: 400 }
+            { status: 410 }
         );
     }
 
@@ -218,7 +232,7 @@ export const verifyResetCode = http.post(`${httpUrl}/users/password-reset/verify
 });
 
 // 비밀번호 재설정
-export const resetPassword = http.put(`${httpUrl}/users/password-reset/confirm`, async ({ request }) => {
+const resetPassword = http.put(`${httpUrl}/users/password-reset/confirm`, async ({ request }) => {
     const { resetToken, resetCode, newPassword } = (await request.json()) as any;
     await delay(1000);
 
@@ -245,7 +259,7 @@ export const resetPassword = http.put(`${httpUrl}/users/password-reset/confirm`,
         resetTokenStore.delete(resetToken);
         return new HttpResponse(
             JSON.stringify({ message: "토큰이 만료되었습니다." }),
-            { status: 400 }
+            { status: 410 }
         );
     }
 
@@ -262,7 +276,7 @@ export const resetPassword = http.put(`${httpUrl}/users/password-reset/confirm`,
 });
 
 // 토큰 갱신 핸들러
-export const refresh = http.post(`${httpUrl}/users/refresh`, async ({ request }) => {
+const refresh = http.post(`${httpUrl}/users/refresh`, async ({ request }) => {
     const cookies = request.headers.get('cookie');
     await delay(500);
 
@@ -283,40 +297,111 @@ export const refresh = http.post(`${httpUrl}/users/refresh`, async ({ request })
     );
 });
 
-// 사용자 인증 핸들러
-export const verifyUser = http.get(`${httpUrl}/users/verify`, async ({ request }) => {
+// 사용자 인증 핸들러 (users/me 통합)
+const verifyUser = http.get(`${httpUrl}/users/verify`, async ({ request }) => {
     const token = request.headers.get('Authorization');
     const cookies = request.headers.get('cookie');
     await delay(1000);
 
-    if (!token) {
-        // 쿠키가 존재하면 인증 성공으로 처리 (유연한 체크)
-        if (cookies?.includes('refreshToken=')) {
-            return HttpResponse.json({
-                authenticated: true,
-                accessToken: 'mock-jwt-token',
-                message: '쿠키를 통해 인증이 복구되었습니다.',
-                user: { email: "moimo@email.com", nickname: "테스터" }
-            }, { status: 200 });
-        }
-
-        return HttpResponse.json({
-            authenticated: false,
-            message: '인증토큰이 없습니다.',
-        },
-            { status: 200 }
+    // 토큰도 없고 쿠키도 없는 경우
+    if (!token && (!cookies || !cookies.includes('refreshToken='))) {
+        return new HttpResponse(
+            JSON.stringify({ message: "인증 토큰이 없습니다." }),
+            { status: 401 }
         );
     }
 
+    console.log("User Info (Verify - Token Based):", {
+        token,
+        userInfo: mockUserInfo
+    });
+
+    // 통합된 응답: 인증 정보 + 모든 사용자 정보
     return HttpResponse.json({
         authenticated: true,
-        accessToken: token.replace("Bearer ", ""),
-        message: '인증이 완료되었습니다.',
-        user: {
-            email: "moimo@email.com",
-            nickname: "테스터",
+        isNewUser: false,
+        ...mockUserInfo,  // 모든 사용자 정보 포함
+        accessToken: 'mock-jwt-token',
+    }, {
+        status: 200,
+        headers: {
+            'Authorization': 'Bearer mock-jwt-token'
         }
-    },
-        { status: 200 }
-    );
+    });
 });
+
+// 사용자 정보 업데이트 핸들러 (userInfoHandler에서 이동)
+const userUpdate = http.put(`${httpUrl}/users/user-update`, async ({ request }) => {
+    try {
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader) {
+            return new HttpResponse(null, { status: 401 });
+        }
+
+        const formData = await request.formData();
+        const bio = formData.get("bio") as string;
+        const rawInterests = formData.getAll("interests");
+        let interests: any[] = [];
+
+        if (rawInterests.length === 1 && typeof rawInterests[0] === 'string' && (rawInterests[0] as string).startsWith('[')) {
+            // JSON string 처리
+            try {
+                interests = JSON.parse(rawInterests[0] as string);
+            } catch (e) {
+                interests = [rawInterests[0]];
+            }
+        } else {
+            // 개별 필드 처리
+            interests = rawInterests;
+        }
+
+        const file = formData.get("file");
+
+        console.log("User Update (Token Based):", {
+            bio,
+            interests,
+            file,
+            token: authHeader
+        });
+
+        // Mock 상태 업데이트
+        mockUserInfo = {
+            ...mockUserInfo,
+            bio: bio || mockUserInfo.bio,
+            // interests가 ID인 경우와 이름인 경우를 모두 대응 (Mock 데이터 보정을 위해)
+            interests: interests.map((item: any, index: number) => {
+                if (typeof item === 'number' || !isNaN(Number(item))) {
+                    // ID가 들어온 경우 (실제 서비스와 유사)
+                    return { id: Number(item), name: `관심사 ${item}` };
+                }
+                return { id: index + 100, name: item }; // 이름이 들어온 경우 (기존 방식)
+            }),
+        };
+
+        // 이미지 파일이 있는 경우
+        if (file && file instanceof File) {
+            mockUserInfo.profile_image = URL.createObjectURL(file);
+        }
+
+        await delay(1000);
+        return HttpResponse.json(mockUserInfo);
+    } catch (error) {
+        console.error("userUpdate handler error:", error);
+        return new HttpResponse(null, { status: 500 });
+    }
+});
+
+export const authHandler = [
+    login,
+    join,
+    checkEmail,
+    checkNickname,
+    findPassword,
+    verifyResetCode,
+    resetPassword,
+    googleLogin,
+    logout,
+    refresh,
+    verifyUser,
+    userUpdate,  // 사용자 정보 업데이트 핸들러 추가
+];

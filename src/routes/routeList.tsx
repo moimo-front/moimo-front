@@ -12,76 +12,78 @@ import HostMeeting from "@/pages/mypage/HostMeeting";
 import { Navigate } from "react-router-dom";
 import MoimerIntro from "@/pages/moimer/MoimerIntro";
 import UserInfo from "@/pages/user/UserInfo";
+import Chatting from "@/pages/chat/Chatting";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import Interests from "@/pages/interests/Interests";
 import SampleComp from "@/components/SampleComp";
 
 export const routeList = [
-    {
+  {
+    path: "/",
+    element: <MainLayout />,
+    // errorElement: <Error />,
+    children: [
+      {
         path: "/",
-        element: <MainLayout />,
-        // errorElement: <Error />,
+        element: <Home />,
+      },
+      {
+        path: "/meetings",
+        element: <MeetingsPage />,
+      },
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "/join",
+        element: <Join />,
+      },
+      {
+        path: "/find-password",
+        element: <FindPassword />,
+      },
+      {
+        path: "/reset-password",
+        element: <ResetPassword />,
+      },
+      {
+        path: "/extra-info",
+        element: <UserInfo />,
+      },
+      {
+        path: "/moimer-intro",
+        element: <MoimerIntro />,
+      },
+      {
+        path: "/mypage",
+        element:
+          <ProtectedRoute>
+            <MypageSession />,
+          </ProtectedRoute>,
         children: [
-            {
-                path: "/",
-                element: <Home />,
-            },
-            {
-                path: "/meetings",
-                element: <MeetingsPage />,
-            },
-            {
-                path: "/login",
-                element: <Login />,
-            },
-            {
-                path: "/join",
-                element: <Join />,
-            },
-            {
-                path: "/find-password",
-                element: <FindPassword />,
-            },
-            {
-                path: "/reset-password",
-                element: <ResetPassword />,
-            },
-            {
-                path: "/extra-info",
-                element: <UserInfo />,
-            },
-            {
-                path: "/moimer-intro",
-                element: <MoimerIntro />,
-            },
-            {
-                path: "/sample",
-                element: <SampleComp />,
-            },
-            {
-                path: "/mypage",
-                element:
-                    <ProtectedRoute>
-                        <MypageSession />,
-                    </ProtectedRoute>,
-                children: [
-                    {
-                        index: true,
-                        element: <Navigate to="profile" replace />,
-                    },
-                    {
-                        path: "profile",
-                        element: <Profile />,
-                    },
-                    {
-                        path: "meetings/join",
-                        element: <JoinedMeeting />,
-                    },
-                    {
-                        path: "meetings/hosting",
-                        element: <HostMeeting />,
-                    },
-                ]
-            }
+          {
+            index: true,
+            element: <Navigate to="profile" replace />,
+          },
+          {
+            path: "profile",
+            element: <Profile />,
+          },
+          {
+            path: "meetings/join",
+            element: <JoinedMeeting />,
+          },
+          {
+            path: "meetings/hosting",
+            element: <HostMeeting />,
+          },
         ],
-    },
+      },
+      {
+        path: "/interests",
+        element: <Interests />,
+      },
+    ],
+  },
 ];

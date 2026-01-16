@@ -7,7 +7,7 @@ export interface User {
     bio?: string;
     resetToken?: string;
     refreshToken?: string;
-    image?: string;
+    profile_image?: string;  // image에서 profile_image로 통일
     createdAt: Date;
     updatedAt?: Date;
 }

@@ -77,7 +77,7 @@ const Join = () => {
             const joinInfo = await joinMutation(data);
             const { /* id, email, */ nickname } = joinInfo.user;
             alert("회원가입이 완료되었습니다.");
-            navigate("/extra-info", { state: { /* id, email, */ nickname } });
+            navigate("/user-info", { state: { /* id, email, */ nickname } });
         } catch (error) {
             console.error("회원가입 중 오류 발생: ", error);
             setError("root", {
@@ -215,21 +215,17 @@ const Join = () => {
                                         {nicknameCheckMutation.isPending ? "확인중..." : "중복확인"}
                                     </Button>
                                 </div>
-                                {errors.nickname && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.nickname.message}
-                                    </p>
-                                )}
-                                {nicknameCheckMutation.isSuccess && (
-                                    <p className="text-sm text-success">
-                                        {"사용 가능한 닉네임입니다."}
-                                    </p>
-                                )}
-                                {nicknameCheckMutation.isError && (
+                                {errors.nickname ? (
+                                    <p className="text-sm text-destructive">{errors.nickname.message}</p>
+                                ) : nicknameCheckMutation.isError ? (
                                     <p className="text-sm text-destructive">
                                         {"이미 사용 중인 닉네임입니다."}
                                     </p>
-                                )}
+                                ) : nicknameCheckMutation.isSuccess ? (
+                                    <p className="text-sm text-success">
+                                        {"사용 가능한 닉네임입니다."}
+                                    </p>
+                                ) : null}
                             </div>
                             {/* 비밀번호 입력 섹션 */}
                             <div className="grid gap-2">

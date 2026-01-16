@@ -1,15 +1,12 @@
 import { apiClient } from "./client"
-import type { UserInfo } from "@/models/user.model";
+import { verifyUser } from "./auth.api";
 
-// 프로필 조회
+/**
+ * @deprecated verifyUser를 사용하세요. users/verify 엔드포인트가 모든 사용자 정보를 반환합니다.
+ */
 export const getUserInfo = async () => {
-    try {
-        const response = await apiClient.get<UserInfo>("/users/me");
-        return response.data;
-    } catch (error) {
-        console.error("getUserInfo error:", error);
-        throw error;
-    }
+    // users/verify로 통합되었으므로 verifyUser 호출
+    return verifyUser();
 }
 
 // 프로필 등록/수정

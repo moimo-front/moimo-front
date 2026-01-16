@@ -1,4 +1,25 @@
-// 모임 데이터 모델 (백엔드에서 조회 시)
+// 위치 정보
+export interface Location {
+    address: string;
+    lat: number;
+    lng: number;
+}
+
+// 호스트 정보
+export interface Host {
+    nickname: string;
+    bio: string;
+}
+
+// 참가자 정보
+export interface Participant {
+    id: number;
+    name: string;
+    profileImageUrl?: string;
+    isHost?: boolean;
+}
+
+// 모임 목록용 (간단한 정보)
 export interface Meeting {
   meetingId: number;
   title: string;
@@ -7,6 +28,21 @@ export interface Meeting {
   currentParticipants: number;
   address: string;
   meetingDate: string;
+}
+
+// 모임 상세 정보
+export interface MeetingDetail {
+  id: number;
+  title: string;
+  description: string;
+  interestName: string;
+  maxParticipants: number;
+  currentParticipants?: number;
+  meetingDate: string;
+  location: Location;
+  host: Host;
+  participants?: Participant[];
+  imageUrl?: string;
 }
 
 export interface MeetingMeta {
@@ -48,7 +84,7 @@ export interface CreateMeetingRequest {
   description: string;
   interestId: number;
   maxParticipants: number;
-  meetingDate: string; // ISO 8601 format
+  meetingDate: string;
   address: string;
   meetingImage?: string; // 클라우드 이미지 URL
 }
