@@ -1,63 +1,74 @@
+// src/mock/chatHandler.ts
 import { http, HttpResponse, delay } from "msw";
 import { httpUrl } from "./mockData";
 
+// 메시지 목록 조회 Mock
 const getMessages = http.get(
   `${httpUrl}/chats/:meetingId/messages`,
-  async () => {
+  async ({ params }) => {
+    const { meetingId } = params;
     await delay(300);
-    return HttpResponse.json([
-      {
-        id: 1,
-        content: "안녕하세요! 모임 관련해서 궁금한 게 있습니다.",
-        senderId: 101,
-        meetingId: 201,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // 1시간 전
-        sender: {
-          id: 101,
-          email: "opponent1@example.com",
-          nickname: "상대방1",
-          image: "https://github.com/shadcn.png", // 백엔드는 image로 줌
+
+    return HttpResponse.json({
+      meetingId: Number(meetingId),
+      messages: [
+        {
+          id: 1,
+          senderId: 101, // 상대방 ID
+          content: "안녕하세요! 모임 관련해서 궁금한 게 있습니다.",
+          createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+          meetingId: Number(meetingId),
+          sender: {
+            id: 101,
+            nickname: "상대방1",
+          },
         },
-      },
-      {
-        id: 2,
-        content: "반갑습니다! 어떤 점이 궁금하신가요?",
-        senderId: 3, // 내 ID (테스터)
-        meetingId: 201,
-        createdAt: new Date().toISOString(),
-        sender: {
-          id: 3,
-          email: "moimo@email.com",
-          nickname: "테스터",
-          image: "https://picsum.photos/id/111/300/300",
+        {
+          id: 2,
+          senderId: 46, // 내 ID (가정)
+          content: "반갑습니다! 어떤 점이 궁금하신가요?",
+          createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+          meetingId: Number(meetingId),
+          sender: {
+            id: 46,
+            nickname: "나",
+          },
         },
-      },
-    ]);
+      ],
+    });
   }
 );
 
-// 채팅방 목록 (참여 중인 모임) Mock
-const getChatRooms = http.get(
-  `${httpUrl}/users/me/participations`,
-  async () => {
-    await delay(300);
-    return HttpResponse.json([
-      {
-        meeting: {
-          id: 201,
-          title: "주말 하이킹 모임",
-          image: "https://picsum.photos/id/10/200/200",
-        },
+// 채팅방 목록 조회 Mock
+const getChatRooms = http.get(`${httpUrl}/chats/rooms`, async () => {
+  await delay(300);
+
+  return HttpResponse.json([
+    {
+      meetingId: 201,
+      title: "주말 하이킹 모임",
+      image: "https://picsum.photos/id/10/200/200",
+      memberCount: 5,
+      isLeader: true,
+      lastMessage: {
+        sender: "상대방1",
+        content: "이번 주말 날씨가 좋아서 기대되네요!",
+        createdAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
       },
-      {
-        meeting: {
-          id: 202,
-          title: "코딩 스터디",
-          image: "https://picsum.photos/id/20/200/200",
-        },
+    },
+    {
+      meetingId: 202,
+      title: "코딩 스터디 그룹",
+      image: "https://picsum.photos/id/20/200/200",
+      memberCount: 3,
+      isLeader: false,
+      lastMessage: {
+        sender: "나",
+        content: "다음 프로젝트 아이디어 있으신 분?",
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
       },
-    ]);
-  }
-);
+    },
+  ]);
+});
 
 export const chatHandler = [getMessages, getChatRooms];
