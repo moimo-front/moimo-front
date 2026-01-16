@@ -26,7 +26,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         <LoginRequiredDialog
           open={true}
           title="로그인이 필요한 서비스입니다"
-          description="이 콘텐츠를 이용하시려면 먼저 로그인해 주세요.\n로그인 페이지로 이동하시겠습니까?"
+          description={`이 콘텐츠를 이용하시려면 먼저 로그인해 주세요.\n로그인 페이지로 이동하시겠습니까?`}
           showCancel={true}
           onCancel={() => navigate("/")}
         />
