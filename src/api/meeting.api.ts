@@ -1,5 +1,10 @@
 import { apiClient } from "@/api/client";
-import type { MeetingListResponse, CreateMeetingRequest, CreateMeetingResponse } from "@/models/meeting.model";
+import type { 
+  MeetingListResponse, 
+  MeetingDetail,
+  CreateMeetingRequest, 
+  CreateMeetingResponse 
+} from "@/models/meeting.model";
 
 export type SortType = "NEW" | "UPDATE" | "DEADLINE" | "POPULAR";
 export type InterestFilterType = string;
@@ -36,6 +41,23 @@ export const getMeetings = async (
     throw error;
   }
 };
+
+// 모임 상세 조회 API
+export const getMeetingById = async (
+  meetingId: string | number
+): Promise<MeetingDetail> => {
+  try {
+    const response = await apiClient.get<MeetingDetail>(
+      `/meetings/${meetingId}`
+    );
+    console.log("📡 API 응답 (meeting.api.ts):", response.data);
+    return response.data; // 백엔드가 직접 모임 데이터를 반환
+  } catch (error) {
+    console.error("getMeetingById error:", error);
+    throw error;
+  }
+};
+
 // 이미지 업로드 API (클라우드 업로드)
 export const uploadImage = async (file: File): Promise<string> => {
   try {

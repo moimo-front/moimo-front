@@ -11,10 +11,10 @@ import {
   logout,
   refresh,
   verifyUser
-} from './authHandler';
-import { meetingHandler } from './meetingHandler';
-import { getInterests } from './interestHandler';
-import { userUpdate } from './userInfoHandler';
+} from "./authHandler";
+import { meetingHandler } from "./meetingHandler";
+import { getInterests } from "./interestHandler";
+import { userUpdate } from "./userInfoHandler";
 
 const handlers = [
   login,

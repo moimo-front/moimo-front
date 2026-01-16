@@ -25,7 +25,7 @@ function SearchSection() {
       >
         <Input
           type="text"
-          placeholder="관심있는 모임 주제를 검색해 보세요"
+          placeholder="관심있는 모임 제목을 검색해 보세요"
           className="pl-4 pr-20"
           value={searchTopic}
           onChange={(e) => setSearchTopic(e.target.value)}

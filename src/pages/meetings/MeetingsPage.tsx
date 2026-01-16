@@ -58,8 +58,10 @@ const MeetingsPage = () => {
     isError,
   } = useMeetingsQuery({ page, limit, ...filters });
 
-  const { data: interestsData, isLoading: isInterestsLoading } =
-    useInterestQuery();
+  const {
+    data: interestsData,
+    isLoading: isInterestsLoading,
+  } = useInterestQuery();
 
   const { totalPages, isFirstPage, isLastPage } = usePagination({
     page,

@@ -1,5 +1,5 @@
 import type { Interest } from "@/models/interest.model";
-import type { Meeting } from "@/models/meeting.model"; // Meeting 타입 import
+import type { Meeting } from "@/models/meeting.model";
 
 export const httpUrl =
   import.meta.env.VITE_API_URL || "https://moimo-back.vercel.app";
@@ -103,12 +103,21 @@ export const interestCategories: Interest[] = [
   },
 ];
 
-export const mockMeetings: Meeting[] = Array.from({ length: 25 }, (_, i) => ({
-  meetingId: i + 1,
-  title: `모임 제목 ${i + 1}`,
-  interestName: i % 2 === 0 ? "자기계발/공부" : "스포츠/운동",
-  maxParticipants: 10,
-  currentParticipants: i % 10,
-  address: `서울시 강남구 역삼동 ${i + 1}번지`,
-  meetingDate: `2024-03-${(i % 28) + 1}T1${i % 9}:00:00`,
-}));
+export const mockMeetings: Meeting[] = Array.from({ length: 25 }, (_, i) => {
+  const interestName = i % 2 === 0 ? "자기계발/공부" : "스포츠/운동";
+  const interestId = interestCategories.find(
+    (cat) => cat.name === interestName
+  )?.id;
+
+  return {
+    meetingId: i + 1,
+    title: `모임 제목 ${i + 1}`,
+    interestName: interestName,
+    interestId: interestId || 1,
+    maxParticipants: 10,
+    currentParticipants: i % 10,
+    address: `서울시 강남구 역삼동 ${i + 1}번지`,
+    meetingDate: `2024-03-${(i % 28) + 1}T1${i % 9}:00:00`,
+    meetingStatus: "OPEN",
+  };
+});
