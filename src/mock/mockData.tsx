@@ -210,6 +210,7 @@ export const mockParticipants: Record<number, Participant[]> = {
       nickname: "러너K",
       profileImage: "https://picsum.photos/200?random=10",
       status: "ACCEPTED",
+      isHost: true,
     },
     {
       participationId: 2,
@@ -233,6 +234,7 @@ export const mockParticipants: Record<number, Participant[]> = {
       nickname: "게이머A",
       profileImage: "https://picsum.photos/200?random=20",
       status: "ACCEPTED",
+      isHost: true,
     },
     {
       participationId: 5,

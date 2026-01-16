@@ -17,4 +17,5 @@ export interface Participant {
     nickname: string;
     profileImage: string;
     status: ParticipationStatus;
+    isHost?: boolean;
 }
