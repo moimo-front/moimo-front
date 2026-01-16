@@ -55,8 +55,8 @@ const JoinedMeeting = () => {
                     <LoadingSpinner />
                 ) : (
                     <>
-                        {joinedMeetings.map((meeting) => (
-                            <SmallMeetingCard key={meeting.id} meeting={meeting}>
+                        {joinedMeetings?.map((meeting) => (
+                            <SmallMeetingCard key={meeting.meetingId} meeting={meeting}>
                                 <>
                                     {meeting.status === 'PENDING' && (
                                         <Button disabled className="bg-orange-200 text-white hover:bg-orange-200 border-none shadow-none disabled:opacity-100 disabled:bg-orange-200">승인 대기중</Button>

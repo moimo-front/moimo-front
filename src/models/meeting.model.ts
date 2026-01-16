@@ -23,9 +23,8 @@ export interface MeetingListResponse {
 
 export interface MeetingDetail {
   id: number;
-  meetingImage?: string;
-  hostImage?: string;
   title: string;
+  meetingImage?: string;
   description: string;
   interestName: string;
   maxParticipants: number;
@@ -39,6 +38,7 @@ export interface MeetingDetail {
   host: {
     nickname: string;
     bio: string;
+    hostImage?: string;
   };
 }
 

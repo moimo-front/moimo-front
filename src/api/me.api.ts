@@ -3,8 +3,9 @@ import { apiClient } from "./client"
 import type { MeetingMeta } from "@/models/meeting.model";
 
 export interface MyMeetingsResponse {
-    id: number;
+    meetingId: number;
     title: string;
+    interestName: string;
     address: string;
     meetingDate: string;
     currentParticipants: number;
@@ -15,7 +16,7 @@ export interface MyMeetingsResponse {
 }
 
 export interface MyMeetingsListResponse {
-    meetings: MyMeetingsResponse[];
+    data: MyMeetingsResponse[];
     meta: MeetingMeta;
 }
 

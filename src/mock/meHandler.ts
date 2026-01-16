@@ -39,7 +39,7 @@ export const getMyMeetings = http.get(`${httpUrl}/meetings/me`, async ({ request
 
     return HttpResponse.json(
         {
-            meetings: paginatedMeetings,
+            data: paginatedMeetings,
             meta: {
                 totalCount,
                 page,

@@ -30,7 +30,7 @@ const HostMeeting = () => {
                 ) : (
                     <>
                         {hostedMeetings?.map((meeting) => (
-                            <SmallMeetingCard key={meeting.id} meeting={meeting}>
+                            <SmallMeetingCard key={meeting.meetingId} meeting={meeting}>
                                 <div className="flex gap-2">
                                     <Button variant="outline" className="border-yellow-400 text-gray-900 shadow-none">멤버 관리</Button>
                                     <Button

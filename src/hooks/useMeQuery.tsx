@@ -21,7 +21,7 @@ export const useMeQuery = (type: 'joined' | 'hosted' | 'all', status: string = "
 
     return {
         ...queryResult,
-        meetings: queryResult.data?.meetings ?? [],
+        meetings: queryResult.data?.data ?? [],
         meta: queryResult.data?.meta,
         totalPages,
         isFirstPage,

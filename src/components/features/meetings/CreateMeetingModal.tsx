@@ -261,7 +261,7 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {meetingDate ? (
+                      {meetingDate && !isNaN(meetingDate.getTime()) ? (
                         format(meetingDate, "PPP", { locale: ko })
                       ) : (
                         <span>날짜를 선택하세요</span>
