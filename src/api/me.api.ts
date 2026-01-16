@@ -21,9 +21,9 @@ export interface MyMeetingsListResponse {
 }
 
 // 내 모임 목록조회
-export const getMyMeetings = async (type: 'joined' | 'hosted' | 'all', status: string, page = 1, limit = 5) => {
+export const getMyMeetings = async (view: 'joined' | 'hosted' | 'all', status: string, page = 1, limit = 5) => {
     try {
-        const response = await apiClient.get<MyMeetingsListResponse>(`/meetings/me?type=${type}&status=${status}&page=${page}&limit=${limit}`);
+        const response = await apiClient.get<MyMeetingsListResponse>(`/meetings/me?view=${view}&status=${status}&page=${page}&limit=${limit}`);
         return response.data;
     } catch (error) {
         console.error("getMyMeetings error:", error);
