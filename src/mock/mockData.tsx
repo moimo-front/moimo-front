@@ -1,6 +1,8 @@
+import { fakerKO as faker } from '@faker-js/faker';
 import type { MyMeetingsResponse } from "@/api/me.api";
 import type { Interest } from "@/models/interest.model";
 import type { Meeting } from "@/models/meeting.model";
+import type { Participant, ParticipationStatus } from "@/models/participation.model";
 
 export const httpUrl =
   import.meta.env.VITE_API_URL || "https://moimo-back.vercel.app";
@@ -114,89 +116,37 @@ export const mockMeetings: Meeting[] = Array.from({ length: 25 }, (_, i) => ({
   meetingDate: `2024-03-${String((i % 28) + 1).padStart(2, '0')}T1${i % 9}:00:00`,
 }));
 
-export const myMeetings: MyMeetingsResponse[] = [
-  {
-    meetingId: 1,
-    title: "부산대학교 러닝 크루 모집",
-    interestName: "스포츠/운동",
-    maxParticipants: 8,
-    currentParticipants: 1,
-    address: "부산광역시 수영구 광안해변로 219",
-    meetingDate: "2026-02-14T19:00:00.000Z",
-    status: "ACCEPTED",
-    isHost: true,
-    isCompleted: false
-  },
-  {
-    meetingId: 101,
-    title: "같이 축구보고 게임해요!",
-    interestName: "스포츠/운동",
-    address: "이태원",
-    meetingDate: "2024-01-15T19:00:00Z",
-    currentParticipants: 2,
-    maxParticipants: 52,
-    status: "ACCEPTED",
-    isHost: false,
-    isCompleted: false
-  },
-  {
-    meetingId: 102,
-    title: "보라매공원 경찰과 도둑 할 사람",
-    interestName: "스포츠/운동",
-    address: "보라매공원",
-    meetingDate: "2024-01-07T19:00:00Z",
-    currentParticipants: 12,
-    maxParticipants: 52,
-    status: "PENDING",
-    isHost: false,
-    isCompleted: false
-  },
-  {
-    meetingId: 103,
-    title: "내가 만든 모임1",
-    interestName: "스포츠/운동",
-    address: "우리집",
-    meetingDate: "2024-01-06T19:00:00Z",
-    currentParticipants: 12,
-    maxParticipants: 52,
-    status: "ACCEPTED",
-    isHost: true,
-    isCompleted: true
-  },
-  {
-    meetingId: 104,
-    title: "크리스마스 기념 정모",
-    interestName: "스포츠/운동",
-    address: "이태원",
-    meetingDate: "2023-12-25T19:00:00Z",
-    currentParticipants: 12,
-    maxParticipants: 52,
-    status: "ACCEPTED",
-    isHost: false,
-    isCompleted: true
-  },
-  {
-    meetingId: 105,
-    title: "크리스마스 기념 정모",
-    interestName: "스포츠/운동",
-    address: "이태원",
-    meetingDate: "2023-12-25T19:00:00Z",
-    currentParticipants: 12,
-    maxParticipants: 52,
-    status: "ACCEPTED",
-    isHost: false,
-    isCompleted: true
-  },
-  {
-    meetingId: 106,
-    title: "내가 만든 모임2",
-    interestName: "스포츠/운동",
-    address: "우리집",
-    currentParticipants: 12,
-    maxParticipants: 20,
-    meetingDate: "2024-01-26T19:00:00Z",
-    status: "ACCEPTED",
-    isHost: true,
-    isCompleted: false,
-  }
-];
+// 내 참여모임
+export const myMeetings: MyMeetingsResponse[] = Array.from({ length: 60 }, (_, i) => {
+  const isHost = i % 3 === 0;
+  const isCompleted = i % 2 === 0;
+  const status: ParticipationStatus = i % 4 === 0 ? "PENDING" : (i % 5 === 0 ? "REJECTED" : "ACCEPTED");
+  const interest = interestCategories[i % interestCategories.length];
+
+  return {
+    meetingId: 101 + i,
+    title: faker.company.catchPhrase(),
+    interestName: interest.name,
+    address: `${faker.location.city()} ${faker.location.street()}`,
+    meetingDate: faker.date.future().toISOString(),
+    currentParticipants: faker.number.int({ min: 1, max: 10 }),
+    maxParticipants: faker.number.int({ min: 10, max: 20 }),
+    status,
+    isHost,
+    isCompleted
+  };
+});
+
+// 내모임 참여자
+export const mockParticipants: Record<number, Participant[]> = myMeetings.reduce((acc, meeting) => {
+  acc[meeting.meetingId] = Array.from({ length: meeting.currentParticipants }, (_, i) => ({
+    participationId: meeting.meetingId * 100 + i,
+    userId: 1000 + i,
+    nickname: faker.person.lastName() + faker.person.firstName(),
+    profileImage: faker.image.avatar(),
+    status: i === 0 && meeting.isHost ? "ACCEPTED" : (i % 5 === 0 ? "PENDING" : "ACCEPTED"),
+    bio: faker.person.bio(),
+    interests: faker.helpers.arrayElements(interestCategories, { min: 1, max: 3 })
+  }));
+  return acc;
+}, {} as Record<number, Participant[]>);

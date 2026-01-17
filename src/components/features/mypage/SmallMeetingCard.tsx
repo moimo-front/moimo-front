@@ -1,5 +1,6 @@
 import type { MyMeetingsResponse } from "@/api/me.api";
 import { Card } from "@/components/ui/card";
+import { getDistrictFromAddress } from "@/lib/formatAddress";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { Calendar, MapPin, Users } from "lucide-react";
@@ -27,7 +28,7 @@ const SmallMeetingCard = ({ meeting, children, className }: SmallMeetingCardProp
                 <div className="flex items-center gap-4 text-gray-500 text-sm">
                     <div className="flex items-center gap-1">
                         <MapPin className="w-4 h-4" />
-                        {meeting.address}
+                        {getDistrictFromAddress(meeting.address)}
                     </div>
                     <div className="flex items-center gap-1">
                         <Users className="w-4 h-4" />

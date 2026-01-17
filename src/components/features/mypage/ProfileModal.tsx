@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useInterestQuery } from "@/hooks/useInterestQuery";
 import { useUserUpdateMutation } from "@/hooks/useUserInfoMutations";
+import { useAuthQuery } from "@/hooks/useAuthQuery";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera } from "lucide-react";
@@ -31,10 +32,15 @@ interface ProfileModalProps {
 }
 
 const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
+    const { data: currentUser } = useAuthQuery();
     const { data: allInterests } = useInterestQuery();
     const userUpdateMutation = useUserUpdateMutation();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+    // userInfo.id (User) 또는 userInfo.userId (Participant) 대응
+    const targetUserId = userInfo?.id || (userInfo as any)?.userId;
+    const isReadOnly = targetUserId !== undefined && currentUser?.id !== undefined && targetUserId !== currentUser.id;
 
     const {
         register,
@@ -58,7 +64,8 @@ const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
                 bio: userInfo.bio || "",
                 interests: userInfo.interests?.map(i => i.id) || [],
             });
-            setPreviewImage(userInfo.profile_image || null);
+            const img = userInfo.profile_image || (userInfo as any).profileImage || null;
+            setPreviewImage(img);
         }
     }, [userInfo, reset, isOpen]);
 
@@ -112,7 +119,7 @@ const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
             <DialogContent className="max-w-md p-6 bg-white rounded-2xl">
                 <DialogHeader className="mb-0">
                     <DialogTitle className="text-2xl font-bold text-center text-[#1A2B4B]">
-                        프로필을 수정해주세요
+                        {isReadOnly ? "프로필 정보" : "프로필을 수정해주세요"}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -133,13 +140,15 @@ const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
                                     </div>
                                 )}
                             </div>
-                            <button
-                                type="button"
-                                onClick={() => fileInputRef.current?.click()}
-                                className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-lg border border-gray-100 hover:bg-gray-50 transition-colors"
-                            >
-                                <Camera className="w-5 h-5 text-gray-600" />
-                            </button>
+                            {!isReadOnly && (
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+                                >
+                                    <Camera className="w-5 h-5 text-gray-600" />
+                                </button>
+                            )}
                             <input
                                 type="file"
                                 ref={fileInputRef}
@@ -160,46 +169,54 @@ const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
                         <Textarea
                             id="bio"
                             {...register("bio")}
-                            placeholder="본인을 소개해주세요."
-                            className="min-h-[100px] bg-white border-gray-200 rounded-lg resize-none focus-visible:ring-yellow-400 text-sm"
+                            placeholder={isReadOnly ? "등록된 자기소개가 없습니다." : "본인을 소개해주세요."}
+                            readOnly={isReadOnly}
+                            className={cn(
+                                "min-h-[100px] bg-white border-gray-200 rounded-lg resize-none focus-visible:ring-yellow-400 text-sm",
+                                isReadOnly && "focus-visible:ring-0 border-gray-100"
+                            )}
                         />
-                        {errors.bio && <p className="text-xs text-red-500 mt-1">{errors.bio.message}</p>}
+                        {!isReadOnly && errors.bio && <p className="text-xs text-red-500 mt-1">{errors.bio.message}</p>}
                     </div>
 
                     {/* Interests Section */}
                     <div className="space-y-3">
                         <div className="space-y-1">
                             <Label className="text-sm font-bold text-gray-700">관심사</Label>
-                            <p className="text-[10px] text-gray-400 text-center block">최소 3개이상 선택해주세요!</p>
+                            {!isReadOnly && <p className="text-[10px] text-gray-400 text-center block">최소 3개이상 선택해주세요!</p>}
                         </div>
                         <div className="grid grid-cols-4 gap-2">
                             {allInterests?.map((interest) => (
                                 <button
                                     key={interest.id}
                                     type="button"
-                                    onClick={() => toggleInterest(interest.id)}
+                                    onClick={() => !isReadOnly && toggleInterest(interest.id)}
+                                    disabled={isReadOnly && !selectedInterests.includes(interest.id)}
                                     className={cn(
                                         "h-10 text-[11px] font-medium rounded-lg transition-all border shadow-sm",
                                         selectedInterests.includes(interest.id)
                                             ? "bg-yellow-400 border-yellow-400 text-white shadow-md"
-                                            : "bg-[#FFF4D9]/50 border-transparent text-[#6B7280] hover:bg-[#FFF4D9]"
+                                            : "bg-[#FFF4D9]/50 border-transparent text-[#6B7280] hover:bg-[#FFF4D9]",
+                                        isReadOnly && !selectedInterests.includes(interest.id) && "hidden"
                                     )}
                                 >
                                     {interest.name}
                                 </button>
                             ))}
                         </div>
-                        {errors.interests && <p className="text-xs text-red-500 mt-1">{errors.interests.message}</p>}
+                        {!isReadOnly && errors.interests && <p className="text-xs text-red-500 mt-1">{errors.interests.message}</p>}
                     </div>
 
                     {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        disabled={!isValid || userUpdateMutation.isPending}
-                        className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-white font-bold rounded-lg shadow-sm disabled:bg-gray-200 disabled:text-gray-400 border-none mt-2"
-                    >
-                        {userUpdateMutation.isPending ? "수정 중..." : "프로필 수정하기"}
-                    </Button>
+                    {!isReadOnly && (
+                        <Button
+                            type="submit"
+                            disabled={!isValid || userUpdateMutation.isPending}
+                            className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-white font-bold rounded-lg shadow-sm disabled:bg-gray-200 disabled:text-gray-400 border-none mt-2"
+                        >
+                            {userUpdateMutation.isPending ? "수정 중..." : "프로필 수정하기"}
+                        </Button>
+                    )}
                 </form>
             </DialogContent>
         </Dialog>

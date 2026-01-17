@@ -10,6 +10,7 @@ import MypageSession from "@/pages/mypage/MypageSession";
 import Profile from "@/pages/mypage/Profile";
 import JoinedMeeting from "@/pages/mypage/JoinedMeeting";
 import HostMeeting from "@/pages/mypage/HostMeeting";
+import Participations from "@/pages/mypage/Participations";
 import { Navigate } from "react-router-dom";
 import MoimerIntro from "@/pages/moimer/MoimerIntro";
 import UserInfo from "@/pages/user/UserInfo";
@@ -53,7 +54,7 @@ export const routeList = [
         element: <ResetPassword />,
       },
       {
-        path: "/extra-info",
+        path: "/user-info",
         element: <UserInfo />,
       },
       {
@@ -82,6 +83,10 @@ export const routeList = [
           {
             path: "meetings/hosting",
             element: <HostMeeting />,
+          },
+          {
+            path: "meetings/hosting/:id/participations",
+            element: <Participations />,
           },
         ],
       },

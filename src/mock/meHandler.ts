@@ -6,16 +6,16 @@ export const getMyMeetings = http.get(`${httpUrl}/meetings/me`, async ({ request
     await delay(1000);
 
     const url = new URL(request.url);
-    const type = url.searchParams.get("type") || "all";
+    const view = url.searchParams.get("view") || "all";
     const status = url.searchParams.get("status") || "all";
     const page = Number(url.searchParams.get("page")) || 1;
     const limit = Number(url.searchParams.get("limit")) || 5;
 
     // 1. 참여/주최 필터링
     let filteredMeetings = myMeetings;
-    if (type === 'joined') {
+    if (view === 'joined') {
         filteredMeetings = filteredMeetings.filter(m => !m.isHost);
-    } else if (type === 'hosted') {
+    } else if (view === 'hosted') {
         filteredMeetings = filteredMeetings.filter(m => m.isHost);
     }
 
