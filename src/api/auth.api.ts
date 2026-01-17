@@ -158,7 +158,7 @@ interface VerifyUserResponse {
     email: string;
     nickname: string;
     bio: string;
-    profile_image: string;
+    profileImage: string;
     interests: {
         id: number;
         name: string;

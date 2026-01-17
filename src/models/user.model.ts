@@ -7,13 +7,14 @@ export interface User {
     bio?: string | null;
     resetToken?: string;
     refreshToken?: string;
-    profile_image?: string | null;  // image에서 profile_image로 통일
+    profileImage?: string | null;  // image > profile_image > profileImage로 변경
     createdAt: Date;
     updatedAt?: Date;
 }
 
 export type UserInfo = Partial<User> & {
     interests: Interest[];
+    userId?: number;
 }
 
 export interface SocialAccounts {

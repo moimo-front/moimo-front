@@ -4,6 +4,7 @@ import type { Participant, ParticipationStatus } from "@/models/participation.mo
 import { useUpdateParticipation } from "@/hooks/useParticipateMutations";
 import { useState } from "react";
 import ProfileModal from "./ProfileModal";
+import defaultProfile from "@/assets/images/profile.png";
 
 interface ParticipantCardProps {
     meetingId: number;
@@ -30,7 +31,11 @@ const ParticipantCard = ({ meetingId, participant }: ParticipantCardProps) => {
                     <Avatar
                         className="w-10 h-10 bg-gray-200"
                     >
-                        <AvatarImage src={participant.profileImage || undefined} />
+                        <AvatarImage
+                            src={participant.profileImage || defaultProfile}
+                            alt={participant.nickname || "user"}
+                            className="object-cover"
+                        />
                         <AvatarFallback>{participant.nickname[0]}</AvatarFallback>
                     </Avatar>
                     <span className="text-lg font-medium text-gray-700">{participant.nickname}</span>
@@ -75,6 +80,7 @@ const ParticipantCard = ({ meetingId, participant }: ParticipantCardProps) => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 userInfo={participant}
+                readOnly={true}
             />
         </div>
     );

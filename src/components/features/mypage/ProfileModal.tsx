@@ -17,6 +17,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import type { UserInfo } from "@/models/user.model";
+import defaultProfile from "@/assets/images/profile.png";
 
 const profileSchema = z.object({
     bio: z.string().max(100, "자기소개는 100자 이내로 입력해주세요."),
@@ -29,9 +30,10 @@ interface ProfileModalProps {
     isOpen: boolean;
     onClose: () => void;
     userInfo?: UserInfo;
+    readOnly?: boolean;
 }
 
-const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
+const ProfileModal = ({ isOpen, onClose, userInfo, readOnly }: ProfileModalProps) => {
     const { data: currentUser } = useAuthQuery();
     const { data: allInterests } = useInterestQuery();
     const userUpdateMutation = useUserUpdateMutation();
@@ -39,8 +41,8 @@ const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     // userInfo.id (User) 또는 userInfo.userId (Participant) 대응
-    const targetUserId = userInfo?.id || (userInfo as any)?.userId;
-    const isReadOnly = targetUserId !== undefined && currentUser?.id !== undefined && targetUserId !== currentUser.id;
+    const targetUserId = userInfo?.id || userInfo?.userId;
+    const isReadOnly = readOnly ?? (targetUserId !== undefined && currentUser?.id !== undefined ? targetUserId !== currentUser.id : true);
 
     const {
         register,
@@ -64,7 +66,7 @@ const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
                 bio: userInfo.bio || "",
                 interests: userInfo.interests?.map(i => i.id) || [],
             });
-            const img = userInfo.profile_image || (userInfo as any).profileImage || null;
+            const img = userInfo.profileImage || defaultProfile;
             setPreviewImage(img);
         }
     }, [userInfo, reset, isOpen]);
@@ -155,7 +157,7 @@ const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
                                 onChange={handleImageChange}
                                 className="hidden"
                                 accept="image/*"
-                                name="profile_image"
+                                name="profileImage"
                             />
                         </div>
                         <h2 className="text-xl font-bold text-gray-900">
@@ -186,23 +188,27 @@ const ProfileModal = ({ isOpen, onClose, userInfo }: ProfileModalProps) => {
                             {!isReadOnly && <p className="text-[10px] text-gray-400 text-center block">최소 3개이상 선택해주세요!</p>}
                         </div>
                         <div className="grid grid-cols-4 gap-2">
-                            {allInterests?.map((interest) => (
-                                <button
-                                    key={interest.id}
-                                    type="button"
-                                    onClick={() => !isReadOnly && toggleInterest(interest.id)}
-                                    disabled={isReadOnly && !selectedInterests.includes(interest.id)}
-                                    className={cn(
-                                        "h-10 text-[11px] font-medium rounded-lg transition-all border shadow-sm",
-                                        selectedInterests.includes(interest.id)
-                                            ? "bg-yellow-400 border-yellow-400 text-white shadow-md"
-                                            : "bg-[#FFF4D9]/50 border-transparent text-[#6B7280] hover:bg-[#FFF4D9]",
-                                        isReadOnly && !selectedInterests.includes(interest.id) && "hidden"
-                                    )}
-                                >
-                                    {interest.name}
-                                </button>
-                            ))}
+                            {isReadOnly && selectedInterests.length === 0 ? (
+                                <p className="text-sm text-gray-400 col-span-4 py-2">선택한 관심사가 없습니다.</p>
+                            ) : (
+                                allInterests?.map((interest) => (
+                                    <button
+                                        key={interest.id}
+                                        type="button"
+                                        onClick={() => !isReadOnly && toggleInterest(interest.id)}
+                                        disabled={isReadOnly && !selectedInterests.includes(interest.id)}
+                                        className={cn(
+                                            "h-10 text-[11px] font-medium rounded-lg transition-all border shadow-sm",
+                                            selectedInterests.includes(interest.id)
+                                                ? "bg-yellow-400 border-yellow-400 text-white shadow-md"
+                                                : "bg-[#FFF4D9]/50 border-transparent text-[#6B7280] hover:bg-[#FFF4D9]",
+                                            isReadOnly && !selectedInterests.includes(interest.id) && "hidden"
+                                        )}
+                                    >
+                                        {interest.name}
+                                    </button>
+                                ))
+                            )}
                         </div>
                         {!isReadOnly && errors.interests && <p className="text-xs text-red-500 mt-1">{errors.interests.message}</p>}
                     </div>

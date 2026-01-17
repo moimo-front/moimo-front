@@ -2,10 +2,10 @@ import { apiClient } from "@/api/client";
 import type {
   MeetingListResponse,
   MeetingDetail,
-  CreateMeetingResponse
+  CreateMeetingResponse,
 } from "@/models/meeting.model";
 
-export type SortType = "NEW" | "UPDATE" | "DEADLINE" | "POPULAR";
+export type SortType = "NEW" | "UPDATE" | "DEADLINE";
 export type InterestFilterType = string;
 export type FinishedFilterType = boolean;
 
