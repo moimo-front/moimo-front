@@ -31,8 +31,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         <Avatar className="w-10 h-10">
           <AvatarImage
             src={
-              sender.profileImage
-                ? sender.profileImage
+              sender.profile_image
+                ? sender.profile_image
                 : "https://github.com/shadcn.png"
             }
             alt={sender.nickname}

@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/authStore";
 import { Separator } from "@/components/ui/separator";
 import ChatMessageItem from "@/components/features/chattings/ChatMessage";
@@ -8,50 +8,68 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FaArrowLeft } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
-import { getChatRooms, getMessages } from "@/api/chat.api";
+import { getChatRooms } from "@/api/chat.api";
 import { useChatSocket } from "@/hooks/useChatSocket";
-import type { ChatRoom } from "@/models/chat.model";
+import type { ChatMessage, ChatRoom } from "@/models/chat.model";
 import { useLocation } from "react-router-dom";
+import type { User } from "@/models/user.model";
+
+// TODO: API 응답 타입 정의 파일로 분리
+interface VerifyUserResponse extends User {
+  authenticated: boolean;
+  isNewUser: boolean;
+  accessToken: string;
+}
 
 const Chatting = () => {
   const { nickname, userId } = useAuthStore();
   const [selectedMeeting, setSelectedMeeting] = useState<ChatRoom | null>(null);
   const [inputValue, setInputValue] = useState("");
   const location = useLocation();
+  const queryClient = useQueryClient();
 
-  // 스크롤 제어를 위한 Ref
+  // Component-owned state for messages
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 1. 채팅방 목록 조회 (Left Panel)
+  // 1. 채팅방 목록 조회
   const { data: chatRooms, isSuccess } = useQuery({
     queryKey: ["chatRooms"],
     queryFn: getChatRooms,
   });
 
-  // 2. 소켓 Hook 연결 (Right Panel)
-  const { messages, setMessages, sendMessage } = useChatSocket(
-    selectedMeeting?.meetingId || null,
+  // 2. 새로운 메시지를 처리하는 콜백 (useChatSocket에 전달)
+  const handleNewMessage = useCallback(
+    (newMessage: ChatMessage) => {
+      // 자신의 메시지는 브로드캐스트에서 무시 (낙관적 업데이트로 이미 처리됨)
+      if (newMessage.senderId === userId) {
+        return;
+      }
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    },
+    [userId],
   );
 
-  // 3. 과거 메시지 내역 조회 (API)
-  const { data: historyData } = useQuery({
-    queryKey: ["chatMessages", selectedMeeting?.meetingId],
-    queryFn: () => getMessages(selectedMeeting!.meetingId),
-    enabled: !!selectedMeeting,
-  });
+  // 3. 소켓 Hook 연결 및 초기 메시지 목록 가져오기
+  const { initialMessages, sendMessage } = useChatSocket(
+    selectedMeeting?.meetingId || null,
+    handleNewMessage,
+  );
 
+  // 4. 초기 메시지 목록을 상태에 동기화
   useEffect(() => {
-    if (historyData?.messages) {
-      setMessages(historyData.messages);
-    }
-  }, [historyData, setMessages]);
+    setMessages(initialMessages);
+  }, [initialMessages]);
 
+  // 스크롤 제어
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
+  // 방 입장 시 초기 방 선택 (라우터 state로부터)
   useEffect(() => {
     if (isSuccess && chatRooms && location.state?.meetingId) {
       const roomToSelect = chatRooms.find(
@@ -63,10 +81,32 @@ const Chatting = () => {
     }
   }, [isSuccess, chatRooms, location.state]);
 
+  // 메시지 전송 핸들러 (낙관적 업데이트 포함)
   const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || !selectedMeeting) return;
+
+    const userData = queryClient.getQueryData<VerifyUserResponse>(["authUser"]);
+    const profileImage = userData?.profile_image || "";
+
+    const optimisticMessage: ChatMessage = {
+      id: Date.now(),
+      content: inputValue,
+      meetingId: selectedMeeting.meetingId,
+      senderId: userId!,
+      createdAt: new Date().toISOString(),
+      sender: {
+        id: userId!,
+        nickname: nickname || "You",
+        profile_image: profileImage,
+      },
+    };
+
+    setMessages((prev) => [...prev, optimisticMessage]);
     sendMessage(inputValue);
     setInputValue("");
+
+    // 쿼리 무효화로 lastMessage 업데이트
+    queryClient.invalidateQueries({ queryKey: ["chatRooms"] });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -137,9 +177,9 @@ const Chatting = () => {
               ref={scrollRef}
               className="flex flex-col gap-4 p-4 flex-grow overflow-y-auto"
             >
-              {messages.map((msg, index) => (
+              {messages.map((msg) => (
                 <ChatMessageItem
-                  key={`${msg.id}-${index}`}
+                  key={msg.id}
                   message={msg}
                   isMine={msg.senderId === userId}
                   hostId={selectedMeeting!.hostId}
