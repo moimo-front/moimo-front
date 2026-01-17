@@ -1,6 +1,8 @@
 import type { MyMeetingsResponse } from "@/api/me.api";
 import type { Interest } from "@/models/interest.model";
 import type { Meeting } from "@/models/meeting.model";
+import type { ChatMessage, ChatRoom } from "@/models/chat.model";
+import type { User } from "@/models/user.model";
 
 export const httpUrl =
   import.meta.env.VITE_API_URL || "https://moimo-back.vercel.app";
@@ -111,7 +113,9 @@ export const mockMeetings: Meeting[] = Array.from({ length: 25 }, (_, i) => ({
   maxParticipants: 10,
   currentParticipants: i % 10,
   address: `서울시 강남구 역삼동 ${i + 1}번지`,
-  meetingDate: `2024-03-${String((i % 28) + 1).padStart(2, '0')}T1${i % 9}:00:00`,
+  meetingDate: `2024-03-${String((i % 28) + 1).padStart(2, "0")}T1${
+    i % 9
+  }:00:00`,
 }));
 
 export const myMeetings: MyMeetingsResponse[] = [
@@ -125,7 +129,7 @@ export const myMeetings: MyMeetingsResponse[] = [
     meetingDate: "2026-02-14T19:00:00.000Z",
     status: "ACCEPTED",
     isHost: true,
-    isCompleted: false
+    isCompleted: false,
   },
   {
     meetingId: 101,
@@ -137,7 +141,7 @@ export const myMeetings: MyMeetingsResponse[] = [
     maxParticipants: 52,
     status: "ACCEPTED",
     isHost: false,
-    isCompleted: false
+    isCompleted: false,
   },
   {
     meetingId: 102,
@@ -149,7 +153,7 @@ export const myMeetings: MyMeetingsResponse[] = [
     maxParticipants: 52,
     status: "PENDING",
     isHost: false,
-    isCompleted: false
+    isCompleted: false,
   },
   {
     meetingId: 103,
@@ -161,7 +165,7 @@ export const myMeetings: MyMeetingsResponse[] = [
     maxParticipants: 52,
     status: "ACCEPTED",
     isHost: true,
-    isCompleted: true
+    isCompleted: true,
   },
   {
     meetingId: 104,
@@ -173,7 +177,7 @@ export const myMeetings: MyMeetingsResponse[] = [
     maxParticipants: 52,
     status: "ACCEPTED",
     isHost: false,
-    isCompleted: true
+    isCompleted: true,
   },
   {
     meetingId: 105,
@@ -185,7 +189,7 @@ export const myMeetings: MyMeetingsResponse[] = [
     maxParticipants: 52,
     status: "ACCEPTED",
     isHost: false,
-    isCompleted: true
+    isCompleted: true,
   },
   {
     meetingId: 106,
@@ -198,5 +202,94 @@ export const myMeetings: MyMeetingsResponse[] = [
     status: "ACCEPTED",
     isHost: true,
     isCompleted: false,
-  }
+  },
 ];
+
+// Mock Users
+const mockUser1: Pick<User, "id" | "email" | "nickname" | "profile_image"> = {
+  id: 1,
+  email: "user1@example.com",
+  nickname: "첫번째유저",
+  profile_image: "https://i.pravatar.cc/150?img=1",
+};
+
+const mockUser2: Pick<User, "id" | "email" | "nickname" | "profile_image"> = {
+  id: 2,
+  email: "user2@example.com",
+  nickname: "두번째유저",
+  profile_image: "https://i.pravatar.cc/150?img=2",
+};
+
+const mockUser3: Pick<User, "id" | "email" | "nickname" | "profile_image"> = {
+  id: 3,
+  email: "user3@example.com",
+  nickname: "세번째유저",
+  profile_image: "https://i.pravatar.cc/150?img=3",
+};
+
+const mockUsers = [mockUser1, mockUser2, mockUser3];
+
+// Function to generate a number of chat messages for a given chat room
+const generateChatMessages = (
+  chatRoomId: number,
+  count: number
+): ChatMessage[] => {
+  const messages: ChatMessage[] = [];
+  for (let i = 0; i < count; i++) {
+    const sender = mockUsers[i % mockUsers.length];
+    const createdAt = new Date(
+      Date.now() - (count - i) * 60 * 1000
+    ).toISOString(); // messages from oldest to newest
+    messages.push({
+      id: i + 1,
+      content: `[방 ${chatRoomId}] ${sender.nickname}의 ${i + 1}번째 메시지`,
+      senderId: sender.id,
+      meetingId: chatRoomId,
+      createdAt: createdAt,
+      sender: sender,
+    });
+  }
+  return messages;
+};
+
+// Mock ChatMessages for each room
+export const mockChatMessages: Record<number, ChatMessage[]> = {
+  1: generateChatMessages(1, 15), // 첫 번째 채팅방 15개 메시지
+  2: generateChatMessages(2, 10), // 두 번째 채팅방 10개 메시지
+  3: generateChatMessages(3, 5),
+  4: generateChatMessages(4, 7),
+  5: generateChatMessages(5, 3),
+  6: generateChatMessages(6, 12),
+  7: generateChatMessages(7, 8),
+  8: generateChatMessages(8, 6),
+  9: generateChatMessages(9, 9),
+  10: generateChatMessages(10, 4),
+};
+
+// Mock ChatRooms (10개) - derived from mockChatMessages
+export const mockChatRooms: ChatRoom[] = Object.keys(mockChatMessages).map(
+  (key) => {
+    const roomId = parseInt(key, 10);
+    const messages = mockChatMessages[roomId];
+    const lastMessageFromMock = messages[messages.length - 1];
+
+    return {
+      meetingId: roomId,
+      title: `채팅방 제목 ${roomId}`,
+      image:
+        roomId % 3 === 0
+          ? null
+          : `https://picsum.photos/seed/${roomId}/200/200`,
+      memberCount: Math.floor(Math.random() * 10) + 2, // 2 ~ 11명
+      isLeader: roomId % 4 === 0, // 4, 8번 방만 리더
+      hostId: roomId % 2 === 0 ? mockUser1.id : mockUser2.id, // 모임장 ID 추가
+      lastMessage: lastMessageFromMock
+        ? {
+            sender: lastMessageFromMock.sender.nickname,
+            content: lastMessageFromMock.content,
+            createdAt: lastMessageFromMock.createdAt,
+          }
+        : undefined,
+    };
+  }
+);

@@ -33,6 +33,14 @@ function Header() {
         >
           <Link to="/meetings">원하는 모임 찾기</Link>
         </Button>
+        <Button
+          asChild
+          size="default"
+          variant="ghost"
+          className="cursor-pointer hover:bg-transparent"
+        >
+          <Link to="/chats">채팅 (임시)</Link>
+        </Button>
       </div>
       {isLoggedIn ? (
         <div className="ml-auto flex items-center gap-8">

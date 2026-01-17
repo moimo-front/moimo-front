@@ -6,10 +6,18 @@ import type { ChatMessage as ChatMessageType } from "@/models/chat.model";
 interface ChatMessageProps {
   message: ChatMessageType;
   isMine: boolean;
+  hostId: number;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, isMine }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({
+  message,
+  isMine,
+  hostId,
+}) => {
   const { content, createdAt, sender } = message;
+
+  // 메시지 발신자가 호스트인지 확인
+  const isHost = sender.id === hostId;
 
   return (
     <div
@@ -22,7 +30,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isMine }) => {
       {!isMine && (
         <Avatar className="w-10 h-10">
           <AvatarImage
-            src={sender.image ? sender.image : "https://github.com/shadcn.png"}
+            src={
+              sender.profile_image
+                ? sender.profile_image
+                : "https://github.com/shadcn.png"
+            }
             alt={sender.nickname}
           />
           <AvatarFallback>
@@ -41,8 +53,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isMine }) => {
         {!isMine && (
           <div className="flex items-center gap-2">
             <span className="font-semibold text-sm">{sender.nickname}</span>
-            {/* TODO: message.isHost 생기면 조건 추가 */}
-            <Badge>호스트</Badge>
+            {isHost && (
+              <Badge
+                variant="outline"
+                className="bg-orange-100 text-orange-700 border-orange-300"
+              >
+                호스트
+              </Badge>
+            )}
           </div>
         )}
         <div
@@ -65,7 +83,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isMine }) => {
           </div>
 
           {/* 보낸 시간 */}
-          <time className="text-xs text-muted-foreground">{createdAt}</time>
+          <time className="text-xs text-muted-foreground">
+            {new Date(createdAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </time>
         </div>
       </div>
     </div>

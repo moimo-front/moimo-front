@@ -16,7 +16,7 @@ export const useAuthQuery = () => {
                     const latestToken = useAuthStore.getState().accessToken;
                     const tokenToStore = verifyUserInfo.accessToken || latestToken || currentToken;
 
-                    storeLogin(verifyUserInfo.nickname, tokenToStore!);
+                    storeLogin({ id: verifyUserInfo.id, nickname: verifyUserInfo.nickname }, tokenToStore!);
                     return verifyUserInfo;
                 }
                 if (isLoggedIn) {

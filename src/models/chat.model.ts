@@ -2,6 +2,7 @@
 export interface MessageSender {
   id: number;
   nickname: string;
+  profile_image: string;
 }
 
 // 채팅 메세지 타입
@@ -27,6 +28,7 @@ export interface ChatRoom {
   image: string | null;
   memberCount: number;
   isLeader: boolean;
+  hostId: number;
   lastMessage?: {
     sender: string;
     content: string;
