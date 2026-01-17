@@ -12,7 +12,7 @@ let mockUserInfo = {
     { id: 2, name: "술" },
     { id: 3, name: "자기계발/공부" },
   ],
-  profile_image: "https://picsum.photos/id/111/300/300",
+  profileImage: "https://picsum.photos/id/111/300/300",
 };
 
 // 일반 로그인 핸들러
@@ -454,7 +454,7 @@ const userUpdate = http.put(
 
       // 이미지 파일이 있는 경우
       if (file && file instanceof File) {
-        mockUserInfo.profile_image = URL.createObjectURL(file);
+        mockUserInfo.profileImage = URL.createObjectURL(file);
       }
 
       await delay(1000);

@@ -94,7 +94,7 @@ const Chatting = () => {
       content: `[테스트] 이것은 상대방으로부터 받은 테스트 메시지입니다. (${new Date().toLocaleTimeString()})`,
       createdAt: new Date().toISOString(),
       meetingId: selectedMeeting!.meetingId,
-      sender: { id: 12345, nickname: "테스트봇", profile_image: "" },
+      sender: { id: 12345, nickname: "테스트봇", profileImage: "" },
     };
     setMessages((prev) => [...prev, testMessage]);
   };
