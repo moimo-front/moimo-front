@@ -1,22 +1,36 @@
 import { useEffect, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 import { useAuthStore } from "@/store/authStore";
 import type { ChatMessage } from "@/models/chat.model";
+import { createMockSocket } from "@/mock/socketMock";
 
-const SOCKET_URL = "https://moimo-back.onrender.com";
+// Mocking 활성화 조건
+const isMockingEnabled =
+  import.meta.env.DEV &&
+  (import.meta.env.VITE_ENABLE_MOCK || "true") === "true";
 
 export const useChatSocket = (meetingId: number | null) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const socketRef = useRef<Socket | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const socketRef = useRef<any | null>(null);
   const { accessToken, userId } = useAuthStore();
 
   useEffect(() => {
-    if (!meetingId || !accessToken) return;
+    if (!meetingId) return;
 
-    socketRef.current = io(SOCKET_URL, {
-      auth: { token: accessToken },
-      transports: ["websocket"],
-    });
+    // 목업 환경일 경우 가짜 소켓 사용, 그렇지 않으면 실제 소켓 연결
+    if (isMockingEnabled) {
+      if (!socketRef.current) {
+        socketRef.current = createMockSocket();
+      }
+    } else {
+      if (!accessToken) return;
+
+      socketRef.current = io(import.meta.env.VITE_SOCKET_URL, {
+        auth: { token: accessToken },
+        transports: ["websocket"],
+      });
+    }
 
     socketRef.current.emit("joinRoom", meetingId);
     console.log(`Socket connected to room: ${meetingId}`);
@@ -30,15 +44,16 @@ export const useChatSocket = (meetingId: number | null) => {
       if (socketRef.current) {
         socketRef.current.disconnect();
         console.log("Socket disconnected");
+        socketRef.current = null;
       }
     };
   }, [meetingId, accessToken]);
 
   const sendMessage = (content: string) => {
-    if (socketRef.current && meetingId && userId) {
+    if (socketRef.current && meetingId && (userId || isMockingEnabled)) {
       const payload = {
         meetingId,
-        senderId: userId,
+        senderId: userId || 0, // Mocking 시 userId가 없을 수 있음
         content,
       };
       socketRef.current.emit("sendMessage", payload);

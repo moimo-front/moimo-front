@@ -1,8 +1,13 @@
-import { fakerKO as faker } from '@faker-js/faker';
+import { fakerKO as faker } from "@faker-js/faker";
 import type { MyMeetingsResponse } from "@/api/me.api";
 import type { Interest } from "@/models/interest.model";
 import type { Meeting } from "@/models/meeting.model";
-import type { Participant, ParticipationStatus } from "@/models/participation.model";
+import type { ChatMessage, ChatRoom } from "@/models/chat.model";
+import type { User } from "@/models/user.model";
+import type {
+  Participant,
+  ParticipationStatus,
+} from "@/models/participation.model";
 
 export const httpUrl =
   import.meta.env.VITE_API_URL || "https://moimo-back.vercel.app";
@@ -116,42 +121,61 @@ export const mockMeetings: Meeting[] = Array.from({ length: 25 }, (_, i) => {
     maxParticipants: 10,
     currentParticipants: i % 10,
     address: `서울시 강남구 역삼동 ${i + 1}번지`,
-    meetingDate: `2024-03-${String((i % 28) + 1).padStart(2, '0')}T1${i % 9}:00:00`,
+    meetingDate: `2024-03-${String((i % 28) + 1).padStart(2, "0")}T1${i % 9}:00:00`,
   };
 });
 
 // 내 참여모임
-export const myMeetings: MyMeetingsResponse[] = Array.from({ length: 60 }, (_, i) => {
-  const isHost = i % 3 === 0;
-  const isCompleted = i % 2 === 0;
-  const status: ParticipationStatus = i % 4 === 0 ? "PENDING" : (i % 5 === 0 ? "REJECTED" : "ACCEPTED");
-  const interest = interestCategories[i % interestCategories.length];
+export const myMeetings: MyMeetingsResponse[] = Array.from(
+  { length: 60 },
+  (_, i) => {
+    const isHost = i % 3 === 0;
+    const isCompleted = i % 2 === 0;
+    const status: ParticipationStatus =
+      i % 4 === 0 ? "PENDING" : i % 5 === 0 ? "REJECTED" : "ACCEPTED";
+    const interest = interestCategories[i % interestCategories.length];
 
-  return {
-    meetingId: 101 + i,
-    title: faker.company.catchPhrase(),
-    interestId: interest.id,
-    interestName: interest.name,
-    address: `${faker.location.city()} ${faker.location.street()}`,
-    meetingDate: faker.date.future().toISOString(),
-    currentParticipants: faker.number.int({ min: 1, max: 10 }),
-    maxParticipants: faker.number.int({ min: 10, max: 20 }),
-    status,
-    isHost,
-    isCompleted
-  };
-});
+    return {
+      meetingId: 101 + i,
+      title: faker.company.catchPhrase(),
+      interestId: interest.id,
+      interestName: interest.name,
+      address: `${faker.location.city()} ${faker.location.street()}`,
+      meetingDate: faker.date.future().toISOString(),
+      currentParticipants: faker.number.int({ min: 1, max: 10 }),
+      maxParticipants: faker.number.int({ min: 10, max: 20 }),
+      status,
+      isHost,
+      isCompleted,
+    };
+  },
+);
 
 // 내모임 참여자
-export const mockParticipants: Record<number, Participant[]> = myMeetings.reduce((acc, meeting) => {
-  acc[meeting.meetingId] = Array.from({ length: meeting.currentParticipants }, (_, i) => ({
-    participationId: meeting.meetingId * 100 + i,
-    userId: 1000 + i,
-    nickname: faker.person.lastName() + faker.person.firstName(),
-    profileImage: faker.image.avatar(),
-    status: i === 0 && meeting.isHost ? "ACCEPTED" : (i % 5 === 0 ? "PENDING" : "ACCEPTED"),
-    bio: faker.person.bio(),
-    interests: faker.helpers.arrayElements(interestCategories, { min: 1, max: 3 })
-  }));
-  return acc;
-}, {} as Record<number, Participant[]>);
+export const mockParticipants: Record<number, Participant[]> =
+  myMeetings.reduce(
+    (acc, meeting) => {
+      acc[meeting.meetingId] = Array.from(
+        { length: meeting.currentParticipants },
+        (_, i) => ({
+          participationId: meeting.meetingId * 100 + i,
+          userId: 1000 + i,
+          nickname: faker.person.lastName() + faker.person.firstName(),
+          profileImage: faker.image.avatar(),
+          status:
+            i === 0 && meeting.isHost
+              ? "ACCEPTED"
+              : i % 5 === 0
+                ? "PENDING"
+                : "ACCEPTED",
+          bio: faker.person.bio(),
+          interests: faker.helpers.arrayElements(interestCategories, {
+            min: 1,
+            max: 3,
+          }),
+        }),
+      );
+      return acc;
+    },
+    {} as Record<number, Participant[]>,
+  );
