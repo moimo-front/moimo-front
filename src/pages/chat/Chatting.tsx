@@ -10,13 +10,12 @@ import { FaArrowLeft } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
 import { getChatRooms, getMessages } from "@/api/chat.api";
 import { useChatSocket } from "@/hooks/useChatSocket";
-import type { ChatMessage, ChatRoom } from "@/models/chat.model";
+import type { ChatRoom } from "@/models/chat.model";
 
 const Chatting = () => {
   const { nickname, userId } = useAuthStore();
   const [selectedMeeting, setSelectedMeeting] = useState<ChatRoom | null>(null);
   const [inputValue, setInputValue] = useState("");
-  const [localChatRooms, setLocalChatRooms] = useState<ChatRoom[]>([]);
 
   // 스크롤 제어를 위한 Ref
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -26,12 +25,6 @@ const Chatting = () => {
     queryKey: ["chatRooms"],
     queryFn: getChatRooms,
   });
-
-  useEffect(() => {
-    if (chatRooms) {
-      setLocalChatRooms(chatRooms);
-    }
-  }, [chatRooms]);
 
   // 2. 소켓 Hook 연결 (Right Panel)
   const { messages, setMessages, sendMessage } = useChatSocket(
@@ -69,41 +62,6 @@ const Chatting = () => {
     }
   };
 
-  // --- 임시 테스트 함수 ---
-  const addTestRoom = () => {
-    const testRoom: ChatRoom = {
-      meetingId: 999,
-      title: "🚀 테스트용 채팅방",
-      image: "https://via.placeholder.com/150/FF0000/FFFFFF?text=Test",
-      memberCount: 2,
-      isLeader: true,
-      hostId: 12345,
-      lastMessage: {
-        sender: "System",
-        content: "이것은 테스트용 채팅방입니다.",
-        createdAt: new Date().toISOString(),
-      },
-    };
-    setLocalChatRooms((prev) => [...prev, testRoom]);
-  };
-
-  const receiveTestMessage = () => {
-    const testMessage: ChatMessage = {
-      id: Date.now(),
-      senderId: 12345,
-      content: `[테스트] 이것은 상대방으로부터 받은 테스트 메시지입니다. (${new Date().toLocaleTimeString()})`,
-      createdAt: new Date().toISOString(),
-      meetingId: selectedMeeting!.meetingId,
-      sender: { id: 12345, nickname: "테스트봇", profile_image: "" },
-    };
-    setMessages((prev) => [...prev, testMessage]);
-  };
-
-  const testSendMessage = () => {
-    console.log("SENDING TEST MESSAGE: 'Hello, world!'");
-    sendMessage("Hello, world!");
-  };
-
   return (
     <div className="flex flex-row h-screen bg-background pt-16">
       <div
@@ -116,7 +74,7 @@ const Chatting = () => {
         </div>
         <Separator />
         <div className="flex-grow overflow-y-auto">
-          {localChatRooms?.map((room) => (
+          {chatRooms?.map((room) => (
             <div key={room.meetingId} onClick={() => setSelectedMeeting(room)}>
               <ChatRoomItem
                 id={room.meetingId}
@@ -136,15 +94,9 @@ const Chatting = () => {
               />
             </div>
           ))}
-          {isSuccess && localChatRooms?.length === 0 && (
+          {isSuccess && chatRooms?.length === 0 && (
             <div className="p-4 text-center text-muted-foreground">
               <p>참여 중인 모임이 없습니다.</p>
-              {/* 개발 모드에서만 임시 버튼 보이기 */}
-              {import.meta.env.DEV && (
-                <Button onClick={addTestRoom} className="mt-4">
-                  임시 채팅방 추가
-                </Button>
-              )}
             </div>
           )}
         </div>
@@ -167,25 +119,6 @@ const Chatting = () => {
                   멤버 {selectedMeeting.memberCount}명
                 </p>
               </div>
-              {/* 개발 모드에서만 임시 버튼 보이기 */}
-              {import.meta.env.DEV && (
-                <div className="ml-auto flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={receiveTestMessage}
-                  >
-                    가짜 메시지 받기
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={testSendMessage}
-                  >
-                    전송 테스트
-                  </Button>
-                </div>
-              )}
             </div>
             <div
               ref={scrollRef}
