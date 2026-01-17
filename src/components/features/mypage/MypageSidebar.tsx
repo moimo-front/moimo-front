@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUserInfoQuery } from "@/hooks/useUserInfoQuery";
 import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
+import defaultProfile from "@/assets/images/profile.png";
 
 export const MypageSidebar = () => {
 
@@ -14,9 +15,15 @@ export const MypageSidebar = () => {
             {/* 프로필 섹션 */}
             <div className="flex flex-col items-center mb-10 w-full px-4">
                 <div className="relative mb-4">
-                    <Avatar className="w-24 h-24 border-2 border-gray-100">
-                        <AvatarImage src={user.profile_image} alt={user.nickname || "user"} />
-                        <AvatarFallback>{user.nickname?.[0] || "U"}</AvatarFallback>
+                    <Avatar className="w-24 h-24 border-2 border-gray-100 bg-white">
+                        <AvatarImage
+                            src={user.profileImage || defaultProfile}
+                            alt={user.nickname || "user"}
+                            className="object-cover"
+                        />
+                        <AvatarFallback className="bg-yellow-50 text-yellow-600 font-bold">
+                            {user.nickname?.[0] || "U"}
+                        </AvatarFallback>
                     </Avatar>
                 </div>
 

@@ -12,7 +12,7 @@ let mockUserInfo = {
         { id: 2, name: "술" },
         { id: 3, name: "자기계발/공부" }
     ],
-    profile_image: "https://picsum.photos/id/111/300/300"
+    profileImage: "https://picsum.photos/id/111/300/300"
 };
 
 
@@ -380,7 +380,7 @@ const userUpdate = http.put(`${httpUrl}/users/user-update`, async ({ request }) 
 
         // 이미지 파일이 있는 경우
         if (file && file instanceof File) {
-            mockUserInfo.profile_image = URL.createObjectURL(file);
+            mockUserInfo.profileImage = URL.createObjectURL(file);
         }
 
         await delay(1000);
