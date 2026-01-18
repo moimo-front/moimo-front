@@ -15,7 +15,6 @@ const Interests = () => {
             key={interest.id}
             topicName={interest.name}
             to={`/meetings?interestFilter=${interest.id}`}
-            imageUrl={""} // TODO: 추후에 이미지 링크 추가
             size="sm"
           />
         ))}

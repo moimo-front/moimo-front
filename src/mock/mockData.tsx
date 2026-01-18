@@ -6,6 +6,7 @@ import type {
   Participant,
   ParticipationStatus,
 } from "@/models/participation.model";
+import { interestImageMap } from "@/lib/interestImageMap"; // Import interestImageMap
 
 export const httpUrl =
   import.meta.env.VITE_API_URL || "https://moimo-back.vercel.app";
@@ -114,6 +115,7 @@ export const mockMeetings: Meeting[] = Array.from({ length: 25 }, (_, i) => {
   return {
     meetingId: i + 1,
     title: `모임 제목 ${i + 1}`,
+    meetingImage: interestImageMap[interest.name] || faker.image.urlLoremFlickr({ category: 'meeting' }), // Add meetingImage
     interestId: interest.id,
     interestName: interest.name,
     maxParticipants: 10,
@@ -136,6 +138,7 @@ export const myMeetings: MyMeetingsResponse[] = Array.from(
     return {
       meetingId: 101 + i,
       title: faker.company.catchPhrase(),
+      meetingImage: faker.image.urlLoremFlickr({ category: "meeting" }),
       interestId: interest.id,
       interestName: interest.name,
       address: `${faker.location.city()} ${faker.location.street()}`,

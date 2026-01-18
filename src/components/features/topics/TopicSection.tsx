@@ -1,5 +1,6 @@
 import TopicCard from "@features/topics/TopicCard";
 import { useInterestQuery } from "@/hooks/useInterestQuery";
+import interest_all from '@/assets/images/interests/interest_all.png';
 
 function TopicSection() {
   const { data: interests, isLoading, error } = useInterestQuery();
@@ -15,10 +16,13 @@ function TopicSection() {
             key={interest.id}
             topicName={interest.name}
             to={`/meetings?interestFilter=${interest.id}`}
-            imageUrl={""} // TODO: 추후에 이미지 링크 추가
           />
         ))}
-        <TopicCard topicName="전체보기" to="/interests" />
+        <TopicCard
+          topicName="전체보기"
+          to="/interests"
+          imageUrl={interest_all}
+        />
       </div>
     </div>
   );

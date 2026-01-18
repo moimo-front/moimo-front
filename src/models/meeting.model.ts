@@ -23,6 +23,7 @@ export interface Participant {
 export interface Meeting {
   meetingId: number;
   title: string;
+  meetingImage: string;
   interestId: number;
   interestName: string;
   maxParticipants: number;

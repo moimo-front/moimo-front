@@ -5,6 +5,7 @@ import type { MeetingMeta } from "@/models/meeting.model";
 export interface MyMeetingsResponse {
     meetingId: number;
     title: string;
+    meetingImage: string;
     interestId: number;
     interestName: string;
     address: string;

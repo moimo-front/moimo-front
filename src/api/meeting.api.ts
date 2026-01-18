@@ -41,6 +41,34 @@ export const getMeetings = async (
   }
 };
 
+export interface SearchMeetingsParams {
+  keyword: string;
+  page?: number;
+  limit?: number;
+}
+
+export const searchMeetings = async (
+  params: SearchMeetingsParams
+): Promise<MeetingListResponse> => {
+  try {
+    const queryParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, String(value));
+      }
+    });
+    
+    const queryString = queryParams.toString();
+    const url = `/meetings/search?${queryString}`;
+
+    const response = await apiClient.get<MeetingListResponse>(url);
+    return response.data;
+  } catch (error) {
+    console.error("searchMeetings error:", error);
+    throw error;
+  }
+};
+
 // 모임 상세 조회 API
 export const getMeetingById = async (
   meetingId: string | number

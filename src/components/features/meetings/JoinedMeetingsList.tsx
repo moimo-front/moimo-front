@@ -7,7 +7,7 @@ function JoinedMeetingsList() {
   const { nickname } = useAuthStore();
   const { meetings, isLoading, isError, error } = useMeQuery(
     "joined",
-    "ACCEPTED",
+    "accepted",
     1,
     4,
   );

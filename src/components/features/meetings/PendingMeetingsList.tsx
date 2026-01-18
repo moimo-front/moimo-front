@@ -7,7 +7,7 @@ function PendingMeetingsList() {
   const { nickname } = useAuthStore();
   const { meetings, isLoading, isError, error } = useMeQuery(
     "joined",
-    "PENDING",
+    "pending",
     1,
     4,
   );
