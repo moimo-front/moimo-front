@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/authStore";
 import { Separator } from "@/components/ui/separator";
 import ChatMessageItem from "@/components/features/chattings/ChatMessage";
@@ -8,98 +8,56 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FaArrowLeft } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
-import { getChatRooms } from "@/api/chat.api";
+import { getChatRooms } from "@/api/chat.api"; // getMessages 제거됨
 import { useChatSocket } from "@/hooks/useChatSocket";
-import type { ChatMessage, ChatRoom } from "@/models/chat.model";
-import { useLocation } from "react-router-dom";
-import type { VerifyUserResponse } from "@/api/auth.api";
+import type { ChatRoom, ChatMessage } from "@/models/chat.model";
 
 const Chatting = () => {
   const { nickname, userId } = useAuthStore();
   const [selectedMeeting, setSelectedMeeting] = useState<ChatRoom | null>(null);
   const [inputValue, setInputValue] = useState("");
-  const location = useLocation();
-  const queryClient = useQueryClient();
-
-  // Component-owned state for messages
+  
+  // [수정 1] 화면에 보여줄 메시지 목록 상태 관리
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-
+  
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 1. 채팅방 목록 조회
-  const { data: chatRooms, isSuccess } = useQuery({
+  // 1. 채팅방 목록 조회 (Left Panel)
+  const { data: chatRooms } = useQuery({
     queryKey: ["chatRooms"],
     queryFn: getChatRooms,
   });
 
-  // 2. 새로운 메시지를 처리하는 콜백 (useChatSocket에 전달)
-  const handleNewMessage = useCallback(
-    (newMessage: ChatMessage) => {
-      // 자신의 메시지는 브로드캐스트에서 무시 (낙관적 업데이트로 이미 처리됨)
-      if (newMessage.senderId === userId) {
-        return;
-      }
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-    },
-    [userId],
-  );
+  // [수정 2] 새 메시지 수신 핸들러 (useCallback으로 메모이제이션)
+  const handleNewMessage = useCallback((newMessage: ChatMessage) => {
+    // 현재 보고 있는 방의 메시지인지 확인 (혹은 훅에서 필터링 된 것을 가정하고 추가)
+    setMessages((prev) => [...prev, newMessage]);
+  }, []);
 
-  // 3. 소켓 Hook 연결 및 초기 메시지 목록 가져오기
+  // [수정 3] 소켓 Hook 연결 (API 호출 없이 훅만 사용)
   const { initialMessages, sendMessage } = useChatSocket(
     selectedMeeting?.meetingId || null,
-    handleNewMessage,
+    handleNewMessage
   );
 
-  // 4. 초기 메시지 목록을 상태에 동기화
+  // [수정 4] 방 이동 시 초기 메시지 로드 (훅에서 받아온 initialMessages 동기화)
   useEffect(() => {
     setMessages(initialMessages);
   }, [initialMessages]);
 
-  // 스크롤 제어
+  // 스크롤 제어 (메시지 추가될 때마다 하단으로)
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
-  // 방 입장 시 초기 방 선택 (라우터 state로부터)
-  useEffect(() => {
-    if (isSuccess && chatRooms && location.state?.meetingId) {
-      const roomToSelect = chatRooms.find(
-        (room) => room.meetingId === location.state.meetingId,
-      );
-      if (roomToSelect) {
-        setSelectedMeeting(roomToSelect);
-      }
-    }
-  }, [isSuccess, chatRooms, location.state]);
-
-  // 메시지 전송 핸들러 (낙관적 업데이트 포함)
+  // 메시지 전송 핸들러
   const handleSendMessage = () => {
-    if (!inputValue.trim() || !selectedMeeting) return;
-
-    const userData = queryClient.getQueryData<VerifyUserResponse>(["authUser"]);
-    const profileImage = userData?.profileImage || "";
-
-    const optimisticMessage: ChatMessage = {
-      id: Date.now(),
-      content: inputValue,
-      meetingId: selectedMeeting.meetingId,
-      senderId: userId!,
-      createdAt: new Date().toISOString(),
-      sender: {
-        id: userId!,
-        nickname: nickname || "You",
-        profileImage: profileImage,
-      },
-    };
-
-    setMessages((prev) => [...prev, optimisticMessage]);
+    if (!inputValue.trim()) return;
     sendMessage(inputValue);
     setInputValue("");
-
-    // 쿼리 무효화로 lastMessage 업데이트
-    queryClient.invalidateQueries({ queryKey: ["chatRooms"] });
+    // (옵션) 낙관적 업데이트가 필요하다면 여기서 messages에 미리 추가할 수도 있음
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -110,11 +68,8 @@ const Chatting = () => {
 
   return (
     <div className="flex flex-row h-screen bg-background pt-16">
-      <div
-        className={`${
-          selectedMeeting ? "hidden lg:flex" : "flex"
-        } w-full lg:w-[30%] min-w-[300px] flex-col h-full border-r`}
-      >
+      {/* [왼쪽 패널] 채팅방 목록 - 기존과 동일 */}
+      <div className={`${selectedMeeting ? "hidden lg:flex" : "flex"} w-full lg:w-[30%] min-w-[300px] flex-col h-full border-r`}>
         <div className="p-4 font-semibold shrink-0">
           {nickname ? `${nickname} 님의 채팅` : "로그인이 필요합니다"}
         </div>
@@ -126,38 +81,27 @@ const Chatting = () => {
                 id={room.meetingId}
                 meetingImage={room.image || ""}
                 meetingTitle={room.title}
-                lastMessageContent={
-                  room.lastMessage?.content || "대화를 시작하세요"
-                }
+                lastMessageContent={room.lastMessage?.content || "대화를 시작하세요"}
                 lastMessageTime={
                   room.lastMessage?.createdAt
-                    ? new Date(room.lastMessage.createdAt).toLocaleTimeString(
-                        [],
-                        { hour: "2-digit", minute: "2-digit" },
-                      )
+                    ? new Date(room.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     : ""
                 }
               />
             </div>
           ))}
-          {isSuccess && chatRooms?.length === 0 && (
-            <div className="p-4 text-center text-muted-foreground">
-              <p>참여 중인 모임이 없습니다.</p>
-            </div>
-          )}
         </div>
       </div>
-      <div
-        className={`${
-          selectedMeeting ? "flex" : "hidden lg:flex"
-        } w-full lg:w-[70%] flex-col h-full bg-card`}
-      >
+
+      {/* [오른쪽 패널] 채팅창 */}
+      <div className={`${selectedMeeting ? "flex" : "hidden lg:flex"} w-full lg:w-[70%] flex-col h-full bg-card`}>
         {selectedMeeting ? (
           <>
+            {/* 헤더 */}
             <div className="p-4 border-b shrink-0 flex items-center gap-3">
-              <FaArrowLeft
-                className="cursor-pointer text-xl"
-                onClick={() => setSelectedMeeting(null)}
+              <FaArrowLeft 
+                className="cursor-pointer text-xl lg:hidden" 
+                onClick={() => setSelectedMeeting(null)} 
               />
               <div>
                 <h2 className="text-xl font-bold">{selectedMeeting.title}</h2>
@@ -166,19 +110,23 @@ const Chatting = () => {
                 </p>
               </div>
             </div>
-            <div
+
+            {/* 메시지 목록 (messages state 사용) */}
+            <div 
               ref={scrollRef}
               className="flex flex-col gap-4 p-4 flex-grow overflow-y-auto"
             >
-              {messages.map((msg) => (
+              {messages.map((msg, index) => (
                 <ChatMessageItem
-                  key={msg.id}
+                  key={`${msg.id}-${index}`}
                   message={msg}
                   isMine={msg.senderId === userId}
-                  hostId={selectedMeeting!.hostId}
+                  hostId={selectedMeeting.hostId}
                 />
               ))}
             </div>
+
+            {/* 입력창 */}
             <div className="p-4 border-t shrink-0">
               <div className="flex items-center gap-2">
                 <Input
