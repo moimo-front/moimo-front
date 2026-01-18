@@ -1,8 +1,6 @@
 import { useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar } from "@/components/ui/avatar";
-import { IoLocationOutline } from "react-icons/io5";
 import { MapPin, Calendar, Users } from "lucide-react";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { getMeetingById } from "@/api/meeting.api";
@@ -22,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { useDeleteMeetingDialog } from "@/hooks/useDeleteMeetingDialog";
 import { useInterestQuery } from "@/hooks/useInterestQuery";
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { ParticipantsCard } from "@/components/features/meetings/ParticipantsCard";
 
 function MeetingDetailPage() {
   const { meetingId } = useParams<{ meetingId: string }>();
@@ -241,38 +240,15 @@ function MeetingDetailPage() {
             </div>
           </div>
         </div>
-        {/* 모이머 */}
-        <Card className="border-2 border-primary/30 rounded-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold">
-              모이머
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0 pb-4">
-            <div className="flex items-center gap-3">
-              <Avatar className="w-12 h-12 bg-muted">
-                <div className="w-full h-full rounded-full bg-muted border border-border flex items-center justify-center text-lg">
-                  O
-                </div>
-              </Avatar>
-              <div>
-                <div className="text-sm font-medium">{meetingDetail.host.nickname}</div>
-                {meetingDetail.host.bio && (
-                  <div className="text-xs text-muted-foreground">{meetingDetail.host.bio}</div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
         {/* 설명 */}
-        <Card className="border-2 border-primary/30 rounded-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold">우리 모임은요...</CardTitle>
+        <Card className="border-2 border-border/50 shadow-sm overflow-hidden rounded-xl">
+          <CardHeader className="bg-primary/5 pb-4 border-b border-border/50">
+            <CardTitle className="text-xl font-bold">우리 모임은요...</CardTitle>
           </CardHeader>
-          <CardContent className="pt-0 pb-4">
+          <CardContent className="p-6">
             <div
               ref={descriptionRef}
-              className={`text-sm text-foreground whitespace-pre-wrap leading-relaxed transition-all duration-300 ${isDescriptionExpanded ? '' : 'max-h-64 overflow-y-auto'
+              className={`text-base text-foreground whitespace-pre-wrap leading-relaxed transition-all duration-300 ${isDescriptionExpanded ? '' : 'max-h-64 overflow-y-auto'
                 }`}
             >
               {meetingDetail.description}
@@ -280,21 +256,29 @@ function MeetingDetailPage() {
             {showExpandButton && (
               <button
                 onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                className="mt-3 text-sm text-foreground/60 hover:text-foreground transition-colors"
+                className="mt-4 text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
               >
-                {isDescriptionExpanded ? '접기' : '자세히보기'}
+                {isDescriptionExpanded ? '접기' : '더보기'}
               </button>
             )}
           </CardContent>
         </Card>
 
+        {/* 참여자 */}
+        <ParticipantsCard
+          meetingId={Number(meetingId)}
+          host={meetingDetail.host}
+          currentParticipants={meetingDetail.currentParticipants || 1}
+          maxParticipants={meetingDetail.maxParticipants}
+        />
+
         {/* 지도 */}
-        <Card className="border-2 border-primary/30 rounded-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold">여기에서 만나요!</CardTitle>
+        <Card className="border-2 border-border/50 shadow-sm overflow-hidden rounded-xl">
+          <CardHeader className="bg-primary/5 pb-4 border-b border-border/50">
+            <CardTitle className="text-xl font-bold">여기에서 만나요!</CardTitle>
           </CardHeader>
-          <CardContent className="pt-0 pb-4">
-            <div className="w-full h-128 bg-muted rounded-lg overflow-hidden">
+          <CardContent className="p-0">
+            <div className="w-full h-96 bg-muted">
               <KakaoMapView
                 lat={meetingDetail.location.lat}
                 lng={meetingDetail.location.lng}
@@ -302,34 +286,11 @@ function MeetingDetailPage() {
                 level={3}
               />
             </div>
-            <p className="text-sm text-muted-foreground mt-3 flex items-center gap-2">
-              <IoLocationOutline className="text-lg text-primary" />
-              {meetingDetail.location.address}
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* 모이미 */}
-        <Card className="border-2 border-primary/30 rounded-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold">
-              모이미 ({meetingDetail.currentParticipants || 1}/{meetingDetail.maxParticipants})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0 pb-4">
-            {/* 추후 참가자 목록으로 교체 예정 */}
-            <div className="flex items-center gap-3">
-              <Avatar className="w-12 h-12 bg-muted">
-                <div className="w-full h-full rounded-full bg-muted border border-border flex items-center justify-center text-lg">
-                  O
-                </div>
-              </Avatar>
-              <div>
-                <div className="text-sm font-medium">{meetingDetail.host.nickname}</div>
-                {meetingDetail.host.bio && (
-                  <div className="text-xs text-muted-foreground">{meetingDetail.host.bio}</div>
-                )}
-              </div>
+            <div className="p-4 bg-card border-t border-border/50">
+              <p className="text-base font-medium text-foreground flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-primary" />
+                {meetingDetail.location.address}
+              </p>
             </div>
           </CardContent>
         </Card>
