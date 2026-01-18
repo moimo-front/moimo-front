@@ -113,3 +113,13 @@ export const updateMeeting = async (
     throw error;
   }
 };
+
+// 모임 참가 신청 API
+export const joinMeeting = async (meetingId: number): Promise<void> => {
+  try {
+    await apiClient.post(`/meetings/${meetingId}/participations`);
+  } catch (error) {
+    console.error("joinMeeting error:", error);
+    throw error;
+  }
+};
