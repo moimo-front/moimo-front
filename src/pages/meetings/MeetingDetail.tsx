@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { IoLocationOutline } from "react-icons/io5";
+import { MapPin, Calendar, Users } from "lucide-react";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { getMeetingById } from "@/api/meeting.api";
 import type { MeetingDetail } from "@/models/meeting.model";
@@ -20,6 +21,7 @@ import { formatMeetingDate } from "@/utils/dateFormat";
 import { useNavigate } from "react-router-dom";
 import { useDeleteMeetingDialog } from "@/hooks/useDeleteMeetingDialog";
 import { useInterestQuery } from "@/hooks/useInterestQuery";
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 function MeetingDetailPage() {
   const { meetingId } = useParams<{ meetingId: string }>();
@@ -138,9 +140,7 @@ function MeetingDetailPage() {
   };
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">로딩 중...</div>
-      </div>
+      <LoadingSpinner />
     );
   }
 
@@ -157,7 +157,7 @@ function MeetingDetailPage() {
 
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background pt-12">
 
 
 
@@ -181,9 +181,14 @@ function MeetingDetailPage() {
           </div>
 
           {/* 정보 */}
-          <div className="flex-1 flex flex-col gap-6 justify-center">
-            <div className="w-full py-2">
-              <div className="flex items-start justify-between pb-3">
+          <div className="flex-1 flex flex-col h-full min-h-[500px] justify-between py-2">
+            <div>
+              <div className="flex items-start justify-between pb-8">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20 text-base px-3 py-1.5 font-medium border-primary/20">
+                    {(meetingDetail.interestName || interests?.find(i => i.id === meetingDetail.interestId)?.name) || "카테고리 없음"}
+                  </Badge>
+                </div>
                 {/* 수정/삭제 버튼 - 호스트일 때만 표시 */}
                 {isHost && (
                   <div className="ml-auto">
@@ -197,34 +202,32 @@ function MeetingDetailPage() {
                   </div>
                 )}
               </div>
-            </div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              {meetingDetail.title}
-            </h1>
-            <div className="space-y-3">
-              {/* 주소, 날짜, 인원 정보 */}
-              <div className="text-base text-muted-foreground whitespace-pre-line leading-relaxed">
-                {meetingDetail.location.address}
-                {"\n"}
-                {formatMeetingDate(meetingDetail.meetingDate)}
+
+              <h1 className="text-3xl font-bold text-foreground mb-6">
+                {meetingDetail.title}
+              </h1>
+
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 text-lg text-foreground/80">
+                  <MapPin className="w-5 h-5 mt-1 text-primary shrink-0" />
+                  <span>{meetingDetail.location.address}</span>
+                </div>
+
+                <div className="flex items-center gap-3 text-lg text-foreground/80">
+                  <Calendar className="w-5 h-5 text-primary shrink-0" />
+                  <span>{formatMeetingDate(meetingDetail.meetingDate)}</span>
+                </div>
+
                 {meetingDetail.maxParticipants && (
-                  <>
-                    {"\n"}
-                    👥 {meetingDetail.currentParticipants || 1}/{meetingDetail.maxParticipants}
-                  </>
+                  <div className="flex items-center gap-3 text-lg text-foreground/80">
+                    <Users className="w-5 h-5 text-primary shrink-0" />
+                    <span>{meetingDetail.currentParticipants || 1}명 / {meetingDetail.maxParticipants}명</span>
+                  </div>
                 )}
               </div>
+            </div>
 
-              {/* 카테고리*/}
-              <div className="flex items-center gap-2 mt-2">
-                {(meetingDetail.interestName || interests?.find(i => i.id === meetingDetail.interestId)?.name) && (
-                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20 text-base px-3 py-1.5 font-medium border-primary/20">
-                    {meetingDetail.interestName || interests?.find(i => i.id === meetingDetail.interestId)?.name}
-                  </Badge>
-                )}
-              </div>
-
-
+            <div className="mt-8 pt-6 border-t border-border/50">
               <MeetingActionButtons
                 meetingId={Number(meetingId)}
                 role={isHost ? "host" : "participant"}
