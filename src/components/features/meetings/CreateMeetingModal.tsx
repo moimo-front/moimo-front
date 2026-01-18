@@ -12,7 +12,7 @@ import DateTimePicker from "@components/common/DateTimePicker";
 import KakaoMapSearch from "@/components/common/kakaoMaps/KakaoMapSearch";
 import { Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Meeting } from "@/models/meeting.model";
+import type { Meeting, MeetingDetail } from "@/models/meeting.model";
 import type { MyMeetingsResponse } from "@/api/me.api";
 import LoadingSpinner from "@components/common/LoadingSpinner";
 import { useInterestQuery } from "@/hooks/useInterestQuery";
@@ -42,7 +42,7 @@ type MeetingFormValues = z.infer<typeof meetingSchema>;
 interface CreateMeetingModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  meeting?: Meeting | MyMeetingsResponse;
+  meeting?: Meeting | MyMeetingsResponse | MeetingDetail;
 }
 
 function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalProps) {

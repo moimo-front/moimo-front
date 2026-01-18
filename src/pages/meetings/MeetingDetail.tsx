@@ -1,9 +1,11 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import FixedBottomButton from "@/components/common/FixedBottomButton";
 import { IoLocationOutline } from "react-icons/io5";
+import { Edit } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { getMeetingById } from "@/api/meeting.api";
 import type { MeetingDetail } from "@/models/meeting.model";
@@ -12,6 +14,8 @@ import { useAuthStore } from "@/store/authStore";
 import LoginRequiredDialog from "@/components/common/LoginRequiredDialog";
 import KakaoMapView from "@/components/common/kakaoMaps/KakaoMapView";
 import { toast } from "sonner";
+import CreateMeetingModal from "@/components/features/meetings/CreateMeetingModal";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 
 function MeetingDetailPage() {
   const { meetingId } = useParams<{ meetingId: string }>();
@@ -23,8 +27,15 @@ function MeetingDetailPage() {
   const descriptionRef = useRef<HTMLDivElement>(null);
 
   // 로그인 상태 및 모달 관리
-  const { isLoggedIn } = useAuthStore();
+  const { isLoggedIn, nickname } = useAuthStore();
+  const navigate = useNavigate();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showJoinConfirm, setShowJoinConfirm] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+
+  // 내 모임인지 확인
+  const isHost = meetingDetail?.host.nickname === nickname;
 
   useEffect(() => {
     const fetchMeetingDetail = async () => {
@@ -67,9 +78,16 @@ function MeetingDetailPage() {
       return;
     }
 
-    // TODO: 로그인 상태면 신청 모달 표시
+    // 신청 확인 모달 표시
+    setShowJoinConfirm(true);
+  };
+
+  const handleConfirmJoin = () => {
+    // TODO: 모임 신청 API 호출
     console.log("Join meeting:", meetingId);
-    toast.info("신청 기능은 곧 추가될 예정입니다!");
+    setIsPending(true);
+    toast.success("모임 신청이 완료되었습니다. 모이머의 승인을 기다려주세요!");
+    setShowJoinConfirm(false);
   };
 
   console.log("🎯 렌더링 상태:", { isLoading, error, meetingDetail: !!meetingDetail });
@@ -109,11 +127,7 @@ function MeetingDetailPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
 
-      <div className="w-full max-w-4xl mx-auto px-4 py-4">
-        <div className="flex items-start justify-between pb-3">
 
-        </div>
-      </div>
 
       <div className="flex-1 w-full max-w-4xl mx-auto px-4 pb-4 space-y-4">
         <div className="flex gap-3">
@@ -136,6 +150,24 @@ function MeetingDetailPage() {
 
           {/* 정보 */}
           <div className="flex-1 flex flex-col gap-4 justify-center">
+            <div className="w-full max-w-4xl mx-auto px-4 py-4">
+              <div className="flex items-start justify-between pb-3">
+                {/* 수정 버튼 - 내 모임일 때만 표시 */}
+                {isHost && (
+                  <div className="ml-auto">
+                    <Button
+                      onClick={() => setShowEditModal(true)}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <Edit className="h-4 w-4" />
+                      수정
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               {meetingDetail.title}
             </h1>
@@ -161,12 +193,22 @@ function MeetingDetailPage() {
               </div>
 
 
-              <button
-                onClick={handleJoinMeeting}
-                className="w-full py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors text-sm font-medium"
-              >
-                {isLoggedIn ? "신청하기" : "로그인하고 신청하기"}
-              </button>
+              {isHost ? (
+                <Button
+                  onClick={() => navigate(`/mypage/meetings/hosting/${meetingId}/participations`)}
+                  className="w-full py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors text-sm font-medium"
+                >
+                  승인 요청 목록 보기
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleJoinMeeting}
+                  disabled={isPending}
+                  className="w-full py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors text-sm font-medium disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
+                >
+                  {isPending ? "승인 요청 중" : isLoggedIn ? "신청하기" : "로그인하고 신청하기"}
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -223,7 +265,7 @@ function MeetingDetailPage() {
             <CardTitle className="text-base font-bold">여기에서 만나요!</CardTitle>
           </CardHeader>
           <CardContent className="pt-0 pb-4">
-            <div className="w-full h-64 bg-muted rounded-lg overflow-hidden">
+            <div className="w-full h-128 bg-muted rounded-lg overflow-hidden">
               <KakaoMapView
                 lat={meetingDetail.location.lat}
                 lng={meetingDetail.location.lng}
@@ -263,13 +305,50 @@ function MeetingDetailPage() {
           </CardContent>
         </Card>
       </div>
-      <FixedBottomButton onClick={handleJoinMeeting}>
-        {isLoggedIn ? "이 모임 신청하기" : "로그인하고 신청하기"}
-      </FixedBottomButton>
+      {isHost ? (
+        <FixedBottomButton
+          onClick={() => navigate(`/mypage/meetings/hosting/${meetingId}/participations`)}
+        >
+          승인 요청 목록 보기
+        </FixedBottomButton>
+      ) : (
+        <FixedBottomButton
+          onClick={handleJoinMeeting}
+          disabled={isPending}
+        >
+          {isPending
+            ? "승인 요청 중"
+            : isLoggedIn
+              ? "이 모임 신청하기"
+              : "로그인하고 신청하기"
+          }
+        </FixedBottomButton>
+      )}
+
 
       <LoginRequiredDialog
         open={showLoginPrompt}
         onOpenChange={setShowLoginPrompt}
+      />
+
+      {/* 수정 모달 */}
+      {showEditModal && meetingDetail && (
+        <CreateMeetingModal
+          open={showEditModal}
+          onOpenChange={setShowEditModal}
+          meeting={meetingDetail}
+        />
+      )}
+
+      {/* 신청 확인 모달 */}
+      <ConfirmDialog
+        open={showJoinConfirm}
+        onOpenChange={setShowJoinConfirm}
+        title="모임 신청"
+        description={`해당 모임을 신청하시겠습니까?\n 신청 후 취소가 불가능합니다.`}
+        confirmText="신청하기"
+        cancelText="취소"
+        onConfirm={handleConfirmJoin}
       />
     </div>
   );
