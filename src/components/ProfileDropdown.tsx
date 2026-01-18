@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import defaultProfileImage from "@/assets/images/profile.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +28,7 @@ export const ProfileDropdown = () => {
   };
 
   const userData = queryClient.getQueryData<VerifyUserResponse>(["authUser"]);
-  const userProfileImage = userData?.profileImage || "";
+  const userProfileImage = userData?.profileImage || defaultProfileImage;
 
   return (
     <DropdownMenu>
