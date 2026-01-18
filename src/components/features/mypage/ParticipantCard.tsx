@@ -80,6 +80,7 @@ const ParticipantCard = ({ meetingId, participant }: ParticipantCardProps) => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 userInfo={participant}
+                userId={participant.userId}
                 readOnly={true}
             />
         </div>

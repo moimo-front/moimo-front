@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { useInterestQuery } from "@/hooks/useInterestQuery";
 import { useUserUpdateMutation } from "@/hooks/useUserInfoMutations";
 import { useAuthQuery } from "@/hooks/useAuthQuery";
+import { useUserInfoByIdQuery } from "@/hooks/useUserInfoQuery";
+import type { Interest } from "@/models/interest.model";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera } from "lucide-react";
@@ -30,18 +32,23 @@ interface ProfileModalProps {
     isOpen: boolean;
     onClose: () => void;
     userInfo?: UserInfo;
+    userId?: number;
     readOnly?: boolean;
 }
 
-const ProfileModal = ({ isOpen, onClose, userInfo, readOnly }: ProfileModalProps) => {
+const ProfileModal = ({ isOpen, onClose, userInfo, userId, readOnly }: ProfileModalProps) => {
     const { data: currentUser } = useAuthQuery();
     const { data: allInterests } = useInterestQuery();
+    const { data: fetchedUser, isLoading: isUserLoading } = useUserInfoByIdQuery(userId || 0);
     const userUpdateMutation = useUserUpdateMutation();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-    // userInfo.id (User) 또는 userInfo.userId (Participant) 대응
-    const targetUserId = userInfo?.id || userInfo?.userId;
+    // 우선순위: fetch된 데이터 > props로 전달된 데이터
+    const displayUserInfo = fetchedUser || userInfo;
+
+    // userInfo.id (User) 또는 userInfo.userId (Participant) 또는 userId 대응
+    const targetUserId = userId || displayUserInfo?.id || displayUserInfo?.userId;
     const isReadOnly = readOnly ?? (targetUserId !== undefined && currentUser?.id !== undefined ? targetUserId !== currentUser.id : true);
 
     const {
@@ -61,15 +68,15 @@ const ProfileModal = ({ isOpen, onClose, userInfo, readOnly }: ProfileModalProps
     });
 
     useEffect(() => {
-        if (userInfo) {
+        if (displayUserInfo) {
             reset({
-                bio: userInfo.bio || "",
-                interests: userInfo.interests?.map(i => i.id) || [],
+                bio: displayUserInfo.bio || "",
+                interests: displayUserInfo.interests?.map((i: Interest) => i.id) || [],
             });
-            const img = userInfo.profileImage || defaultProfile;
+            const img = displayUserInfo.profileImage || defaultProfile;
             setPreviewImage(img);
         }
-    }, [userInfo, reset, isOpen]);
+    }, [displayUserInfo, reset, isOpen]);
 
     const selectedInterests = watch("interests");
 
@@ -161,7 +168,7 @@ const ProfileModal = ({ isOpen, onClose, userInfo, readOnly }: ProfileModalProps
                             />
                         </div>
                         <h2 className="text-xl font-bold text-gray-900">
-                            {userInfo?.nickname || "사용자"}
+                            {isUserLoading ? "불러오는 중..." : (displayUserInfo?.nickname || "사용자")}
                         </h2>
                     </div>
 
