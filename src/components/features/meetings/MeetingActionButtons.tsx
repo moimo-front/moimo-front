@@ -14,8 +14,10 @@ interface MeetingActionButtonsProps {
 
   // 참가자 전용
   isPending?: boolean;
+  isJoined?: boolean;
   isLoggedIn?: boolean;
   onJoin?: () => void;
+  onChat?: () => void;
 }
 
 function MeetingActionButtons({
@@ -25,8 +27,10 @@ function MeetingActionButtons({
   onEdit,
   onDelete,
   isPending = false,
+  isJoined = false,
   isLoggedIn = false,
   onJoin,
+  onChat,
 }: MeetingActionButtonsProps) {
   const navigate = useNavigate();
 
@@ -145,6 +149,30 @@ function MeetingActionButtons({
 
   // Participant
   if (role === "participant") {
+    // 가입 완료 상태
+    if (isJoined) {
+      if (location === "detail-mid") {
+        return (
+          <Button
+            onClick={onChat || handleChatClick}
+            className="w-full py-2.5 bg-yellow-400 hover:bg-yellow-500 text-white font-bold rounded-md transition-colors text-sm"
+          >
+            채팅방으로 이동
+          </Button>
+        );
+      }
+      if (location === "detail-bottom") {
+        return (
+          <FixedBottomButton
+            onClick={onChat || handleChatClick}
+            className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold"
+          >
+            채팅방으로 이동
+          </FixedBottomButton>
+        );
+      }
+    }
+
     const buttonText = isPending
       ? "승인 요청 중"
       : isLoggedIn
