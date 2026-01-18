@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { interestImageMap } from "@/lib/interestImageMap";
 
 interface TopicCardProps {
   topicName: string;
@@ -11,7 +12,7 @@ interface TopicCardProps {
 function TopicCard({
   topicName,
   to,
-  imageUrl,
+  imageUrl = interestImageMap[topicName],
   size = "md",
 }: TopicCardProps) {
   const sizeStyles = {
@@ -44,17 +45,14 @@ function TopicCard({
           "rounded-full bg-secondary flex items-center justify-center overflow-hidden mb-3 border border-black",
           imageDimensions
         )}
-        style={
-          imageUrl
-            ? {
-                backgroundImage: `url(${imageUrl})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }
-            : {}
-        }
       >
-        {!imageUrl && (
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={topicName}
+            className="w-full h-full object-cover scale-120"
+          />
+        ) : (
           <span
             className={cn("font-bold text-primary-foreground", initialSize)}
           >
