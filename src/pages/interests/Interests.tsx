@@ -8,7 +8,7 @@ const Interests = () => {
   if (error) return <div>Error loading interests: {error.message}</div>;
 
   return (
-    <div className="py-4">
+    <div className="">
       <div className="grid grid-cols-4">
         {interests?.map((interest) => (
           <TopicCard

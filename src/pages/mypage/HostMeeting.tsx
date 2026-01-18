@@ -22,7 +22,7 @@ const HostMeeting = () => {
   };
 
   return (
-    <div className="w-full h-full p-10 bg-white overflow-y-auto">
+    <div className="w-full h-full py-10 bg-white overflow-y-auto">
       <h1 className="text-2xl font-bold text-gray-900 mb-8">내 모임</h1>
 
       {/* 내가 만든 모임 */}

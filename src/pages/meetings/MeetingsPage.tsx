@@ -86,7 +86,7 @@ const MeetingsPage = () => {
 
   return (
     <div className="space-y-4 bg-card">
-      <h1 className="text-3xl font-bold p-4">원하는 모임 찾기</h1>
+      <h1 className="text-3xl font-bold py-8 px-4">원하는 모임 찾기</h1>
 
       <MeetingFilterControls
         filters={filters}

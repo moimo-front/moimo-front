@@ -152,7 +152,7 @@ function MeetingDetailPage() {
 
 
 
-      <div className="flex-1 w-full max-w-4xl mx-auto px-4 pb-4 space-y-4">
+      <div className="flex-1 w-full max-w-4xl mx-auto pb-4 space-y-4">
         <div className="flex gap-3">
           {/* 이미지 */}
           <div className="w-[60%] h-[40%] rounded-lg overflow-hidden bg-primary/80 flex-shrink-0">
@@ -173,7 +173,7 @@ function MeetingDetailPage() {
 
           {/* 정보 */}
           <div className="flex-1 flex flex-col gap-4 justify-center">
-            <div className="w-full max-w-4xl mx-auto px-4 py-4">
+            <div className="w-full max-w-4xl mx-auto py-4">
               <div className="flex items-start justify-between pb-3">
                 {/* 수정/삭제 버튼 - 호스트일 때만 표시 */}
                 {isHost && (
