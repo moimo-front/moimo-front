@@ -45,8 +45,9 @@ function MeetingDetailPage() {
     onSuccess: () => navigate("/mypage/meetings/hosting")
   });
 
-  // 내가 신청한 모임 목록 조회
+  // 내가 신청한/참가한 모임 목록 조회
   const { meetings: pendingMeetings } = useMeQuery("joined", "pending", 1, 50);
+  const { meetings: joinedMeetings } = useMeQuery("joined", "accepted", 1, 50);
 
   // 내 모임인지 확인
   const isHost = meetingDetail?.host.nickname === nickname;
@@ -321,10 +322,11 @@ function MeetingDetailPage() {
         meetingId={Number(meetingId)}
         role={isHost ? "host" : "participant"}
         location="detail-bottom"
-        onEdit={() => setShowEditModal(true)}
         isPending={isPending}
+        isJoined={joinedMeetings?.some((m) => m.meetingId === Number(meetingId))}
         isLoggedIn={isLoggedIn}
         onJoin={handleJoinMeeting}
+        onChat={() => navigate("/chats", { state: { meetingId: Number(meetingId) } })}
       />
       <DeleteConfirmDialog />
 
