@@ -35,7 +35,7 @@ class MockSocket extends CustomEventEmitter {
   private meetingId: number | null = null;
   private userId: number = 46; // Mock user ID '나'
   private nickname: string = "나";
-  private profile_image: string = "https://i.pravatar.cc/150?img=46"; // Mock user profile image
+  private profileImage: string = "https://i.pravatar.cc/150?img=46"; // Mock user profile image
 
   constructor() {
     super();
@@ -50,7 +50,7 @@ class MockSocket extends CustomEventEmitter {
       senderId: 0, // 시스템 메시지 senderId는 0
       content: `${this.nickname}님이 입장했습니다.`,
       createdAt: new Date().toISOString(),
-      sender: { id: 0, nickname: "System", profile_image: "" },
+      sender: { id: 0, nickname: "System", profileImage: "" },
     };
 
     // 해당 채팅방의 메시지 목록에 시스템 메시지 추가
@@ -87,7 +87,7 @@ class MockSocket extends CustomEventEmitter {
       sender: {
         id: this.userId,
         nickname: this.nickname,
-        profile_image: this.profile_image,
+        profileImage: this.profileImage,
       },
     };
 
@@ -118,7 +118,7 @@ class MockSocket extends CustomEventEmitter {
       senderId: 0,
       content: `${this.nickname}님이 퇴장했습니다.`,
       createdAt: new Date().toISOString(),
-      sender: { id: 0, nickname: "System", profile_image: "" },
+      sender: { id: 0, nickname: "System", profileImage: "" },
     };
 
     mockChatMessages[this.meetingId].push(leaveMessage);

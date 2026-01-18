@@ -2,7 +2,7 @@
 export interface MessageSender {
   id: number;
   nickname: string;
-  profile_image: string;
+  profileImage: string;
 }
 
 // 채팅 메세지 타입

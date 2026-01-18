@@ -3,25 +3,25 @@ import type { ChatMessage, ChatRoom } from "@/models/chat.model";
 import type { User } from "@/models/user.model";
 
 // Mock Users
-const mockUser1: Pick<User, "id" | "email" | "nickname" | "profile_image"> = {
+const mockUser1: Pick<User, "id" | "email" | "nickname" | "profileImage"> = {
   id: 1,
   email: "user1@example.com",
   nickname: "첫번째유저",
-  profile_image: "https://i.pravatar.cc/150?img=1",
+  profileImage: "https://i.pravatar.cc/150?img=1",
 };
 
-const mockUser2: Pick<User, "id" | "email" | "nickname" | "profile_image"> = {
+const mockUser2: Pick<User, "id" | "email" | "nickname" | "profileImage"> = {
   id: 2,
   email: "user2@example.com",
   nickname: "두번째유저",
-  profile_image: "https://i.pravatar.cc/150?img=2",
+  profileImage: "https://i.pravatar.cc/150?img=2",
 };
 
-const mockUser3: Pick<User, "id" | "email" | "nickname" | "profile_image"> = {
+const mockUser3: Pick<User, "id" | "email" | "nickname" | "profileImage"> = {
   id: 3,
   email: "user3@example.com",
   nickname: "세번째유저",
-  profile_image: "https://i.pravatar.cc/150?img=3",
+  profileImage: "https://i.pravatar.cc/150?img=3",
 };
 
 export const mockUsers = [mockUser1, mockUser2, mockUser3];
@@ -46,7 +46,7 @@ const generateChatMessages = (
       sender: {
         id: sender.id,
         nickname: sender.nickname,
-        profile_image: sender.profile_image || "",
+        profileImage: sender.profileImage || "",
       },
     });
   }

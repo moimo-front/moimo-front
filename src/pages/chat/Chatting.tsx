@@ -79,7 +79,7 @@ const Chatting = () => {
     if (!inputValue.trim() || !selectedMeeting) return;
 
     const userData = queryClient.getQueryData<VerifyUserResponse>(["authUser"]);
-    const profileImage = userData?.profile_image || "";
+    const profileImage = userData?.profileImage || "";
 
     const optimisticMessage: ChatMessage = {
       id: Date.now(),
@@ -90,7 +90,7 @@ const Chatting = () => {
       sender: {
         id: userId!,
         nickname: nickname || "You",
-        profile_image: profileImage,
+        profileImage: profileImage,
       },
     };
 
