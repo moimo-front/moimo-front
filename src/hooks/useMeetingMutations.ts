@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createMeeting, updateMeeting } from "@/api/meeting.api";
+import { createMeeting, updateMeeting, joinMeeting } from "@/api/meeting.api";
 
 // 모임 생성 훅
 export const useCreateMeetingMutation = () => {
@@ -30,6 +30,22 @@ export const useUpdateMeetingMutation = () => {
     },
     onError: (error: any) => {
       console.error("모임 수정 실패:", error);
+    },
+  });
+};
+
+// 모임 참가 신청 훅
+export const useJoinMeetingMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (meetingId: number) => joinMeeting(meetingId),
+    onSuccess: () => {
+      // 성공 시 모임 목록 다시 가져오기
+      queryClient.invalidateQueries({ queryKey: ["meetings"] });
+    },
+    onError: (error: any) => {
+      console.error("모임 신청 실패:", error);
     },
   });
 };
