@@ -138,6 +138,7 @@ export const myMeetings: MyMeetingsResponse[] = Array.from(
     return {
       meetingId: 101 + i,
       title: faker.company.catchPhrase(),
+      meetingImage: faker.image.urlLoremFlickr({ category: "meeting" }),
       interestId: interest.id,
       interestName: interest.name,
       address: `${faker.location.city()} ${faker.location.street()}`,
