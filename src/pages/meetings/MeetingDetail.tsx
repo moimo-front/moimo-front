@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { IoLocationOutline } from "react-icons/io5";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { getMeetingById } from "@/api/meeting.api";
 import type { MeetingDetail } from "@/models/meeting.model";
 import moimoMeeting from "@/assets/images/moimo-meetings.png";
@@ -19,9 +19,15 @@ import MeetingActionButtons from "@/components/features/meetings/MeetingActionBu
 import { formatMeetingDate } from "@/utils/dateFormat";
 import { useNavigate } from "react-router-dom";
 import { useDeleteMeetingDialog } from "@/hooks/useDeleteMeetingDialog";
+import { useInterestQuery } from "@/hooks/useInterestQuery";
 
 function MeetingDetailPage() {
   const { meetingId } = useParams<{ meetingId: string }>();
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [meetingDetail, setMeetingDetail] = useState<MeetingDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +54,9 @@ function MeetingDetailPage() {
   // 내가 신청한/참가한 모임 목록 조회
   const { meetings: pendingMeetings } = useMeQuery("joined", "pending", 1, 50);
   const { meetings: joinedMeetings } = useMeQuery("joined", "accepted", 1, 50);
+
+  // 카테고리 목록 조회 (이름 매핑용)
+  const { data: interests } = useInterestQuery();
 
   // 내 모임인지 확인
   const isHost = meetingDetail?.host.nickname === nickname;
@@ -152,10 +161,10 @@ function MeetingDetailPage() {
 
 
 
-      <div className="flex-1 w-full max-w-4xl mx-auto pb-4 space-y-4">
-        <div className="flex gap-3">
+      <div className="flex-1 w-full max-w-5xl mx-auto pb-8 space-y-8 px-4 md:px-0">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12">
           {/* 이미지 */}
-          <div className="w-[60%] h-[40%] rounded-lg overflow-hidden bg-primary/80 flex-shrink-0">
+          <div className="w-full md:w-1/2 aspect-square rounded-2xl overflow-hidden bg-muted flex-shrink-0 shadow-sm border border-border/50">
             {meetingDetail.meetingImage ? (
               <img
                 src={meetingDetail.meetingImage}
@@ -172,8 +181,8 @@ function MeetingDetailPage() {
           </div>
 
           {/* 정보 */}
-          <div className="flex-1 flex flex-col gap-4 justify-center">
-            <div className="w-full max-w-4xl mx-auto py-4">
+          <div className="flex-1 flex flex-col gap-6 justify-center">
+            <div className="w-full py-2">
               <div className="flex items-start justify-between pb-3">
                 {/* 수정/삭제 버튼 - 호스트일 때만 표시 */}
                 {isHost && (
@@ -207,10 +216,12 @@ function MeetingDetailPage() {
               </div>
 
               {/* 카테고리*/}
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="bg-background border border-border text-foreground text-base px-2 py-0.5">
-                  {meetingDetail.interestName}
-                </Badge>
+              <div className="flex items-center gap-2 mt-2">
+                {(meetingDetail.interestName || interests?.find(i => i.id === meetingDetail.interestId)?.name) && (
+                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20 text-base px-3 py-1.5 font-medium border-primary/20">
+                    {meetingDetail.interestName || interests?.find(i => i.id === meetingDetail.interestId)?.name}
+                  </Badge>
+                )}
               </div>
 
 
@@ -219,8 +230,10 @@ function MeetingDetailPage() {
                 role={isHost ? "host" : "participant"}
                 location="detail-mid"
                 isPending={isPending}
+                isJoined={joinedMeetings?.some((m) => m.meetingId === Number(meetingId))}
                 isLoggedIn={isLoggedIn}
                 onJoin={handleJoinMeeting}
+                onChat={() => navigate("/chats", { state: { meetingId: Number(meetingId) } })}
               />
             </div>
           </div>
