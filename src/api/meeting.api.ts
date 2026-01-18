@@ -123,3 +123,13 @@ export const joinMeeting = async (meetingId: number): Promise<void> => {
     throw error;
   }
 };
+
+// 모임 삭제 API
+export const deleteMeeting = async (meetingId: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/meetings/${meetingId}`);
+  } catch (error) {
+    console.error("deleteMeeting error:", error);
+    throw error;
+  }
+};
