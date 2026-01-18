@@ -55,11 +55,11 @@ export const useChatSocket = (
 
     // --- 공통 이벤트 리스너 등록 ---
     socket.on("connect", () => {
-      console.log(`Socket connected: ${socket.id}`);
+
     });
 
     socket.on("disconnect", (reason: string) => {
-      console.log(`Socket disconnected: ${reason}`);
+
     });
 
     socket.on("connect_error", (error: Error) => {
@@ -68,7 +68,7 @@ export const useChatSocket = (
 
     // 메시지 수신 리스너 (전역적으로 한 번만 등록)
     socket.on("newMessage", (message: ChatMessage) => {
-      console.log("New message received:", message);
+
       if (onNewMessageRef.current) {
         onNewMessageRef.current(message);
       }
@@ -77,7 +77,7 @@ export const useChatSocket = (
     // 컴포넌트가 언마운트되거나 토큰이 아예 바뀔 때만 연결 해제
     return () => {
       if (socketRef.current) {
-        console.log("Cleaning up socket connection...");
+
         socketRef.current.disconnect();
         socketRef.current = null;
       }
@@ -92,11 +92,11 @@ export const useChatSocket = (
       return;
     }
 
-    console.log(`Switching to room: ${meetingId}`);
+
 
     // 방 입장 요청
     socket.emit("joinRoom", meetingId, (response: any) => {
-      console.log(`방 ${meetingId} 입장 응답:`, response);
+
     });
 
     // 메시지 목록 요청
@@ -104,7 +104,7 @@ export const useChatSocket = (
       "getMessages",
       meetingId,
       (response: { meetingId: number; messages: ChatMessage[] }) => {
-        console.log("메시지 목록 응답:", response);
+
         if (response && response.messages) {
           setInitialMessages(response.messages);
         }
@@ -120,10 +120,10 @@ export const useChatSocket = (
         meetingId,
         content,
       };
-      console.log("Emitting sendMessage with payload:", payload);
+
       
       socketRef.current.emit("sendMessage", payload, (response: any) => {
-        console.log("메시지 전송 응답:", response);
+
       });
     } else {
       console.error(
