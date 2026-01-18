@@ -1,19 +1,31 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { updateParticipation } from "@/api/participation.api";
-import type { Participant, ParticipationStatus } from "@/models/participation.model";
+import {
+    approveParticipation,
+    rejectParticipation,
+    approveAllParticipations,
+    cancelParticipation
+} from "@/api/participation.api";
+import type { Participant } from "@/models/participation.model";
 import type { MeetingDetail } from "@/models/meeting.model";
 
-export const useUpdateParticipation = () => {
+// 공통 낙관적 업데이트 스냅샷 타입
+interface MutationContext {
+    previousParticipants?: Participant[];
+    previousMeeting?: MeetingDetail;
+    meetingId: number;
+}
+
+// 개별 승인 Mutation
+export const useApproveParticipation = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: ({ meetingId, updates }:
-            { meetingId: number, updates: { participationId: number, status: ParticipationStatus }[] }) =>
-            updateParticipation(meetingId, updates),
+    return useMutation<void, AxiosError, { meetingId: number, participationId: number }, MutationContext>({
+        mutationFn: ({ meetingId, participationId }) =>
+            approveParticipation(meetingId, participationId),
 
-        onMutate: async ({ meetingId, updates }) => {
-            // 1. 발송된 요청과 겹치지 않게 관련 쿼리 취소
+        // 1. 발송된 요청과 겹치지 않게 관련 쿼리 취소
+        onMutate: async ({ meetingId, participationId }) => {
             await queryClient.cancelQueries({ queryKey: ["participants", meetingId] });
             await queryClient.cancelQueries({ queryKey: ["meeting", meetingId] });
 
@@ -21,57 +33,190 @@ export const useUpdateParticipation = () => {
             const previousParticipants = queryClient.getQueryData<Participant[]>(["participants", meetingId]);
             const previousMeeting = queryClient.getQueryData<MeetingDetail>(["meeting", meetingId]);
 
-            // 3. 낙관적 업데이트: 참여자 목록 상태 변경
+            // 3. 낙관적 업데이트: 상태 ACCEPTED로 변경
             if (previousParticipants) {
-                queryClient.setQueryData<Participant[]>(["participants", meetingId], (old) => {
-                    if (!old) return [];
-                    return old.map(p => {
-                        const update = updates.find(u => u.participationId === p.participationId);
-                        return update ? { ...p, status: update.status } : p;
-                    });
-                });
+                queryClient.setQueryData<Participant[]>(["participants", meetingId], (old) =>
+                    old?.map(p => p.participationId === participationId ? { ...p, status: 'ACCEPTED' } : p)
+                );
             }
 
-            // 4. 낙관적 업데이트: 모임 인원수 계산 및 반영
+            // 낙관적 업데이트: 인원수 +1 (이미 ACCEPTED가 아닐 경우만)
             if (previousMeeting && previousParticipants) {
-                let diff = 0;
-                updates.forEach(update => {
-                    const prev = previousParticipants.find(p => p.participationId === update.participationId);
-                    if (prev) {
-                        if (prev.status !== "ACCEPTED" && update.status === "ACCEPTED") diff++;
-                        else if (prev.status === "ACCEPTED" && update.status !== "ACCEPTED") diff--;
-                    }
-                });
-
-                if (diff !== 0) {
-                    queryClient.setQueryData<MeetingDetail>(["meeting", meetingId], (old) => {
-                        if (!old) return old;
-                        return {
-                            ...old,
-                            currentParticipants: old.currentParticipants + diff
-                        };
-                    });
+                const p = previousParticipants.find(p => p.participationId === participationId);
+                if (p && p.status !== 'ACCEPTED') {
+                    queryClient.setQueryData<MeetingDetail>(["meeting", meetingId], (old) =>
+                        old ? { ...old, currentParticipants: old.currentParticipants + 1 } : old
+                    );
                 }
             }
 
             return { previousParticipants, previousMeeting, meetingId };
         },
 
-        onError: (error: AxiosError, _, context) => {
-            console.error("Error updating participation:", error);
-            // 에러 발생 시 원래 데이터로 복구
+        // 4. 에러 발생 시 저장해둔 스냅샷으로 롤백
+        onError: (_, __, context) => {
             if (context) {
                 queryClient.setQueryData(["participants", context.meetingId], context.previousParticipants);
                 queryClient.setQueryData(["meeting", context.meetingId], context.previousMeeting);
             }
         },
 
-        onSettled: (_, __, variables) => {
-            // 성공/실패 여부와 관계없이 서버 데이터와 동기화
-            queryClient.invalidateQueries({ queryKey: ["participants", variables.meetingId] });
-            queryClient.invalidateQueries({ queryKey: ["meeting", variables.meetingId] });
-            // 내 모임 목록도 인원수가 바뀔 수 있으므로 무효화
-            queryClient.invalidateQueries({ queryKey: ["my-meetings"] });
+        // 5. 성공/실패 여부와 관계없이 실행 (데이터 무효화)
+        onSettled: (_, __, context) => {
+            if (context) {
+                queryClient.invalidateQueries({ queryKey: ["participants", context.meetingId] });
+                queryClient.invalidateQueries({ queryKey: ["meeting", context.meetingId] });
+                queryClient.invalidateQueries({ queryKey: ["my-meetings"] });
+            }
+        },
+    });
+};
+
+// 개별 거절 Mutation
+export const useRejectParticipation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation<void, AxiosError, { meetingId: number, participationId: number }, MutationContext>({
+        mutationFn: ({ meetingId, participationId }) =>
+            rejectParticipation(meetingId, participationId),
+
+        onMutate: async ({ meetingId, participationId }) => {
+            await queryClient.cancelQueries({ queryKey: ["participants", meetingId] });
+            await queryClient.cancelQueries({ queryKey: ["meeting", meetingId] });
+
+            const previousParticipants = queryClient.getQueryData<Participant[]>(["participants", meetingId]);
+            const previousMeeting = queryClient.getQueryData<MeetingDetail>(["meeting", meetingId]);
+
+            // 낙관적 업데이트: 상태 REJECTED로 변경
+            if (previousParticipants) {
+                queryClient.setQueryData<Participant[]>(["participants", meetingId], (old) =>
+                    old?.map(p => p.participationId === participationId ? { ...p, status: 'REJECTED' } : p)
+                );
+            }
+
+            // 낙관적 업데이트: ACCEPTED에서 REJECTED로 변할 경우만 인원수 -1 (보통 PENDING에서 오므로 생략 가능하나 안전장치로 추가)
+            if (previousMeeting && previousParticipants) {
+                const p = previousParticipants.find(p => p.participationId === participationId);
+                if (p && p.status === 'ACCEPTED') {
+                    queryClient.setQueryData<MeetingDetail>(["meeting", meetingId], (old) =>
+                        old ? { ...old, currentParticipants: old.currentParticipants - 1 } : old
+                    );
+                }
+            }
+
+            return { previousParticipants, previousMeeting, meetingId };
+        },
+
+        onError: (_, __, context) => {
+            if (context) {
+                queryClient.setQueryData(["participants", context.meetingId], context.previousParticipants);
+                queryClient.setQueryData(["meeting", context.meetingId], context.previousMeeting);
+            }
+        },
+
+        onSettled: (_, __, context) => {
+            if (context) {
+                queryClient.invalidateQueries({ queryKey: ["participants", context.meetingId] });
+                queryClient.invalidateQueries({ queryKey: ["meeting", context.meetingId] });
+                queryClient.invalidateQueries({ queryKey: ["my-meetings"] });
+            }
+        },
+    });
+};
+
+// 전체 승인 Mutation
+export const useApproveAllParticipations = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation<void, AxiosError, { meetingId: number }, MutationContext>({
+        mutationFn: ({ meetingId }) => approveAllParticipations(meetingId),
+
+        onMutate: async ({ meetingId }) => {
+            await queryClient.cancelQueries({ queryKey: ["participants", meetingId] });
+            await queryClient.cancelQueries({ queryKey: ["meeting", meetingId] });
+
+            const previousParticipants = queryClient.getQueryData<Participant[]>(["participants", meetingId]);
+            const previousMeeting = queryClient.getQueryData<MeetingDetail>(["meeting", meetingId]);
+
+            // 낙관적 업데이트: 모든 PENDING을 ACCEPTED로 변경
+            if (previousParticipants) {
+                queryClient.setQueryData<Participant[]>(["participants", meetingId], (old) =>
+                    old?.map(p => p.status === 'PENDING' ? { ...p, status: 'ACCEPTED' } : p)
+                );
+            }
+
+            // 낙관적 업데이트: PENDING 수만큼 인원수 증가
+            if (previousMeeting && previousParticipants) {
+                const pendingCount = previousParticipants.filter(p => p.status === 'PENDING').length;
+                if (pendingCount > 0) {
+                    queryClient.setQueryData<MeetingDetail>(["meeting", meetingId], (old) =>
+                        old ? { ...old, currentParticipants: old.currentParticipants + pendingCount } : old
+                    );
+                }
+            }
+
+            return { previousParticipants, previousMeeting, meetingId };
+        },
+
+        onError: (_, __, context) => {
+            if (context) {
+                queryClient.setQueryData(["participants", context.meetingId], context.previousParticipants);
+                queryClient.setQueryData(["meeting", context.meetingId], context.previousMeeting);
+            }
+        },
+
+        onSettled: (_, __, context) => {
+            // 5. 성공/실패 여부와 관계없이 실행 (데이터 무효화)
+            if (context) {
+                queryClient.invalidateQueries({ queryKey: ["participants", context.meetingId] });
+                queryClient.invalidateQueries({ queryKey: ["meeting", context.meetingId] });
+                queryClient.invalidateQueries({ queryKey: ["my-meetings"] });
+            }
+        },
+    });
+};
+
+// 승인 취소 Mutation
+export const useCancelParticipation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation<void, AxiosError, { meetingId: number, participationId: number }, MutationContext>({
+        mutationFn: ({ meetingId, participationId }) =>
+            cancelParticipation(meetingId, participationId),
+
+        onMutate: async ({ meetingId, participationId }) => {
+            await queryClient.cancelQueries({ queryKey: ["participants", meetingId] });
+            await queryClient.cancelQueries({ queryKey: ["meeting", meetingId] });
+
+            const previousParticipants = queryClient.getQueryData<Participant[]>(["participants", meetingId]);
+            const previousMeeting = queryClient.getQueryData<MeetingDetail>(["meeting", meetingId]);
+
+            // 낙관적 업데이트: 상태 PENDING으로 변경
+            if (previousParticipants) {
+                queryClient.setQueryData<Participant[]>(["participants", meetingId], (old) =>
+                    old?.map(p => p.participationId === participationId ? { ...p, status: 'PENDING' } : p)
+                );
+            }
+
+            // 낙관적 업데이트: 인원수 -1
+            if (previousMeeting && previousParticipants) {
+                const p = previousParticipants.find(p => p.participationId === participationId);
+                if (p && p.status === 'ACCEPTED') {
+                    queryClient.setQueryData<MeetingDetail>(["meeting", meetingId], (old) =>
+                        old ? { ...old, currentParticipants: old.currentParticipants - 1 } : old
+                    );
+                }
+            }
+
+            return { previousParticipants, previousMeeting, meetingId };
+        },
+
+        onSettled: (_, __, context) => {
+            if (context) {
+                queryClient.invalidateQueries({ queryKey: ["participants", context.meetingId] });
+                queryClient.invalidateQueries({ queryKey: ["meeting", context.meetingId] });
+                queryClient.invalidateQueries({ queryKey: ["my-meetings"] });
+            }
         },
     });
 };

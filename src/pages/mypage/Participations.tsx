@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import ParticipantCard from "@/components/features/mypage/ParticipantCard";
 import ParticipantSection from "@/components/features/mypage/ParticipantSection";
 import { useParticipationQuery } from "@/hooks/useParticipationQuery";
-import { useUpdateParticipation } from "@/hooks/useParticipateMutations";
+import { useApproveAllParticipations } from "@/hooks/useParticipateMutations";
 
 const Participations = () => {
     const { id } = useParams<{ id: string }>();
@@ -14,7 +14,7 @@ const Participations = () => {
     const [isConfirmedOpen, setIsConfirmedOpen] = useState(true);
     const [isRejectedOpen, setIsRejectedOpen] = useState(false);
     const { data: participants } = useParticipationQuery(meetingId);
-    const { mutate: updateParticipation } = useUpdateParticipation();
+    const { mutate: approveAll } = useApproveAllParticipations();
 
     const waitingParticipants = participants?.filter((participant) => participant.status === "PENDING") || [];
     const confirmedParticipants = participants?.filter((participant) => participant.status === "ACCEPTED") || [];
@@ -35,11 +35,7 @@ const Participations = () => {
                         className="bg-[#FFB800] hover:bg-[#E5A600] text-white font-bold h-8 px-4 rounded-md text-xs border-none shadow-none"
                         onClick={(e) => {
                             e.stopPropagation();
-                            const updates = waitingParticipants.map(p => ({
-                                participationId: p.participationId,
-                                status: "ACCEPTED" as const
-                            }));
-                            updateParticipation({ meetingId, updates });
+                            approveAll({ meetingId });
                         }}
                     >
                         모두승인
