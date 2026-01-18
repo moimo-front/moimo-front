@@ -1,98 +1,136 @@
-import { useEffect, useRef, useState } from "react";
-import { io } from "socket.io-client";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@/store/authStore";
 import type { ChatMessage } from "@/models/chat.model";
 import { createMockSocket } from "@/mock/socketMock";
 
-// Mocking 활성화 조건
+type MockSocketType = ReturnType<typeof createMockSocket>;
+
+// Mocking 설정
 const isMockingEnabled =
   import.meta.env.DEV &&
   (import.meta.env.VITE_ENABLE_MOCK || "true") === "true";
 
+// 소켓 인스턴스 팩토리
+const getSocketInstance = (accessToken: string | null): Socket | MockSocketType | null => {
+  if (isMockingEnabled) {
+    return createMockSocket();
+  }
+
+  if (!accessToken) return null;
+
+  return io(import.meta.env.VITE_SOCKET_URL, {
+    auth: { token: accessToken },
+    transports: ["websocket"],
+    reconnection: true,
+    reconnectionAttempts: 5,
+  });
+};
+
 export const useChatSocket = (
   meetingId: number | null,
-  onNewMessage: (message: ChatMessage) => void,
+  onNewMessage: (message: ChatMessage) => void
 ) => {
   const [initialMessages, setInitialMessages] = useState<ChatMessage[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const socketRef = useRef<any | null>(null);
+
+  const socketRef = useRef<Socket | MockSocketType | null>(null);
+  
+  // 리스너 재등록 방지를 위한 핸들러 Ref
+  const onNewMessageRef = useRef(onNewMessage);
   const { accessToken, userId } = useAuthStore();
 
   useEffect(() => {
-    if (!meetingId) {
-      setInitialMessages([]); // meetingId가 없으면 초기 메시지 초기화
-      return;
-    }
+    onNewMessageRef.current = onNewMessage;
+  }, [onNewMessage]);
 
-    // 목업 환경일 경우 가짜 소켓 사용, 그렇지 않으면 실제 소켓 연결
-    if (isMockingEnabled) {
-      if (!socketRef.current) {
-        socketRef.current = createMockSocket();
-      }
-    } else {
-      if (!accessToken) return;
+  // 1. 소켓 연결 관리 (앱 시작/토큰 변경 시 1회 실행)
+  useEffect(() => {
+    // 싱글턴 유지
+    if (socketRef.current) return;
 
-      socketRef.current = io(import.meta.env.VITE_SOCKET_URL, {
-        auth: { token: accessToken },
-        transports: ["websocket"],
-      });
-    }
+    const socket = getSocketInstance(accessToken);
+    if (!socket) return;
 
-    // 소켓 이벤트 로깅
-    socketRef.current.on("connect", () => {
-      console.log(`Socket connected: ${socketRef.current.id}`);
-      socketRef.current.emit("joinRoom", meetingId, (response: any) => {
-        console.log("방 입장 응답:", response);
-      });
-      console.log(`Socket joined room: ${meetingId}`);
+    socketRef.current = socket;
 
-      // 방 입장 후 메시지 목록 요청
-      socketRef.current.emit("getMessages", meetingId, (response: { meetingId: number, messages: ChatMessage[] }) => {
-        console.log("메시지 목록 응답:", response);
-        setInitialMessages(response.messages);
-      });
+    // --- 공통 이벤트 리스너 등록 ---
+    socket.on("connect", () => {
+      console.log(`Socket connected: ${socket.id}`);
     });
 
-    socketRef.current.on("disconnect", (reason: string) => {
+    socket.on("disconnect", (reason: string) => {
       console.log(`Socket disconnected: ${reason}`);
     });
 
-    socketRef.current.on("connect_error", (error: Error) => {
+    socket.on("connect_error", (error: Error) => {
       console.error("Socket connection error:", error);
     });
 
-    // newMessage 리스너는 connect 이벤트와 독립적으로 유지
-    socketRef.current.on("newMessage", (message: ChatMessage) => {
+    // 메시지 수신 리스너 (전역적으로 한 번만 등록)
+    socket.on("newMessage", (message: ChatMessage) => {
       console.log("New message received:", message);
-      onNewMessage(message);
+      if (onNewMessageRef.current) {
+        onNewMessageRef.current(message);
+      }
     });
 
+    // 컴포넌트가 언마운트되거나 토큰이 아예 바뀔 때만 연결 해제
     return () => {
       if (socketRef.current) {
+        console.log("Cleaning up socket connection...");
         socketRef.current.disconnect();
-        console.log("Socket disconnected");
         socketRef.current = null;
       }
     };
-  }, [meetingId, accessToken, onNewMessage]);
+  }, [accessToken]);
 
-  const sendMessage = (content: string) => {
+  // 2. 방 입장 및 데이터 조회 (meetingId가 바뀔 때 실행)
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket || !meetingId) {
+      setInitialMessages([]);
+      return;
+    }
+
+    console.log(`Switching to room: ${meetingId}`);
+
+    // 방 입장 요청
+    socket.emit("joinRoom", meetingId, (response: any) => {
+      console.log(`방 ${meetingId} 입장 응답:`, response);
+    });
+
+    // 메시지 목록 요청
+    socket.emit(
+      "getMessages",
+      meetingId,
+      (response: { meetingId: number; messages: ChatMessage[] }) => {
+        console.log("메시지 목록 응답:", response);
+        if (response && response.messages) {
+          setInitialMessages(response.messages);
+        }
+      }
+    );
+    
+  }, [meetingId]); // meetingId가 바뀔 때만 실행됨
+
+  // 메시지 전송 함수
+  const sendMessage = useCallback((content: string) => {
     if (socketRef.current && meetingId && (userId || isMockingEnabled)) {
       const payload = {
         meetingId,
         content,
       };
       console.log("Emitting sendMessage with payload:", payload);
+      
       socketRef.current.emit("sendMessage", payload, (response: any) => {
         console.log("메시지 전송 응답:", response);
-        // 여기서 응답으로 받은 메시지 ID 등을 활용하여 낙관적 업데이트 메시지 대체 가능
       });
     } else {
       console.error(
-        "Cannot send message: Missing socket, meetingId, or userId",
+        "Cannot send message: Missing socket, meetingId, or userId"
       );
     }
-  };
+  }, [meetingId, userId]);
 
   return { initialMessages, sendMessage };
 };
