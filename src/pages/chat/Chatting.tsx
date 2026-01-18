@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/authStore";
 import { Separator } from "@/components/ui/separator";
 import ChatMessageItem from "@/components/features/chattings/ChatMessage";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FaArrowLeft } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
-import { getChatRooms } from "@/api/chat.api"; // getMessages 제거됨
+import { getChatRooms } from "@/api/chat.api";
 import { useChatSocket } from "@/hooks/useChatSocket";
 import type { ChatRoom, ChatMessage } from "@/models/chat.model";
 
@@ -17,10 +17,9 @@ const Chatting = () => {
   const [selectedMeeting, setSelectedMeeting] = useState<ChatRoom | null>(null);
   const [inputValue, setInputValue] = useState("");
   
-  // [수정 1] 화면에 보여줄 메시지 목록 상태 관리
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  
   const scrollRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
   // 1. 채팅방 목록 조회 (Left Panel)
   const { data: chatRooms } = useQuery({
@@ -28,21 +27,55 @@ const Chatting = () => {
     queryFn: getChatRooms,
   });
 
-  // [수정 2] 새 메시지 수신 핸들러 (useCallback으로 메모이제이션)
-  const handleNewMessage = useCallback((newMessage: ChatMessage) => {
-    // 현재 보고 있는 방의 메시지인지 확인 (혹은 훅에서 필터링 된 것을 가정하고 추가)
-    setMessages((prev) => [...prev, newMessage]);
-  }, []);
+  const handleNewMessage = useCallback(
+    (newMessage: ChatMessage) => {
+      // 1. 현재 보고 있는 채팅방에 새 메시지 추가
+      if (newMessage.meetingId === selectedMeeting?.meetingId) {
+        setMessages((prev) => [...prev, newMessage]);
+      }
 
-  // [수정 3] 소켓 Hook 연결 (API 호출 없이 훅만 사용)
-  const { initialMessages, sendMessage } = useChatSocket(
-    selectedMeeting?.meetingId || null,
-    handleNewMessage
+      // 2. 'chatRooms' 쿼리 데이터(왼쪽 채팅방 목록)를 직접 업데이트
+      queryClient.setQueryData<ChatRoom[]>(["chatRooms"], (oldData) => {
+        if (!oldData) return [];
+        
+        // 최신 메시지를 받은 채팅방을 찾아 lastMessage 정보 업데이트
+        const updatedData = oldData.map((room) => {
+          if (room.meetingId === newMessage.meetingId) {
+            return {
+              ...room,
+              lastMessage: {
+                content: newMessage.content,
+                createdAt: newMessage.createdAt,
+                sender: newMessage.sender.nickname,
+              },
+            };
+          }
+          return room;
+        });
+
+        // 해당 채팅방을 목록의 맨 위로 이동
+        const targetRoomIndex = updatedData.findIndex(room => room.meetingId === newMessage.meetingId);
+        if (targetRoomIndex > 0) {
+          const targetRoom = updatedData.splice(targetRoomIndex, 1)[0];
+          updatedData.unshift(targetRoom);
+        }
+
+        return updatedData;
+      });
+    },
+    [queryClient, selectedMeeting?.meetingId],
   );
 
-  // [수정 4] 방 이동 시 초기 메시지 로드 (훅에서 받아온 initialMessages 동기화)
+  const { initialMessages, sendMessage } = useChatSocket(
+    selectedMeeting?.meetingId || null,
+    handleNewMessage,
+  );
+
+  // 방을 바꿀 때마다 `useChatSocket`으로부터 받은 초기 메시지로 화면 상태를 동기화
   useEffect(() => {
-    setMessages(initialMessages);
+    if (initialMessages) {
+      setMessages(initialMessages);
+    }
   }, [initialMessages]);
 
   // 스크롤 제어 (메시지 추가될 때마다 하단으로)
@@ -68,7 +101,7 @@ const Chatting = () => {
 
   return (
     <div className="flex flex-row h-screen bg-background pt-16">
-      {/* [왼쪽 패널] 채팅방 목록 - 기존과 동일 */}
+      {/* [왼쪽 패널] 채팅방 목록*/}
       <div className={`${selectedMeeting ? "hidden lg:flex" : "flex"} w-full lg:w-[30%] min-w-[300px] flex-col h-full border-r`}>
         <div className="p-4 font-semibold shrink-0">
           {nickname ? `${nickname} 님의 채팅` : "로그인이 필요합니다"}
@@ -100,7 +133,7 @@ const Chatting = () => {
             {/* 헤더 */}
             <div className="p-4 border-b shrink-0 flex items-center gap-3">
               <FaArrowLeft 
-                className="cursor-pointer text-xl lg:hidden" 
+                className="cursor-pointer text-xl" 
                 onClick={() => setSelectedMeeting(null)} 
               />
               <div>
