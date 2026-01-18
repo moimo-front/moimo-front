@@ -1,9 +1,10 @@
 import { setupWorker } from "msw/browser";
 import { authHandler } from "./authHandler";
 import { meetingHandler } from "./meetingHandler";
-import { getInterests } from './interestHandler';
-import { getMyMeetings } from './meHandler';
-import { userInfoHandler } from './userInfoHandler';
+import { getInterests } from "./interestHandler";
+import { getMyMeetings } from "./meHandler";
+import { userInfoHandler } from "./userInfoHandler";
+import { chatHandler } from "./chatHandler";
 import { participationHandlers } from "./participationHandler";
 
 const handlers = [
@@ -12,6 +13,7 @@ const handlers = [
   getMyMeetings,
   ...userInfoHandler,
   ...meetingHandler,
+  ...chatHandler,
   ...participationHandlers,
 ];
 

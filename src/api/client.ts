@@ -87,3 +87,8 @@ export const createClient = (config?: AxiosRequestConfig) => {
 }
 
 export const apiClient = createClient();
+
+// Chat API를 위한 별도 클라이언트
+export const chatApiClient = createClient({
+    baseURL: 'https://moimo-back.onrender.com'
+});
