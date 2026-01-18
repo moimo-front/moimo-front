@@ -9,6 +9,7 @@ import FormField from "@components/common/FormField";
 import { useCreateMeetingMutation, useUpdateMeetingMutation } from "@/hooks/useMeetingMutations";
 import { useMeetingQuery } from "@/hooks/useMeetingQuery";
 import DateTimePicker from "@components/common/DateTimePicker";
+import KakaoMapSearch from "@/components/common/kakaoMaps/KakaoMapSearch";
 import { Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Meeting } from "@/models/meeting.model";
@@ -19,7 +20,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import type { PlaceInfo } from "@/models/kakao-maps.model";
 
 // Zod 스키마 정의
 const meetingSchema = z.object({
@@ -133,20 +136,26 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
     if (!file) return;
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      alert("지원하는 이미지 형식만 업로드할 수 있어요 (JPG, PNG, WebP, GIF)");
+      toast.error("지원하는 이미지 형식만 업로드할 수 있어요", {
+        description: "JPG, PNG, WebP, GIF 형식만 가능합니다"
+      });
       e.target.value = "";
       return;
     }
 
     const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(file.name);
     if (hasKorean) {
-      alert("이미지 파일명이 한글인 경우에는 업로드할 수 없어요. 영문으로 변경해주세요");
+      toast.error("이미지 파일명이 한글인 경우 업로드할 수 없어요", {
+        description: "파일명을 영문으로 변경해주세요"
+      });
       e.target.value = "";
       return;
     }
 
     if (file.size > MAX_IMAGE_SIZE) {
-      alert("이미지는 4.5MB 이하만 업로드할 수 있어요");
+      toast.error("이미지 크기가 너무 큽니다", {
+        description: "4.5MB 이하의 이미지만 업로드 가능합니다"
+      });
       e.target.value = "";
       return;
     }
@@ -157,6 +166,12 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
     };
     reader.readAsDataURL(file);
   };
+
+  // 장소 선택 핸들러
+  const handlePlaceSelect = (place: PlaceInfo) => {
+    setValue("address", place.roadAddress || place.address, { shouldValidate: true });
+  };
+
   // 관심사 토글
   const toggleInterest = (interestId: number) => {
     setValue(
@@ -219,7 +234,7 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
           id: mid,
           data: formData
         });
-        alert("모임이 수정되었습니다!");
+        toast.success("모임이 수정되었습니다!");
         onOpenChange(false);
       } else {
         const createdMeeting = await createMeetingMutation.mutateAsync(
@@ -239,7 +254,9 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
         ? serverMessage.join("\n")
         : serverMessage;
 
-      alert(displayMessage || "모임 생성에 실패했습니다. 입력 정보를 확인해주세요.");
+      toast.error("모임 생성에 실패했습니다", {
+        description: displayMessage || "입력 정보를 확인해주세요"
+      });
     }
   };
 
@@ -285,7 +302,7 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
                   <Textarea
                     id="description"
                     {...register("description")}
-                    placeholder="모임에 대해 자유롭게 설명해주세요! (4000자 이내)&#10;ex) 모임의 개성적인 특징, 모임의 의의, 참여자가 가지면 좋은 마인드, 지켜야 할 사항"
+                    placeholder="모임에 대해 자유롭게 설명해주세요! (4000자 이내)&#10;ex) (필수) 모임의 정확한 위치, 개성적인 특징, 참여자가 가지면 좋은 마인드, 지켜야 할 사항"
                     className="min-h-[120px] resize-none"
                   />
                   {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>}
@@ -366,12 +383,13 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
                 </FormField>
 
                 {/* 모임 장소 */}
-                <FormField label="모임 장소" htmlFor="address">
-                  <Input
-                    id="address"
-                    {...register("address")}
-                    placeholder="초행길인 사람도 이해하기 쉽도록 장소를 가능한 상세하게 설명해주세요."
-                    className="h-12"
+                <FormField
+                  label="모임 장소"
+                  description="카카오맵에서 장소를 검색하여 선택해주세요"
+                >
+                  <KakaoMapSearch
+                    onPlaceSelect={handlePlaceSelect}
+                    defaultValue={watch("address")}
                   />
                   {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address.message}</p>}
                 </FormField>

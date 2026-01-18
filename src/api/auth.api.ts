@@ -7,6 +7,7 @@ import type { ResetPasswordFormValues } from "@/pages/user/ResetPassword";
 
 export interface LoginResponse {
   user: {
+    id: number;
     isNewUser: boolean;
     email: string;
     nickname: string;

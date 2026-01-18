@@ -59,7 +59,9 @@ const JoinedMeeting = () => {
                                         <Button disabled className="bg-orange-200 text-white hover:bg-orange-200 border-none shadow-none disabled:opacity-100 disabled:bg-orange-200">승인 대기중</Button>
                                     )}
                                     {(meeting.status === 'ACCEPTED' || meeting.isCompleted) && (
-                                        <Button className="bg-yellow-400 hover:bg-yellow-500 text-white border-none shadow-none">채팅</Button>
+                                        <Link to="/chats" state={{ meetingId: meeting.meetingId }}>
+                                            <Button className="bg-yellow-400 hover:bg-yellow-500 text-white border-none shadow-none">채팅</Button>
+                                        </Link>
                                     )}
                                 </>
                             </SmallMeetingCard>

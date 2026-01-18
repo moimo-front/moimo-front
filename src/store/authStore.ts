@@ -1,13 +1,17 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface StoreState {
-    isLoggedIn: boolean;
-    nickname: string | null;
-    accessToken: string | null;
-    storeLogin: (nickname: string, accessToken: string) => void;
-    storeLogout: () => void;
-    setAccessToken: (token: string) => void;
+  isLoggedIn: boolean;
+  userId: number | null;
+  nickname: string | null;
+  accessToken: string | null;
+  storeLogin: (
+    user: { id: number; nickname: string },
+    accessToken: string
+  ) => void;
+  storeLogout: () => void;
+  setAccessToken: (token: string) => void;
 }
 
 // export const useAuthStore = create<StoreState>((set) => ({
@@ -22,19 +26,35 @@ interface StoreState {
 // }));
 
 export const useAuthStore = create<StoreState>()(
-    persist(
-        (set) => ({
-            isLoggedIn: false,
-            nickname: null,
-            accessToken: null,
-            storeLogin: (nickname: string, accessToken: string) => set({ isLoggedIn: true, nickname, accessToken }),
-            storeLogout: () => set({ isLoggedIn: false, nickname: null, accessToken: null }),
-            setAccessToken: (accessToken: string) => {
-                set(() => ({ accessToken }));
-            }
+  persist(
+    (set) => ({
+      isLoggedIn: false,
+      userId: null,
+      nickname: null,
+      accessToken: null,
+      storeLogin: (
+        user: { id: number; nickname: string },
+        accessToken: string
+      ) =>
+        set({
+          isLoggedIn: true,
+          userId: user.id,
+          nickname: user.nickname,
+          accessToken,
         }),
-        {
-            name: 'auth-storage',
-        }
-    )
+      storeLogout: () =>
+        set({
+          isLoggedIn: false,
+          userId: null,
+          nickname: null,
+          accessToken: null,
+        }),
+      setAccessToken: (accessToken: string) => {
+        set(() => ({ accessToken }));
+      },
+    }),
+    {
+      name: "auth-storage",
+    }
+  )
 );

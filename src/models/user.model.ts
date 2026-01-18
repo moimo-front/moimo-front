@@ -18,9 +18,9 @@ export type UserInfo = Partial<User> & {
 }
 
 export interface SocialAccounts {
-    id: number;
-    googleSubId: string;
-    userId: number;
-    createdAt: Date;
-    updatedAt?: Date;
+  id: number;
+  googleSubId: string;
+  userId: number;
+  createdAt: Date;
+  updatedAt?: Date;
 }

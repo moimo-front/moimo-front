@@ -16,6 +16,7 @@ import MoimerIntro from "@/pages/moimer/MoimerIntro";
 import UserInfo from "@/pages/user/UserInfo";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Interests from "@/pages/interests/Interests";
+import Chatting from "@/pages/chat/Chatting";
 
 export const routeList = [
   {
@@ -60,11 +61,16 @@ export const routeList = [
         element: <MoimerIntro />,
       },
       {
+        path: "/chats",
+        element: <Chatting />,
+      },
+      {
         path: "/mypage",
-        element:
+        element: (
           <ProtectedRoute>
             <MypageSession />,
-          </ProtectedRoute>,
+          </ProtectedRoute>
+        ),
         children: [
           {
             index: true,

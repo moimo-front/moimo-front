@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -20,8 +20,8 @@ import type { UserInfo } from "@/models/user.model";
 import defaultProfile from "@/assets/images/profile.png";
 
 const profileSchema = z.object({
-    bio: z.string().max(100, "자기소개는 100자 이내로 입력해주세요."),
-    interests: z.array(z.number()).min(3, "관심사를 3개 이상 선택해주세요!"),
+  bio: z.string().max(100, "자기소개는 100자 이내로 입력해주세요."),
+  interests: z.array(z.number()).min(3, "관심사를 3개 이상 선택해주세요!"),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;

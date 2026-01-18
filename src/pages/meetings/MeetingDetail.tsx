@@ -10,6 +10,8 @@ import type { MeetingDetail } from "@/models/meeting.model";
 import moimoMeeting from "@/assets/images/moimo-meetings.png";
 import { useAuthStore } from "@/store/authStore";
 import LoginRequiredDialog from "@/components/common/LoginRequiredDialog";
+import KakaoMapView from "@/components/common/kakaoMaps/KakaoMapView";
+import { toast } from "sonner";
 
 function MeetingDetailPage() {
   const { meetingId } = useParams<{ meetingId: string }>();
@@ -67,7 +69,7 @@ function MeetingDetailPage() {
 
     // TODO: 로그인 상태면 신청 모달 표시
     console.log("Join meeting:", meetingId);
-    alert("신청 기능은 곧 추가될 예정입니다!");
+    toast.info("신청 기능은 곧 추가될 예정입니다!");
   };
 
   console.log("🎯 렌더링 상태:", { isLoading, error, meetingDetail: !!meetingDetail });
@@ -221,17 +223,18 @@ function MeetingDetailPage() {
             <CardTitle className="text-base font-bold">여기에서 만나요!</CardTitle>
           </CardHeader>
           <CardContent className="pt-0 pb-4">
-            <div className="w-full h-48 bg-muted rounded-lg overflow-hidden relative">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <IoLocationOutline className="text-4xl text-primary mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    {meetingDetail.location.address}
-                  </p>
-                </div>
-              </div>
-              {/* 추후 카카오 맵으로 교체 예정 */}
+            <div className="w-full h-64 bg-muted rounded-lg overflow-hidden">
+              <KakaoMapView
+                lat={meetingDetail.location.lat}
+                lng={meetingDetail.location.lng}
+                placeName={meetingDetail.location.address}
+                level={3}
+              />
             </div>
+            <p className="text-sm text-muted-foreground mt-3 flex items-center gap-2">
+              <IoLocationOutline className="text-lg text-primary" />
+              {meetingDetail.location.address}
+            </p>
           </CardContent>
         </Card>
 

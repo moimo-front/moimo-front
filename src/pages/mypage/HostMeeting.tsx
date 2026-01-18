@@ -46,7 +46,9 @@ const HostMeeting = () => {
                                         <Pencil className="w-4 h-4 text-yellow-500" />
                                         수정
                                     </Button>
-                                    <Button className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold border-none shadow-none">채팅</Button>
+                                    <Link to="/chats" state={{ meetingId: meeting.meetingId }}>
+                                        <Button className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold border-none shadow-none">채팅</Button>
+                                    </Link>
                                 </div>
                             </SmallMeetingCard>
                         ))}
