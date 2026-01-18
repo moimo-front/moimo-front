@@ -7,19 +7,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { IoIosNotifications } from "react-icons/io";
 
 export const NotificationDropdown = () => {
-  const notificationAvatarUrl = "";
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full">
           <Avatar>
-            <AvatarImage
-              src={notificationAvatarUrl}
-              alt="Notification Avatar"
-            />
-            <AvatarFallback>알림</AvatarFallback>
+            <AvatarImage alt="Notification Avatar" />
+            <AvatarFallback>
+              <IoIosNotifications />
+            </AvatarFallback>
           </Avatar>
         </button>
       </DropdownMenuTrigger>

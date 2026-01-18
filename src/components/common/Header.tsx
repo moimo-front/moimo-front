@@ -35,12 +35,12 @@ function Header() {
         </Button>
       </div>
       {isLoggedIn ? (
-        <div className="ml-auto flex items-center gap-8">
+        <div className="ml-auto flex items-center gap-8 pr-4">
           <NotificationDropdown />
           <ProfileDropdown />
         </div>
       ) : (
-        <div className="login ml-auto">
+        <div className="login ml-auto pr-4">
           <Button
             asChild
             size="default"

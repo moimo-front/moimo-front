@@ -176,18 +176,12 @@ export interface VerifyUserResponse {
   email: string;
   nickname: string;
   bio: string;
-  profile_image: string;
+  profileImage: string;
   interests: {
     id: number;
-    email: string;
-    nickname: string;
-    bio: string;
-    profileImage: string;
-    interests: {
-        id: number;
-        name: string;
-    }[];
-    accessToken: string;
+    name: string;
+  }[];
+  accessToken: string;
 }
 
 // 사용자 인증

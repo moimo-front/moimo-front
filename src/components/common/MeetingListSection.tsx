@@ -8,7 +8,7 @@ import { Skeleton } from "../ui/skeleton";
 interface MeetingListSectionProps {
   title: string;
   queryOptions: GetMeetingsParams;
-  seeMoreHref: string;
+  seeMoreHref?: string;
 }
 
 function MeetingListSection({
@@ -31,9 +31,11 @@ function MeetingListSection({
     <div className="w-full max-w-6xl mx-auto py-8">
       <div className="flex justify-between w-full mb-4">
         <div className="text-xl font-bold">{finalTitle}</div>
-        <Link to={seeMoreHref} className="text-sm cursor-pointer">
-          전체보기
-        </Link>
+        {seeMoreHref && (
+          <Link to={seeMoreHref} className="text-sm cursor-pointer">
+            전체보기
+          </Link>
+        )}
       </div>
       {isLoading && (
         <div className="grid grid-cols-4 gap-4 justify-items-center">
