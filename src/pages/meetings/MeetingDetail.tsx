@@ -3,8 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Users } from "lucide-react";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { getMeetingById } from "@/api/meeting.api";
-import type { MeetingDetail } from "@/models/meeting.model";
 import moimoMeeting from "@/assets/images/moimo-meetings.png";
 import { useAuthStore } from "@/store/authStore";
 import LoginRequiredDialog from "@/components/features/login/LoginRequiredDialog";
@@ -13,6 +11,7 @@ import { toast } from "sonner";
 import CreateMeetingModal from "@/components/features/meetings/CreateMeetingModal";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { useJoinMeetingMutation } from "@/hooks/useMeetingMutations";
+import { useMeetingQuery } from "@/hooks/useMeetingQuery";
 import { useMeQuery } from "@/hooks/useMeQuery";
 import MeetingActionButtons from "@/components/features/meetings/MeetingActionButtons";
 import { formatMeetingDate } from "@/utils/dateFormat";
@@ -29,9 +28,7 @@ function MeetingDetailPage() {
     window.scrollTo(0, 0);
   }, []);
 
-  const [meetingDetail, setMeetingDetail] = useState<MeetingDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: meetingDetail, isLoading, error } = useMeetingQuery(Number(meetingId));
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [showExpandButton, setShowExpandButton] = useState(false);
   const descriptionRef = useRef<HTMLDivElement>(null);
@@ -72,28 +69,6 @@ function MeetingDetailPage() {
     }
   }, [meetingId, pendingMeetings]);
 
-  useEffect(() => {
-    const fetchMeetingDetail = async () => {
-      if (!meetingId) {
-        console.log("meetingId가 없습니다");
-        return;
-      }
-      try {
-        setIsLoading(true);
-        const response = await getMeetingById(meetingId);
-        setMeetingDetail(response); // response 자체가 MeetingDetail
-        setError(null);
-      } catch (err: any) {
-        console.error("API 에러:", err);
-        console.error("에러 응답:", err.response?.data);
-        setError(err.response?.data?.message || "모임 정보를 불러오는데 실패했습니다.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMeetingDetail();
-  }, [meetingId]);
 
   // 설명 텍스트 높이 확인
   useEffect(() => {
@@ -147,7 +122,7 @@ function MeetingDetailPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg text-destructive">
-          {error || "모임을 찾을 수 없습니다."}
+          {error ? (error as Error).message : "모임을 찾을 수 없습니다."}
         </div>
       </div>
     );
