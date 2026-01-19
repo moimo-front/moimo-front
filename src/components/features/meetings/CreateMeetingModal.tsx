@@ -307,13 +307,15 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
             </div>
           </DialogHeader>
 
-          <div className="overflow-y-auto px-6 pb-6 scrollbar-hide">
-            {(isMeetingLoading || !isFormReady) ? (
+          {(isMeetingLoading || !isFormReady) ? (
+            <div className="overflow-y-auto px-6 pb-6 scrollbar-hide">
               <div className="flex h-[400px] items-center justify-center">
                 <LoadingSpinner />
               </div>
-            ) : (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-4">
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col min-h-0">
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 scrollbar-hide">
                 {/* 모임명 */}
                 <FormField label="모임명" htmlFor="title">
                   <Input
@@ -442,31 +444,32 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
                   </div>
                   {errors.maxParticipants && <p className="text-xs text-red-500 mt-1">{errors.maxParticipants.message}</p>}
                 </FormField>
-                {/* Buttons */}
-                <div className="flex gap-3 mt-6">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => onOpenChange(false)}
-                    className="flex-1 h-12"
-                    disabled={createMeetingMutation.isPending || updateMeetingMutation.isPending}
-                  >
-                    취소
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground"
-                    disabled={!isValid || createMeetingMutation.isPending || updateMeetingMutation.isPending}
-                  >
-                    {meeting ?
-                      (updateMeetingMutation.isPending ? "수정 중..." : "수정하기") :
-                      (createMeetingMutation.isPending ? "신청 중..." : "신청하기")
-                    }
-                  </Button>
-                </div>
-              </form>
-            )}
-          </div>
+              </div>
+
+              {/* Fixed Footer Buttons */}
+              <div className="shrink-0 px-6 py-4 border-t bg-card flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  className="flex-1 h-12"
+                  disabled={createMeetingMutation.isPending || updateMeetingMutation.isPending}
+                >
+                  취소
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground"
+                  disabled={!isValid || createMeetingMutation.isPending || updateMeetingMutation.isPending}
+                >
+                  {meeting ?
+                    (updateMeetingMutation.isPending ? "수정 중..." : "수정하기") :
+                    (createMeetingMutation.isPending ? "신청 중..." : "신청하기")
+                  }
+                </Button>
+              </div>
+            </form>
+          )}
         </DialogContent>
       </Dialog>
 

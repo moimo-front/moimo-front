@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ParticipantCard from "@/components/features/mypage/ParticipantCard";
 import ParticipantSection from "@/components/features/mypage/ParticipantSection";
 import { useParticipationsQuery } from "@/hooks/useParticipationsQuery";
 import { useApproveAllParticipations } from "@/hooks/useParticipateMutations";
+import { UserCheck, ChevronLeft } from "lucide-react";
 
 const Participations = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,6 +16,11 @@ const Participations = () => {
   const [isRejectedOpen, setIsRejectedOpen] = useState(false);
   const { data: participants } = useParticipationsQuery(meetingId);
   const { mutate: approveAll } = useApproveAllParticipations();
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate(-1);
+  };
 
   const waitingParticipants = participants?.filter((participant) => participant.status === "PENDING") || [];
   const confirmedParticipants = participants?.filter((participant) => participant.status === "ACCEPTED") || [];
@@ -22,7 +28,16 @@ const Participations = () => {
 
   return (
     <div className="w-full h-full p-10 bg-white overflow-y-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">모이미 관리</h1>
+      <div className="flex items-center gap-2 mb-8">
+        <button
+          onClick={handleBack}
+          className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+          aria-label="뒤로 가기"
+        >
+          <ChevronLeft className="w-8 h-8 text-gray-900" />
+        </button>
+        <h1 className="text-2xl font-bold text-gray-900">모이미 관리</h1>
+      </div>
 
       {/* 참여 대기 멤버 섹션 */}
       <ParticipantSection
@@ -32,12 +47,14 @@ const Participations = () => {
         onToggle={() => setIsWaitingOpen(!isWaitingOpen)}
         actionButton={
           <Button
-            className="bg-[#FFB800] hover:bg-[#E5A600] text-white font-bold h-8 px-4 rounded-md text-xs border-none shadow-none"
+            variant="outline"
+            className="border-2 border-[#FFB800] text-[#FFB800] hover:bg-[#FFB800]/10 font-semibold h-10 px-4 rounded-md text-xs shadow-none gap-2"
             onClick={(e) => {
               e.stopPropagation();
               approveAll({ meetingId });
             }}
           >
+            <UserCheck className="w-3 h-3" fill="currentColor" />
             모두승인
           </Button>
         }

@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import type { ParticipationDetail } from "@/models/participation.model";
 import {
   useApproveParticipation,
@@ -11,6 +10,7 @@ import {
 import { useState } from "react";
 import ProfileModal from "./ProfileModal";
 import defaultProfile from "@/assets/images/profile.png";
+import MeetingActionButtons from "@/components/features/meetings/MeetingActionButtons";
 
 interface ParticipantCardProps {
   meetingId: number;
@@ -51,40 +51,15 @@ const ParticipantCard = ({ meetingId, participant }: ParticipantCardProps) => {
           <span className="text-lg font-medium text-gray-700">{participant.nickname}</span>
         </div>
       </div>
-      <div className="flex gap-2">
-        {participant.status === "PENDING" && (
-          <>
-            <Button
-              className="bg-[#FF8A8A] hover:bg-[#FF7070] text-white font-bold h-9 px-6 rounded-lg border-none shadow-none text-base"
-              onClick={handleReject}
-            >
-              거절
-            </Button>
-            <Button
-              className="bg-[#FFB800] hover:bg-[#E5A600] text-white font-bold h-9 px-6 rounded-lg border-none shadow-none text-base"
-              onClick={handleApprove}
-            >
-              승인
-            </Button>
-          </>
-        )}
-        {participant.status === "ACCEPTED" && (
-          <Button
-            className="bg-gray-400 hover:bg-gray-500 text-white font-bold h-9 px-6 rounded-lg border-none shadow-none text-base"
-            onClick={handleCancel}
-          >
-            승인취소
-          </Button>
-        )}
-        {participant.status === "REJECTED" && (
-          <Button
-            className="bg-blue-400 hover:bg-blue-500 text-white font-bold h-9 px-6 rounded-lg border-none shadow-none text-base"
-            onClick={handleReset}
-          >
-            거절취소
-          </Button>
-        )}
-      </div>
+      <MeetingActionButtons
+        meetingId={meetingId}
+        role="applicant"
+        applicantStatus={participant.status}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        onCancelApproval={handleCancel}
+        onCancelReject={handleReset}
+      />
 
       <ProfileModal
         isOpen={isModalOpen}

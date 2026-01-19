@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, MessageCircle, X, RotateCcw, UserCheck, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import FixedBottomButton from "@/components/common/FixedBottomButton";
 
 interface MeetingActionButtonsProps {
   meetingId: number;
-  role: "host" | "participant";
-  location?: "detail-mid" | "detail-bottom" | "detail-top" | "hosting-list";
+  role: "host" | "participant" | "applicant";
+  location?: "detail-mid" | "detail-bottom" | "detail-top" | "hosting-list" | "joined-list";
 
   // 호스트 전용
   onEdit?: () => void;
@@ -18,6 +18,13 @@ interface MeetingActionButtonsProps {
   isLoggedIn?: boolean;
   onJoin?: () => void;
   onChat?: () => void;
+
+  // 신청자 관리 전용 (호스트가 신청자를 관리할 때)
+  applicantStatus?: "PENDING" | "ACCEPTED" | "REJECTED";
+  onApprove?: () => void;
+  onReject?: () => void;
+  onCancelApproval?: () => void;
+  onCancelReject?: () => void;
 }
 
 function MeetingActionButtons({
@@ -31,6 +38,11 @@ function MeetingActionButtons({
   isLoggedIn = false,
   onJoin,
   onChat,
+  applicantStatus,
+  onApprove,
+  onReject,
+  onCancelApproval,
+  onCancelReject,
 }: MeetingActionButtonsProps) {
   const navigate = useNavigate();
 
@@ -50,15 +62,17 @@ function MeetingActionButtons({
         <div className="flex gap-2">
           <Button
             onClick={handleManageClick}
-            className="flex-[3] h-16 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors text-base font-medium"
+            className="flex-[3] h-16 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors text-base font-semibold gap-3"
           >
+            <Users className="w-5 h-5" fill="currentColor" />
             승인 요청 목록 보기
           </Button>
           <Button
             onClick={handleChatClick}
             variant="outline"
-            className="flex-[2] h-16  py-2.5 rounded-md transition-colors text-base font-medium"
+            className="flex-[2] h-16 py-2.5 rounded-md transition-colors text-base font-semibold gap-2 border-[1.5px]"
           >
+            <MessageCircle className="w-5 h-5 text-yellow-500" fill="currentColor" />
             채팅
           </Button>
         </div>
@@ -83,9 +97,9 @@ function MeetingActionButtons({
               variant="outline"
               size="sm"
               onClick={onEdit}
-              className="gap-2 border-yellow-400"
+              className="gap-2 border-[1.5px] border-yellow-400 font-semibold"
             >
-              <Pencil className="h-4 w-4 text-yellow-500" />
+              <Pencil className="h-4 w-4 text-yellow-500" fill="currentColor" />
               수정
             </Button>
           )}
@@ -94,7 +108,7 @@ function MeetingActionButtons({
               variant="outline"
               size="sm"
               onClick={onDelete}
-              className="gap-2 border-red-500 text-red-600 hover:bg-red-50"
+              className="gap-2 border-[1.5px] border-red-500 text-red-600 hover:bg-red-50 font-semibold"
             >
               <Trash2 className="h-4 w-4" />
               삭제
@@ -110,8 +124,9 @@ function MeetingActionButtons({
         <Button
           variant="outline"
           onClick={handleManageClick}
-          className="border-yellow-400 text-gray-900 shadow-none"
+          className="h-10 border-[1.5px] border-yellow-400 text-gray-900 shadow-none font-semibold gap-2 hover:bg-yellow-50"
         >
+          <Users className="w-4 h-4 text-yellow-500" fill="currentColor" />
           모이미 관리
         </Button>
 
@@ -119,30 +134,81 @@ function MeetingActionButtons({
           <Button
             variant="outline"
             onClick={onEdit}
-            className="border-yellow-400 text-gray-900 shadow-none"
+            className="h-10 border-[1.5px] border-yellow-400 text-gray-900 hover:bg-yellow-50 shadow-none font-semibold"
           >
-            <Pencil className="w-4 h-4 text-yellow-500" />
+            <Pencil className="w-4 h-4 text-yellow-500 " fill="currentColor" />
             수정
           </Button>
         )}
 
+
+
+        <Button
+          variant="outline"
+          onClick={handleChatClick}
+          className="h-10 border-[1.5px] border-yellow-400 text-gray-900 shadow-none gap-2 font-semibold"
+        >
+          <MessageCircle className="w-4 h-4 text-yellow-500" fill="currentColor" />
+          채팅
+        </Button>
         {onDelete && (
           <Button
             variant="outline"
             onClick={onDelete}
-            className="border-red-500 text-red-600 hover:bg-red-50 shadow-none"
+            className="h-10 border-[1.5px] border-red-500 text-red-600 hover:bg-red-50 shadow-none font-semibold"
           >
             <Trash2 className="w-4 h-4" />
             삭제
           </Button>
         )}
+      </div>
+    );
+  }
 
-        <Button
-          onClick={handleChatClick}
-          className="bg-yellow-400 hover:bg-yellow-500 text-gray font-bold border-none shadow-none"
-        >
-          채팅
-        </Button>
+  // 내 모임 관리 (거절, 승인, 승인취소, 거절취소)
+  if (role === "applicant") {
+    return (
+      <div className="flex gap-2">
+        {applicantStatus === "PENDING" && (
+          <>
+            <Button
+              variant="outline"
+              className="h-10 border-[1.5px] border-[#FF8A8A] text-[#FF8A8A] font-semibold hover:bg-[#FF8A8A]/10 shadow-none gap-2"
+              onClick={onReject}
+            >
+              <X className="w-4 h-4" fill="currentColor" />
+              거절
+            </Button>
+            <Button
+              variant="outline"
+              className="h-10 border-[1.5px] border-[#FFB800] text-[#FFB800] hover:bg-[#FFB800]/10 shadow-none gap-2 font-semibold"
+              onClick={onApprove}
+            >
+              <UserCheck className="w-4 h-4" fill="currentColor" />
+              승인
+            </Button>
+          </>
+        )}
+        {applicantStatus === "ACCEPTED" && (
+          <Button
+            variant="outline"
+            className="h-10 border-[1.5px] border-gray-400 text-gray-500 hover:bg-gray-50 shadow-none gap-2 font-semibold"
+            onClick={onCancelApproval}
+          >
+            <RotateCcw className="w-4 h-4" />
+            승인취소
+          </Button>
+        )}
+        {applicantStatus === "REJECTED" && (
+          <Button
+            variant="outline"
+            className="h-10 border-[1.5px] border-blue-400 text-blue-500 hover:bg-blue-50 shadow-none gap-2 font-semibold"
+            onClick={onCancelReject}
+          >
+            <RotateCcw className="w-4 h-4" />
+            거절취소
+          </Button>
+        )}
       </div>
     );
   }
@@ -155,7 +221,7 @@ function MeetingActionButtons({
         return (
           <Button
             onClick={onChat || handleChatClick}
-            className="w-full h-16 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-gray font-bold rounded-md transition-colors text-base"
+            className="w-full h-16 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-gray font-semibold rounded-md transition-colors text-base"
           >
             채팅방으로 이동
           </Button>
@@ -165,7 +231,7 @@ function MeetingActionButtons({
         return (
           <FixedBottomButton
             onClick={onChat || handleChatClick}
-            className="bg-yellow-400 hover:bg-yellow-500 text-gray font-bold"
+            className="bg-yellow-400 hover:bg-yellow-500 text-gray font-semibold"
           >
             채팅방으로 이동
           </FixedBottomButton>
@@ -185,7 +251,7 @@ function MeetingActionButtons({
         <Button
           onClick={onJoin}
           disabled={isPending}
-          className="w-full h-16 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors text-base font-medium disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
+          className="w-full h-16 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors text-base font-semibold disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
         >
           {buttonText}
         </Button>
@@ -199,6 +265,36 @@ function MeetingActionButtons({
           {buttonText}
         </FixedBottomButton>
       );
+    }
+
+    // 목록 카드 내부 (Joined List)
+    if (location === "joined-list") {
+      // 승인 대기 상태
+      if (isPending) {
+        return (
+          <Button
+            disabled
+            variant="outline"
+            className="h-10 border-[1.5px] border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed shadow-none font-semibold"
+          >
+            승인 대기중
+          </Button>
+        );
+      }
+
+      // 참여 완료 (채팅 가능)
+      if (isJoined) {
+        return (
+          <Button
+            variant="outline"
+            onClick={onChat || handleChatClick}
+            className="h-10 border-[1.5px] border-yellow-400 text-gray-900 shadow-none gap-2 font-semibold"
+          >
+            <MessageCircle className="w-4 h-4 text-yellow-500" fill="currentColor" />
+            채팅
+          </Button>
+        );
+      }
     }
   }
 
