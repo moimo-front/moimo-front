@@ -88,7 +88,7 @@ const approveAllParticipations = http.put(`${httpUrl}/meetings/:meetingId/partic
 });
 
 // 승인 취소 핸들러
-const cancelParticipation = http.put(`${httpUrl}/meetings/:meetingId/participations/:participationId/cancel`, async ({ params }) => {
+const cancelApprovalParticipation = http.put(`${httpUrl}/meetings/:meetingId/participations/:participationId/cancel-approval`, async ({ params }) => {
     await delay(1000);
     const { meetingId, participationId } = params;
     const mid = Number(meetingId);
@@ -114,10 +114,38 @@ const cancelParticipation = http.put(`${httpUrl}/meetings/:meetingId/participati
     return new HttpResponse(null, { status: 204 });
 });
 
+// 거절 취소 핸들러
+const cancelRejectParticipation = http.put(`${httpUrl}/meetings/:meetingId/participations/:participationId/cancel-rejection`, async ({ params }) => {
+    await delay(1000);
+    const { meetingId, participationId } = params;
+    const mid = Number(meetingId);
+    const pid = Number(participationId);
+
+    const meeting = myMeetings.find(m => m.meetingId === mid);
+    if (!meeting) return HttpResponse.json({ message: "모임이 존재하지 않습니다." }, { status: 404 });
+
+    const participants = mockParticipants[mid] || [];
+    const participant = participants.find(p => p.participationId === pid);
+
+    if (participant) {
+        // 거절된 참여자만 취소 가능 (PENDING으로 되돌림)
+        if (participant.status === 'REJECTED') {
+            participant.status = 'PENDING';
+            // 거절 취소는 인원수에 영향 없음
+        } else {
+            return HttpResponse.json({ message: "거절된 상태가 아니면 취소할 수 없습니다." }, { status: 400 });
+        }
+    }
+
+    return new HttpResponse(null, { status: 204 });
+});
+
+
 export const participationHandlers = [
     getParticipants,
     approveParticipation,
     rejectParticipation,
     approveAllParticipations,
-    cancelParticipation,
+    cancelApprovalParticipation,
+    cancelRejectParticipation,
 ];

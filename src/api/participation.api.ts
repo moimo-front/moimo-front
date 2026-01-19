@@ -45,9 +45,19 @@ export const approveAllParticipations = async (meetingId: number) => {
 };
 
 // 승인 취소
-export const cancelParticipation = async (meetingId: number, participationId: number) => {
+export const cancelApprovalParticipation = async (meetingId: number, participationId: number) => {
     try {
-        await apiClient.put(`/meetings/${meetingId}/participations/${participationId}/cancel`);
+        await apiClient.put(`/meetings/${meetingId}/participations/${participationId}/cancel-approval`);
+    } catch (error) {
+        console.error("Error cancelling participation:", error);
+        throw error;
+    }
+};
+
+// 거절 취소
+export const cancelRejectParticipation = async (meetingId: number, participationId: number) => {
+    try {
+        await apiClient.put(`/meetings/${meetingId}/participations/${participationId}/cancel-rejection`);
     } catch (error) {
         console.error("Error cancelling participation:", error);
         throw error;
