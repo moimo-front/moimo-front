@@ -133,7 +133,7 @@ const Chatting = () => {
             <div key={room.meetingId} onClick={() => setSelectedMeeting(room)}>
               <ChatRoomItem
                 id={room.meetingId}
-                meetingImage={room.image || ""}
+                meetingImage={room.image}
                 meetingTitle={room.title}
                 lastMessageContent={
                   room.lastMessage?.content || "대화를 시작하세요"

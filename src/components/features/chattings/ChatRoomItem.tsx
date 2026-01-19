@@ -1,8 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import defaultMeetingIcon from "@/assets/images/moimer.png"; // 모임 기본 이미지 import
 
 interface ChatRoomItemProps {
   id: string | number;
-  meetingImage: string;
+  meetingImage: string | null; // null 타입 추가
   meetingTitle: string;
   lastMessageContent: string;
   lastMessageTime: string;
@@ -22,7 +23,7 @@ const ChatRoomItem: React.FC<ChatRoomItemProps> = ({
     >
       {/* 왼쪽: 모임 이미지 */}
       <Avatar className="w-12 h-12">
-        <AvatarImage src={meetingImage} alt={meetingTitle} />
+        <AvatarImage src={meetingImage || defaultMeetingIcon} alt={meetingTitle} />
         <AvatarFallback>{meetingTitle.slice(0, 2)}</AvatarFallback>
       </Avatar>
 
