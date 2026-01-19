@@ -15,34 +15,56 @@ import { useGoogleLogin, type CodeResponse } from "@react-oauth/google";
 
 // zod schema 정의
 export const loginSchema = z.object({
-    email: z
-        .string()
-        .min(1, "이메일을 입력해주세요.")
-        .email("이메일 형식이 올바르지 않습니다."),
-    password: z
-        .string()
-        .min(1, "비밀번호를 입력해주세요.")
-        .min(8, "비밀번호는 최소 8자 이상이어야 합니다."),
+  email: z
+    .string()
+    .min(1, "이메일을 입력해주세요.")
+    .email("이메일 형식이 올바르지 않습니다."),
+  password: z
+    .string()
+    .min(1, "비밀번호를 입력해주세요.")
+    .min(8, "비밀번호는 최소 8자 이상이어야 합니다."),
 });
 
 // zod schema에서 추출한 타입
 export type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
-    const { mutateAsync: loginMutation, isPending } = useLoginMutation();
-    const googleLoginMutation = useGoogleLoginMutation();
-    const navigate = useNavigate();
+  const { mutateAsync: loginMutation, isPending } = useLoginMutation();
+  const googleLoginMutation = useGoogleLoginMutation();
+  const navigate = useNavigate();
 
-    const {
-        register,
-        handleSubmit,
-        setError,
-        formState: { errors }
-    } = useForm<LoginFormValues>({
-        resolver: zodResolver(loginSchema),
-        defaultValues: {
-            email: "",
-            password: ""
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors }
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: ""
+    }
+  });
+
+  const onSubmit = async (data: LoginFormValues) => {
+    try {
+      const loginInfo = await loginMutation(data);
+
+      if (loginInfo.user.isNewUser) {
+        navigate("/user-info", {
+          state: {
+            accessToken: loginInfo.accessToken,
+            user: loginInfo.user
+          }
+        });
+      } else {
+        navigate("/");
+      }
+    } catch (error: any) {
+      setError("root",
+        {
+          type: "manual",
+          message: "로그인에 실패했습니다"
         }
     });
 
@@ -216,14 +238,14 @@ const Login = () => {
                                 theme="filled_black"
                             />
                             */}
-                            <SiNaver size={24} color="#03C75A" />
-                            <SiKakaotalk size={24} color="#FFEB3B" />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-    );
+              <SiNaver size={24} color="#03C75A" />
+              <SiKakaotalk size={24} color="#FFEB3B" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 };
 
 export default Login;

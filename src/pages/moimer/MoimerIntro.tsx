@@ -8,7 +8,7 @@ import { guidelines, faqs } from "@/constants/moimerIntroData"
 import moimer from "@/assets/images/moimer.png"
 import moimerIntro from "@/assets/images/moimer-intro.png"
 import { useAuthStore } from "@/store/authStore";
-import LoginRequiredDialog from "@/components/common/LoginRequiredDialog";
+import LoginRequiredDialog from "@/components/features/login/LoginRequiredDialog";
 
 function MoimerIntro() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);

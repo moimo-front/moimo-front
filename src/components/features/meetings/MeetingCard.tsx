@@ -18,7 +18,7 @@ function MeetingCard({ meeting, imageUrl, className }: MeetingCardProps) {
   return (
     <Link
       to={href}
-      className="block w-48 h-60 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      className="block w-full h-80 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
     >
       <Card
         className={cn(

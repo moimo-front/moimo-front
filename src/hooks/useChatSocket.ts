@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@/store/authStore";
 import type { ChatMessage } from "@/models/chat.model";
-import { createMockSocket } from "@/mock/socketMock";
+import type { createMockSocket } from "@/mock/socketMock";
 
 type MockSocketType = ReturnType<typeof createMockSocket>;
 
@@ -12,8 +12,9 @@ const isMockingEnabled =
   (import.meta.env.VITE_ENABLE_MOCK || "true") === "true";
 
 // 소켓 인스턴스 팩토리
-const getSocketInstance = (accessToken: string | null): Socket | MockSocketType | null => {
+const getSocketInstance = async (accessToken: string | null): Promise<Socket | MockSocketType | null> => {
   if (isMockingEnabled) {
+    const { createMockSocket } = await import("@/mock/socketMock");
     return createMockSocket();
   }
 
@@ -48,36 +49,40 @@ export const useChatSocket = (
     // 싱글턴 유지
     if (socketRef.current) return;
 
-    const socket = getSocketInstance(accessToken);
-    if (!socket) return;
+    const initSocket = async () => {
+      const socket = await getSocketInstance(accessToken);
+      if (!socket) return;
 
-    socketRef.current = socket;
+      socketRef.current = socket;
 
-    // --- 공통 이벤트 리스너 등록 ---
-    socket.on("connect", () => {
-      console.log(`Socket connected: ${socket.id}`);
-    });
+      // --- 공통 이벤트 리스너 등록 ---
+      socket.on("connect", () => {
 
-    socket.on("disconnect", (reason: string) => {
-      console.log(`Socket disconnected: ${reason}`);
-    });
+      });
 
-    socket.on("connect_error", (error: Error) => {
-      console.error("Socket connection error:", error);
-    });
+      socket.on("disconnect", (_reason: string) => {
 
-    // 메시지 수신 리스너 (전역적으로 한 번만 등록)
-    socket.on("newMessage", (message: ChatMessage) => {
-      console.log("New message received:", message);
-      if (onNewMessageRef.current) {
-        onNewMessageRef.current(message);
-      }
-    });
+      });
+
+      socket.on("connect_error", (error: Error) => {
+        console.error("Socket connection error:", error);
+      });
+
+      // 메시지 수신 리스너 (전역적으로 한 번만 등록)
+      socket.on("newMessage", (message: ChatMessage) => {
+
+        if (onNewMessageRef.current) {
+          onNewMessageRef.current(message);
+        }
+      });
+    };
+
+    initSocket();
 
     // 컴포넌트가 언마운트되거나 토큰이 아예 바뀔 때만 연결 해제
     return () => {
       if (socketRef.current) {
-        console.log("Cleaning up socket connection...");
+
         socketRef.current.disconnect();
         socketRef.current = null;
       }
@@ -92,11 +97,11 @@ export const useChatSocket = (
       return;
     }
 
-    console.log(`Switching to room: ${meetingId}`);
+
 
     // 방 입장 요청
-    socket.emit("joinRoom", meetingId, (response: any) => {
-      console.log(`방 ${meetingId} 입장 응답:`, response);
+    socket.emit("joinRoom", meetingId, (_response: any) => {
+
     });
 
     // 메시지 목록 요청
@@ -104,7 +109,7 @@ export const useChatSocket = (
       "getMessages",
       meetingId,
       (response: { meetingId: number; messages: ChatMessage[] }) => {
-        console.log("메시지 목록 응답:", response);
+
         if (response && response.messages) {
           setInitialMessages(response.messages);
         }
@@ -120,10 +125,10 @@ export const useChatSocket = (
         meetingId,
         content,
       };
-      console.log("Emitting sendMessage with payload:", payload);
+
       
-      socketRef.current.emit("sendMessage", payload, (response: any) => {
-        console.log("메시지 전송 응답:", response);
+      socketRef.current.emit("sendMessage", payload, (_response: any) => {
+
       });
     } else {
       console.error(

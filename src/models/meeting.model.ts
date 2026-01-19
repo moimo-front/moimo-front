@@ -34,7 +34,7 @@ export interface Meeting {
 
 // 모임 상세 정보
 export interface MeetingDetail {
-  id: number;
+  meetingId: number;
   title: string;
   description: string;
   interestId: number;
@@ -49,6 +49,7 @@ export interface MeetingDetail {
     lng: number;
   };
   host: {
+    hostId: number; // API 응답에 맞춰 추가
     nickname: string;
     bio: string;
     hostImage: string | null;

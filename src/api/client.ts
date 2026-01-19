@@ -61,10 +61,11 @@ export const createClient = (config?: AxiosRequestConfig) => {
                         return Promise.reject(error);
                     }
 
-                    const { refresh } = await import("./auth.api");
+                    // 순환 참조 방지를 위해 직접 호출
                     const { setAccessToken } = useAuthStore.getState();
 
-                    const newToken = await refresh();
+                    const response = await axiosInstance.post("/users/refresh");
+                    const newToken = response.data.accessToken || response.headers.authorization?.replace("Bearer ", "");
 
                     if (newToken) {
                         setAccessToken(newToken);

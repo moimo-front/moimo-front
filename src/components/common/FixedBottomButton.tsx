@@ -8,26 +8,24 @@ interface FixedBottomButtonProps {
   disabled?: boolean;
 }
 
-function FixedBottomButton({ 
-  children, 
-  onClick, 
+function FixedBottomButton({
+  children,
+  onClick,
   className,
-  disabled 
+  disabled
 }: FixedBottomButtonProps) {
   return (
-    <div className="sticky bottom-0 left-0 right-0 bg-primary p-4 shadow-lg z-40 mt-auto">
-      <div className="max-w-7xl mx-auto">
-        <Button
-          onClick={onClick}
-          disabled={disabled}
-          className={cn(
-            "w-full h-14 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-none border-none",
-            className
-          )}
-        >
-          {children}
-        </Button>
-      </div>
+    <div className="sticky bottom-0 left-0 w-screen ml-[calc(50%-50vw)] z-50">
+      <Button
+        onClick={onClick}
+        disabled={disabled}
+        className={cn(
+          "w-full h-24 rounded-none text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-none border-none transition-all",
+          className
+        )}
+      >
+        {children}
+      </Button>
     </div>
   );
 }

@@ -1,51 +1,23 @@
 import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
 import { interestImageMap } from "@/lib/interestImageMap";
 
 interface TopicCardProps {
   topicName: string;
   to: string;
   imageUrl?: string;
-  size?: "sm" | "md";
 }
 
 function TopicCard({
   topicName,
   to,
   imageUrl = interestImageMap[topicName],
-  size = "md",
 }: TopicCardProps) {
-  const sizeStyles = {
-    sm: {
-      padding: "p-1",
-      imageDimensions: "w-16 h-16",
-      textSize: "text-sm",
-      initialSize: "text-lg",
-    },
-    md: {
-      padding: "p-8",
-      imageDimensions: "w-24 h-24",
-      textSize: "text-base",
-      initialSize: "text-xl",
-    },
-  };
-
-  const { padding, imageDimensions, textSize, initialSize } = sizeStyles[size];
-
   return (
     <Link
       to={to}
-      className={cn(
-        "flex flex-col items-center justify-center rounded-lg transition-colors cursor-pointer hover:bg-accent/50",
-        padding
-      )}
+      className="flex flex-col items-center justify-center rounded-lg transition-colors cursor-pointer hover:bg-accent/50 px-4 w-full"
     >
-      <div
-        className={cn(
-          "rounded-full bg-secondary flex items-center justify-center overflow-hidden mb-3 border border-black",
-          imageDimensions
-        )}
-      >
+      <div className="w-full aspect-square rounded-full bg-secondary flex items-center justify-center overflow-hidden mb-3 border border-yellow-500">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -53,14 +25,12 @@ function TopicCard({
             className="w-full h-full object-cover scale-120"
           />
         ) : (
-          <span
-            className={cn("font-bold text-primary-foreground", initialSize)}
-          >
+          <span className="font-semibold text-primary-foreground text-2xl">
             {topicName.charAt(0)}
           </span>
         )}
       </div>
-      <p className={cn("font-medium text-center", textSize)}>{topicName}</p>
+      <p className="font-medium text-center text-lg mt-1 whitespace-nowrap">{topicName}</p>
     </Link>
   );
 }
