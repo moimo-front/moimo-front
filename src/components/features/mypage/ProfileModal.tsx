@@ -21,6 +21,7 @@ import * as z from "zod";
 import type { UserInfo } from "@/models/user.model";
 import defaultProfile from "@/assets/images/profile.png";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const profileSchema = z.object({
   bio: z.string().max(100, "자기소개는 100자 이내로 입력해주세요."),
@@ -36,6 +37,27 @@ interface ProfileModalProps {
   userId?: number;
   readOnly?: boolean;
 }
+
+const ProfileSkeleton = () => (
+  <div className="space-y-6 animate-pulse">
+    <div className="flex flex-col items-center gap-4 py-4">
+      <Skeleton className="w-32 h-32 rounded-full" />
+      <Skeleton className="h-7 w-28" />
+    </div>
+    <div className="space-y-2">
+      <Skeleton className="h-5 w-16" />
+      <Skeleton className="h-24 w-full" />
+    </div>
+    <div className="space-y-3">
+      <Skeleton className="h-5 w-16" />
+      <div className="grid grid-cols-4 gap-2">
+        {[...Array(8)].map((_, i) => (
+          <Skeleton key={i} className="h-10 w-full" />
+        ))}
+      </div>
+    </div>
+  </div>
+);
 
 const ProfileModal = ({ isOpen, onClose, userInfo, userId, readOnly }: ProfileModalProps) => {
   const { data: currentUser } = useAuthQuery();
@@ -133,105 +155,109 @@ const ProfileModal = ({ isOpen, onClose, userInfo, userId, readOnly }: ProfileMo
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Profile Image Section */}
-          <div className="flex flex-col items-center gap-4 py-4">
-            <div className="relative group">
-              <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-gray-100 shadow-sm">
-                {previewImage ? (
-                  <img
-                    src={previewImage}
-                    alt="Profile Preview"
-                    className="w-full h-full object-cover"
-                  />
+        {isUserLoading && userId ? (
+          <ProfileSkeleton />
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Profile Image Section */}
+            <div className="flex flex-col items-center gap-4 py-4">
+              <div className="relative group">
+                <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-gray-100 shadow-sm">
+                  {previewImage ? (
+                    <img
+                      src={previewImage}
+                      alt="Profile Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <Camera className="w-8 h-8 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                {!isReadOnly && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
+                    <Camera className="w-5 h-5 text-gray-600" />
+                  </button>
+                )}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  className="hidden"
+                  accept="image/*"
+                  name="profileImage"
+                />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900">
+                {isUserLoading ? <Skeleton className="h-7 w-28" /> : (displayUserInfo?.nickname || "사용자")}
+              </h2>
+            </div>
+
+            {/* Bio Section */}
+            <div className="space-y-2">
+              <Label htmlFor="bio" className="text-sm font-bold text-gray-700">자기소개</Label>
+              <Textarea
+                id="bio"
+                {...register("bio")}
+                placeholder={isReadOnly ? "등록된 자기소개가 없습니다." : "본인을 소개해주세요."}
+                readOnly={isReadOnly}
+                className={cn(
+                  "min-h-[100px] bg-white border-gray-200 rounded-lg resize-none focus-visible:ring-yellow-400 text-sm",
+                  isReadOnly && "focus-visible:ring-0 border-gray-100"
+                )}
+              />
+              {!isReadOnly && errors.bio && <p className="text-xs text-red-500 mt-1">{errors.bio.message}</p>}
+            </div>
+
+            {/* Interests Section */}
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <Label className="text-sm font-bold text-gray-700">관심사</Label>
+                {!isReadOnly && <p className="text-[10px] text-gray-400 text-center block">최소 3개이상 선택해주세요!</p>}
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {isReadOnly && selectedInterests.length === 0 ? (
+                  <p className="text-sm text-gray-400 col-span-4 py-2">선택한 관심사가 없습니다.</p>
                 ) : (
-                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                    <Camera className="w-8 h-8 text-gray-400" />
-                  </div>
+                  allInterests?.map((interest) => (
+                    <button
+                      key={interest.id}
+                      type="button"
+                      onClick={() => !isReadOnly && toggleInterest(interest.id)}
+                      disabled={isReadOnly && !selectedInterests.includes(interest.id)}
+                      className={cn(
+                        "h-10 text-[11px] font-medium rounded-lg transition-all border shadow-sm",
+                        selectedInterests.includes(interest.id)
+                          ? "bg-yellow-400 border-yellow-400 text-white shadow-md"
+                          : "bg-[#FFF4D9]/50 border-transparent text-[#6B7280] hover:bg-[#FFF4D9]",
+                        isReadOnly && !selectedInterests.includes(interest.id) && "hidden"
+                      )}
+                    >
+                      {interest.name}
+                    </button>
+                  ))
                 )}
               </div>
-              {!isReadOnly && (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-lg border border-gray-100 hover:bg-gray-50 transition-colors"
-                >
-                  <Camera className="w-5 h-5 text-gray-600" />
-                </button>
-              )}
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImageChange}
-                className="hidden"
-                accept="image/*"
-                name="profileImage"
-              />
+              {!isReadOnly && errors.interests && <p className="text-xs text-red-500 mt-1">{errors.interests.message}</p>}
             </div>
-            <h2 className="text-xl font-bold text-gray-900">
-              {isUserLoading ? "불러오는 중..." : (displayUserInfo?.nickname || "사용자")}
-            </h2>
-          </div>
 
-          {/* Bio Section */}
-          <div className="space-y-2">
-            <Label htmlFor="bio" className="text-sm font-bold text-gray-700">자기소개</Label>
-            <Textarea
-              id="bio"
-              {...register("bio")}
-              placeholder={isReadOnly ? "등록된 자기소개가 없습니다." : "본인을 소개해주세요."}
-              readOnly={isReadOnly}
-              className={cn(
-                "min-h-[100px] bg-white border-gray-200 rounded-lg resize-none focus-visible:ring-yellow-400 text-sm",
-                isReadOnly && "focus-visible:ring-0 border-gray-100"
-              )}
-            />
-            {!isReadOnly && errors.bio && <p className="text-xs text-red-500 mt-1">{errors.bio.message}</p>}
-          </div>
-
-          {/* Interests Section */}
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <Label className="text-sm font-bold text-gray-700">관심사</Label>
-              {!isReadOnly && <p className="text-[10px] text-gray-400 text-center block">최소 3개이상 선택해주세요!</p>}
-            </div>
-            <div className="grid grid-cols-4 gap-2">
-              {isReadOnly && selectedInterests.length === 0 ? (
-                <p className="text-sm text-gray-400 col-span-4 py-2">선택한 관심사가 없습니다.</p>
-              ) : (
-                allInterests?.map((interest) => (
-                  <button
-                    key={interest.id}
-                    type="button"
-                    onClick={() => !isReadOnly && toggleInterest(interest.id)}
-                    disabled={isReadOnly && !selectedInterests.includes(interest.id)}
-                    className={cn(
-                      "h-10 text-[11px] font-medium rounded-lg transition-all border shadow-sm",
-                      selectedInterests.includes(interest.id)
-                        ? "bg-yellow-400 border-yellow-400 text-white shadow-md"
-                        : "bg-[#FFF4D9]/50 border-transparent text-[#6B7280] hover:bg-[#FFF4D9]",
-                      isReadOnly && !selectedInterests.includes(interest.id) && "hidden"
-                    )}
-                  >
-                    {interest.name}
-                  </button>
-                ))
-              )}
-            </div>
-            {!isReadOnly && errors.interests && <p className="text-xs text-red-500 mt-1">{errors.interests.message}</p>}
-          </div>
-
-          {/* Submit Button */}
-          {!isReadOnly && (
-            <Button
-              type="submit"
-              disabled={!isValid || userUpdateMutation.isPending}
-              className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-white font-bold rounded-lg shadow-sm disabled:bg-gray-200 disabled:text-gray-400 border-none mt-2"
-            >
-              {userUpdateMutation.isPending ? "수정 중..." : "프로필 수정하기"}
-            </Button>
-          )}
-        </form>
+            {/* Submit Button */}
+            {!isReadOnly && (
+              <Button
+                type="submit"
+                disabled={!isValid || userUpdateMutation.isPending}
+                className="w-full h-12 bg-yellow-400 hover:bg-yellow-500 text-white font-bold rounded-lg shadow-sm disabled:bg-gray-200 disabled:text-gray-400 border-none mt-2"
+              >
+                {userUpdateMutation.isPending ? "수정 중..." : "프로필 수정하기"}
+              </Button>
+            )}
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

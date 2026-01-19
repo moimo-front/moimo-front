@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "../../ui/skeleton"; // Import Skeleton component
 import type { Interest } from "@/models/interest.model";
 import { sortOptions } from "@/constants/sort";
 
@@ -53,7 +54,17 @@ export const MeetingFilterControls = ({
           <SelectContent>
             <SelectItem value="ALL">전체</SelectItem>
             {isInterestsLoading ? (
-              <p className="p-2 text-sm">로딩 중...</p>
+              <>
+                <SelectItem value="loading-1" disabled>
+                  <Skeleton className="h-5 w-[100px]" />
+                </SelectItem>
+                <SelectItem value="loading-2" disabled>
+                  <Skeleton className="h-5 w-[100px]" />
+                </SelectItem>
+                <SelectItem value="loading-3" disabled>
+                  <Skeleton className="h-5 w-[100px]" />
+                </SelectItem>
+              </>
             ) : (
               interestsData?.map((interest) => (
                 <SelectItem key={interest.id} value={interest.id.toString()}>
