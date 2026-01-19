@@ -7,7 +7,7 @@ interface MeetingListProps {
 
 const MeetingList = ({ meetings }: MeetingListProps) => {
   return (
-    <div className="grid grid-cols-4 gap-4 justify-items-center">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3 justify-items-center">
       {meetings.filter(Boolean).map((meeting) => (
         <MeetingCard key={meeting.meetingId} meeting={meeting} imageUrl={meeting.meetingImage} />
       ))}

@@ -1,15 +1,14 @@
 import { useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar } from "@/components/ui/avatar";
-import { IoLocationOutline } from "react-icons/io5";
-import { useState, useEffect, useRef } from "react";
+import { MapPin, Calendar, Users } from "lucide-react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { getMeetingById } from "@/api/meeting.api";
 import type { MeetingDetail } from "@/models/meeting.model";
 import moimoMeeting from "@/assets/images/moimo-meetings.png";
 import { useAuthStore } from "@/store/authStore";
-import LoginRequiredDialog from "@/components/common/LoginRequiredDialog";
-import KakaoMapView from "@/components/common/kakaoMaps/KakaoMapView";
+import LoginRequiredDialog from "@/components/features/login/LoginRequiredDialog";
+import KakaoMapView from "@/components/features/meetings/kakaoMaps/KakaoMapView";
 import { toast } from "sonner";
 import CreateMeetingModal from "@/components/features/meetings/CreateMeetingModal";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
@@ -19,9 +18,17 @@ import MeetingActionButtons from "@/components/features/meetings/MeetingActionBu
 import { formatMeetingDate } from "@/utils/dateFormat";
 import { useNavigate } from "react-router-dom";
 import { useDeleteMeetingDialog } from "@/hooks/useDeleteMeetingDialog";
+import { useInterestQuery } from "@/hooks/useInterestQuery";
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { ParticipantsCard } from "@/components/features/meetings/ParticipantsCard";
 
 function MeetingDetailPage() {
   const { meetingId } = useParams<{ meetingId: string }>();
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [meetingDetail, setMeetingDetail] = useState<MeetingDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,8 +53,11 @@ function MeetingDetailPage() {
   });
 
   // 내가 신청한/참가한 모임 목록 조회
-  const { meetings: pendingMeetings } = useMeQuery("joined", "pending", 1, 50);
-  const { meetings: joinedMeetings } = useMeQuery("joined", "accepted", 1, 50);
+  const { meetings: pendingMeetings } = useMeQuery("joined", "pending", 1, 50, { enabled: isLoggedIn });
+  const { meetings: joinedMeetings } = useMeQuery("joined", "accepted", 1, 50, { enabled: isLoggedIn });
+
+  // 카테고리 목록 조회 (이름 매핑용)
+  const { data: interests } = useInterestQuery();
 
   // 내 모임인지 확인
   const isHost = meetingDetail?.host.nickname === nickname;
@@ -129,9 +139,7 @@ function MeetingDetailPage() {
   };
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">로딩 중...</div>
-      </div>
+      <LoadingSpinner />
     );
   }
 
@@ -148,14 +156,14 @@ function MeetingDetailPage() {
 
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background pt-12">
 
 
 
-      <div className="flex-1 w-full max-w-4xl mx-auto px-4 pb-4 space-y-4">
-        <div className="flex gap-3">
+      <div className="flex-1 w-full max-w-5xl mx-auto pb-8 space-y-8 px-4 md:px-0">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12">
           {/* 이미지 */}
-          <div className="w-[60%] h-[40%] rounded-lg overflow-hidden bg-primary/80 flex-shrink-0">
+          <div className="w-full md:w-1/2 aspect-square rounded-2xl overflow-hidden bg-muted flex-shrink-0 shadow-sm border border-border/50">
             {meetingDetail.meetingImage ? (
               <img
                 src={meetingDetail.meetingImage}
@@ -172,9 +180,14 @@ function MeetingDetailPage() {
           </div>
 
           {/* 정보 */}
-          <div className="flex-1 flex flex-col gap-4 justify-center">
-            <div className="w-full max-w-4xl mx-auto px-4 py-4">
-              <div className="flex items-start justify-between pb-3">
+          <div className="flex-1 flex flex-col h-full min-h-[500px] justify-between py-2">
+            <div>
+              <div className="flex items-start justify-between pb-8">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20 text-base px-3 py-1.5 font-medium border-primary/20">
+                    {(meetingDetail.interestName || interests?.find(i => i.id === meetingDetail.interestId)?.name) || "카테고리 없음"}
+                  </Badge>
+                </div>
                 {/* 수정/삭제 버튼 - 호스트일 때만 표시 */}
                 {isHost && (
                   <div className="ml-auto">
@@ -188,75 +201,54 @@ function MeetingDetailPage() {
                   </div>
                 )}
               </div>
-            </div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              {meetingDetail.title}
-            </h1>
-            <div className="space-y-3">
-              {/* 주소, 날짜, 인원 정보 */}
-              <div className="text-base text-muted-foreground whitespace-pre-line leading-relaxed">
-                {meetingDetail.location.address}
-                {"\n"}
-                {formatMeetingDate(meetingDetail.meetingDate)}
+
+              <h1 className="text-3xl font-bold text-foreground mb-6">
+                {meetingDetail.title}
+              </h1>
+
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 text-lg text-foreground/80">
+                  <MapPin className="w-5 h-5 mt-1 text-primary shrink-0" />
+                  <span>{meetingDetail.location.address}</span>
+                </div>
+
+                <div className="flex items-center gap-3 text-lg text-foreground/80">
+                  <Calendar className="w-5 h-5 text-primary shrink-0" />
+                  <span>{formatMeetingDate(meetingDetail.meetingDate)}</span>
+                </div>
+
                 {meetingDetail.maxParticipants && (
-                  <>
-                    {"\n"}
-                    👥 {meetingDetail.currentParticipants || 1}/{meetingDetail.maxParticipants}
-                  </>
+                  <div className="flex items-center gap-3 text-lg text-foreground/80">
+                    <Users className="w-5 h-5 text-primary shrink-0" />
+                    <span>{meetingDetail.currentParticipants || 1}명 / {meetingDetail.maxParticipants}명</span>
+                  </div>
                 )}
               </div>
+            </div>
 
-              {/* 카테고리*/}
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="bg-background border border-border text-foreground text-base px-2 py-0.5">
-                  {meetingDetail.interestName}
-                </Badge>
-              </div>
-
-
+            <div className="mt-8 pt-6 border-t border-border/50">
               <MeetingActionButtons
                 meetingId={Number(meetingId)}
                 role={isHost ? "host" : "participant"}
                 location="detail-mid"
                 isPending={isPending}
+                isJoined={joinedMeetings?.some((m) => m.meetingId === Number(meetingId))}
                 isLoggedIn={isLoggedIn}
                 onJoin={handleJoinMeeting}
+                onChat={() => navigate("/chats", { state: { meetingId: Number(meetingId) } })}
               />
             </div>
           </div>
         </div>
-        {/* 모이머 */}
-        <Card className="border-2 border-primary/30 rounded-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold">
-              모이머
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0 pb-4">
-            <div className="flex items-center gap-3">
-              <Avatar className="w-12 h-12 bg-muted">
-                <div className="w-full h-full rounded-full bg-muted border border-border flex items-center justify-center text-lg">
-                  O
-                </div>
-              </Avatar>
-              <div>
-                <div className="text-sm font-medium">{meetingDetail.host.nickname}</div>
-                {meetingDetail.host.bio && (
-                  <div className="text-xs text-muted-foreground">{meetingDetail.host.bio}</div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
         {/* 설명 */}
-        <Card className="border-2 border-primary/30 rounded-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold">우리 모임은요...</CardTitle>
+        <Card className="border-2 border-border/50 shadow-sm overflow-hidden rounded-xl">
+          <CardHeader className="bg-primary/5 pb-4 border-b border-border/50">
+            <CardTitle className="text-xl font-bold">우리 모임은요...</CardTitle>
           </CardHeader>
-          <CardContent className="pt-0 pb-4">
+          <CardContent className="p-6">
             <div
               ref={descriptionRef}
-              className={`text-sm text-foreground whitespace-pre-wrap leading-relaxed transition-all duration-300 ${isDescriptionExpanded ? '' : 'max-h-64 overflow-y-auto'
+              className={`text-base text-foreground whitespace-pre-wrap leading-relaxed transition-all duration-300 ${isDescriptionExpanded ? '' : 'max-h-64 overflow-y-auto'
                 }`}
             >
               {meetingDetail.description}
@@ -264,21 +256,29 @@ function MeetingDetailPage() {
             {showExpandButton && (
               <button
                 onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                className="mt-3 text-sm text-foreground/60 hover:text-foreground transition-colors"
+                className="mt-4 text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
               >
-                {isDescriptionExpanded ? '접기' : '자세히보기'}
+                {isDescriptionExpanded ? '접기' : '더보기'}
               </button>
             )}
           </CardContent>
         </Card>
 
+        {/* 참여자 */}
+        <ParticipantsCard
+          meetingId={Number(meetingId)}
+          host={meetingDetail.host}
+          currentParticipants={meetingDetail.currentParticipants || 1}
+          maxParticipants={meetingDetail.maxParticipants}
+        />
+
         {/* 지도 */}
-        <Card className="border-2 border-primary/30 rounded-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold">여기에서 만나요!</CardTitle>
+        <Card className="border-2 border-border/50 shadow-sm overflow-hidden rounded-xl">
+          <CardHeader className="bg-primary/5 pb-4 border-b border-border/50">
+            <CardTitle className="text-xl font-bold">여기에서 만나요!</CardTitle>
           </CardHeader>
-          <CardContent className="pt-0 pb-4">
-            <div className="w-full h-128 bg-muted rounded-lg overflow-hidden">
+          <CardContent className="p-0">
+            <div className="w-full h-96 bg-muted">
               <KakaoMapView
                 lat={meetingDetail.location.lat}
                 lng={meetingDetail.location.lng}
@@ -286,34 +286,11 @@ function MeetingDetailPage() {
                 level={3}
               />
             </div>
-            <p className="text-sm text-muted-foreground mt-3 flex items-center gap-2">
-              <IoLocationOutline className="text-lg text-primary" />
-              {meetingDetail.location.address}
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* 모이미 */}
-        <Card className="border-2 border-primary/30 rounded-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold">
-              모이미 ({meetingDetail.currentParticipants || 1}/{meetingDetail.maxParticipants})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0 pb-4">
-            {/* 추후 참가자 목록으로 교체 예정 */}
-            <div className="flex items-center gap-3">
-              <Avatar className="w-12 h-12 bg-muted">
-                <div className="w-full h-full rounded-full bg-muted border border-border flex items-center justify-center text-lg">
-                  O
-                </div>
-              </Avatar>
-              <div>
-                <div className="text-sm font-medium">{meetingDetail.host.nickname}</div>
-                {meetingDetail.host.bio && (
-                  <div className="text-xs text-muted-foreground">{meetingDetail.host.bio}</div>
-                )}
-              </div>
+            <div className="p-4 bg-card border-t border-border/50">
+              <p className="text-base font-medium text-foreground flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-primary" />
+                {meetingDetail.location.address}
+              </p>
             </div>
           </CardContent>
         </Card>

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import MeetingList from "@/components/common/MeetingList";
+import MeetingList from "@/components/features/home/MeetingList";
 import PaginationComponent from "@/components/common/PaginationComponent";
 import { useMeetingsQuery } from "@/hooks/useMeetingsQuery";
 import { usePagination } from "@/hooks/usePagination";
@@ -21,7 +21,7 @@ const MeetingsPage = () => {
   // URL에서 직접 상태 읽기
   const { filters } = useMeetingFilter(searchParams);
   const page = Number(searchParams.get("page") || "1");
-  const limit = Number(searchParams.get("limit") || "10");
+  const limit = Number(searchParams.get("limit") || "12");
 
   // URL 업데이트 로직
   const updateUrlParams = (newValues: Partial<GetMeetingsParams>) => {
@@ -86,7 +86,7 @@ const MeetingsPage = () => {
 
   return (
     <div className="space-y-4 bg-card">
-      <h1 className="text-3xl font-bold p-4">원하는 모임 찾기</h1>
+      <h1 className="text-3xl font-bold py-8 px-4">원하는 모임 찾기</h1>
 
       <MeetingFilterControls
         filters={filters}

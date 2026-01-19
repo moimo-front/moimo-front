@@ -77,7 +77,7 @@ export const getMeetingById = async (
     const response = await apiClient.get<MeetingDetail>(
       `/meetings/${meetingId}`
     );
-    console.log("📡 API 응답 (meeting.api.ts):", response.data);
+
     return response.data; // 백엔드가 직접 모임 데이터를 반환
   } catch (error) {
     console.error("getMeetingById error:", error);

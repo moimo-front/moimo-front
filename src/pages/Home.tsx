@@ -1,6 +1,6 @@
-import NewMeetingList from "@/components/features/meetings/NewMeetingList";
-import JoinedMeetingsList from "@features/meetings/JoinedMeetingsList";
-import PendingMeetingsList from "@features/meetings/PendingMeetingsList";
+import NewMeetingList from "@/components/features/home/NewMeetingList";
+import JoinedMeetingsList from "@/components/features/home/JoinedMeetingsList";
+import PendingMeetingsList from "@/components/features/home/PendingMeetingsList";
 import SearchSection from "@features/search/SearchSection";
 import TopicSection from "@features/topics/TopicSection";
 import { useAuthStore } from "@store/authStore";
@@ -10,7 +10,7 @@ function Home() {
   return (
     <div className="flex flex-col justify-center items-center">
       <SearchSection />
-      <div className="flex flex-col pt-8 items-center w-full bg-card">
+      <div className="flex flex-col pt-8 items-center w-full">
         <TopicSection />
         {isLoggedIn && (
           <>

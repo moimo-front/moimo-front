@@ -1,17 +1,64 @@
 import TopicCard from "@features/topics/TopicCard";
 import { useInterestQuery } from "@/hooks/useInterestQuery";
-import interest_all from "@/assets/images/interests/interest_all.webp";
+import interest_all from '@/assets/images/interests/interest_all.webp';
+import { useRef, useState, useEffect } from "react";
+
+import { Skeleton } from "@/components/ui/skeleton";
 
 function TopicSection() {
   const { data: interests, isLoading, error } = useInterestQuery();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [columns, setColumns] = useState(5);
 
-  if (isLoading) return <div>Loading interests...</div>;
+  useEffect(() => {
+    const updateColumns = () => {
+      if (!containerRef.current) return;
+      const width = containerRef.current.offsetWidth;
+      // 현재 gap 계산 (16px or 24px)
+      const gap = parseInt(window.getComputedStyle(containerRef.current).columnGap) || 16;
+      const minItemWidth = 120;
+
+      // 한 줄에 들어가는 아이템 수 계산
+      const calculatedCols = Math.floor((width + gap) / (minItemWidth + gap));
+      setColumns(Math.max(1, calculatedCols));
+    };
+
+    updateColumns(); // 초기 계산
+
+    const observer = new ResizeObserver(updateColumns);
+    if (containerRef.current) observer.observe(containerRef.current);
+
+    return () => observer.disconnect();
+  }, [isLoading]); // content가 로드된 후 ref가 잡히므로 isLoading 의존성 추가 고려, 혹은 ref callback 사용이 더 안전하지만 여기선 간단히
+
+  // 2줄 표시 (전체보기 포함을 위해 -1)
+  const maxItems = columns * 2;
+  const visibleInterests = interests?.slice(0, maxItems - 1) || [];
+
+  if (isLoading) {
+    return (
+      <div className="py-4 pb-8">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4 md:gap-6 justify-items-center">
+          {Array.from({ length: 10 }).map((_, index) => (
+            <div key={index} className="flex flex-col items-center justify-center w-full px-4">
+              <Skeleton className="w-full aspect-square rounded-full bg-secondary mb-3 border border-gray-200/10" />
+              <Skeleton className="h-7 w-full rounded-md bg-secondary/50" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (error) return <div>Error loading interests: {error.message}</div>;
 
   return (
-    <div className="py-4">
-      <div className="grid grid-cols-5 gap-3">
-        {interests?.slice(0, 9).map((interest) => (
+    <div className="px-4 md:px-8">
+      <div
+        ref={containerRef}
+        className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4 md:gap-6 justify-items-center"
+      >
+        {visibleInterests.map((interest) => (
           <TopicCard
             key={interest.id}
             topicName={interest.name}
