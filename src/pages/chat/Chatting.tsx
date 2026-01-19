@@ -16,15 +16,16 @@ const Chatting = () => {
   const { nickname, userId } = useAuthStore();
   const [selectedMeeting, setSelectedMeeting] = useState<ChatRoom | null>(null);
   const [inputValue, setInputValue] = useState("");
-  
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
   // 1. 채팅방 목록 조회 (Left Panel)
   const { data: chatRooms } = useQuery({
-    queryKey: ["chatRooms"],
+    queryKey: ["chatRooms", userId],
     queryFn: getChatRooms,
+    enabled: !!userId,
   });
 
   const handleNewMessage = useCallback(
@@ -35,9 +36,9 @@ const Chatting = () => {
       }
 
       // 2. 'chatRooms' 쿼리 데이터(왼쪽 채팅방 목록)를 직접 업데이트
-      queryClient.setQueryData<ChatRoom[]>(["chatRooms"], (oldData) => {
+      queryClient.setQueryData<ChatRoom[]>(["chatRooms", userId], (oldData) => {
         if (!oldData) return [];
-        
+
         // 최신 메시지를 받은 채팅방을 찾아 lastMessage 정보 업데이트
         const updatedData = oldData.map((room) => {
           if (room.meetingId === newMessage.meetingId) {
@@ -132,9 +133,9 @@ const Chatting = () => {
           <>
             {/* 헤더 */}
             <div className="p-4 border-b shrink-0 flex items-center gap-3">
-              <FaArrowLeft 
-                className="cursor-pointer text-xl" 
-                onClick={() => setSelectedMeeting(null)} 
+              <FaArrowLeft
+                className="cursor-pointer text-xl"
+                onClick={() => setSelectedMeeting(null)}
               />
               <div>
                 <h2 className="text-xl font-bold">{selectedMeeting.title}</h2>
@@ -145,7 +146,7 @@ const Chatting = () => {
             </div>
 
             {/* 메시지 목록 (messages state 사용) */}
-            <div 
+            <div
               ref={scrollRef}
               className="flex flex-col gap-4 p-4 flex-grow overflow-y-auto"
             >
