@@ -98,9 +98,9 @@ export const MeetingFilterControls = ({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="10">10개씩</SelectItem>
-            <SelectItem value="20">20개씩</SelectItem>
-            <SelectItem value="50">50개씩</SelectItem>
+            <SelectItem value="12">12개씩</SelectItem>
+            <SelectItem value="24">24개씩</SelectItem>
+            <SelectItem value="48">48개씩</SelectItem>
           </SelectContent>
         </Select>
       </div>

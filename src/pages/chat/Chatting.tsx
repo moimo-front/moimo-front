@@ -101,9 +101,9 @@ const Chatting = () => {
   };
 
   return (
-    <div className="flex flex-row h-screen bg-background pt-16">
+    <div className="flex flex-row h-[calc(100vh-80px)] bg-background">
       {/* [왼쪽 패널] 채팅방 목록*/}
-      <div className={`${selectedMeeting ? "hidden lg:flex" : "flex"} w-full lg:w-[30%] min-w-[300px] flex-col h-full border-r`}>
+      <div className={`${selectedMeeting ? "hidden lg:flex" : "flex"} w-full lg:w-[28%] min-w-[300px] flex-col h-full border-r`}>
         <div className="p-4 font-semibold shrink-0">
           {nickname ? `${nickname} 님의 채팅` : "로그인이 필요합니다"}
         </div>

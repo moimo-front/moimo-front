@@ -2,9 +2,57 @@ import type { Participant } from "@/models/participation.model";
 import { apiClient } from "./client";
 
 
-
 // 내 모임 참여자 목록 조회
-export const getParticipants = async (meetingId: number) => {
+export const getParticipants = async (_meetingId: number) => {
+    // TODO: 백엔드 API 권한 수정되면 실제 API 호출로 변경
+    return new Promise<Participant[]>((resolve) => {
+        setTimeout(() => {
+            resolve([
+                // 호스트 (테스터1)
+                {
+                    participationId: 1,
+                    userId: 15, // 예시 ID
+                    nickname: "테스터1",
+                    profileImage: null,
+                    status: "ACCEPTED",
+                    bio: "모이머의 자기소개",
+                    interests: []
+                },
+                // 게스트 1
+                {
+                    participationId: 2,
+                    userId: 101,
+                    nickname: "모이미1",
+                    profileImage: null,
+                    status: "ACCEPTED",
+                    bio: "참여자1입니다",
+                    interests: []
+                },
+                // 게스트 2
+                {
+                    participationId: 3,
+                    userId: 102,
+                    nickname: "모이미2",
+                    profileImage: null,
+                    status: "ACCEPTED",
+                    bio: "참여자2입니다",
+                    interests: []
+                },
+                // 대기중인 게스트 (표시 안 됨)
+                {
+                    participationId: 4,
+                    userId: 103,
+                    nickname: "대기자1",
+                    profileImage: null,
+                    status: "PENDING",
+                    bio: "승인 대기중",
+                    interests: []
+                }
+            ]);
+        }, 500); // 0.5초 딜레이 시뮬레이션
+    });
+
+    /* 실제 API 호출 코드 (잠시 주석 처리)
     try {
         const response = await apiClient.get<Participant[]>(`/meetings/${meetingId}/participations`);
         return response.data;
@@ -12,6 +60,7 @@ export const getParticipants = async (meetingId: number) => {
         console.error("Error fetching participants:", error);
         throw error;
     }
+    */
 };
 
 // 개별 참여 승인

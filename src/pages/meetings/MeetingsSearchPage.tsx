@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import MeetingList from "@/components/common/MeetingList";
+import MeetingList from "@/components/features/home/MeetingList";
 import PaginationComponent from "@/components/common/PaginationComponent";
 import { useSearchMeetingsQuery } from "@/hooks/useMeetingsQuery";
 import { usePagination } from "@/hooks/usePagination";
@@ -23,7 +23,7 @@ const MeetingsSearchPage = () => {
     // 페이지를 1로 초기화하며 새로운 검색 실행
     setSearchParams({ keyword: inputValue, page: "1", limit: String(limit) });
   };
-  
+
   const setPage = (newPage: number) => {
     setSearchParams({ keyword, page: String(newPage), limit: String(limit) });
   };

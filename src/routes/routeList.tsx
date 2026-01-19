@@ -1,4 +1,4 @@
-import MainLayout from "@/components/common/MainLayout";
+import MainLayout from "@/components/layout/MainLayout";
 import Home from "@/pages/Home";
 import MeetingDetailPage from "@/pages/meetings/MeetingDetail";
 import MeetingsPage from "@/pages/meetings/MeetingsPage";
@@ -15,7 +15,7 @@ import Participations from "@/pages/mypage/Participations";
 import { Navigate } from "react-router-dom";
 import MoimerIntro from "@/pages/moimer/MoimerIntro";
 import UserInfo from "@/pages/user/UserInfo";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
 import Interests from "@/pages/interests/Interests";
 import Chatting from "@/pages/chat/Chatting";
 
