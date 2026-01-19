@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ParticipantCard from "@/components/features/mypage/ParticipantCard";
@@ -16,11 +17,18 @@ const Participations = () => {
   const [isConfirmedOpen, setIsConfirmedOpen] = useState(true);
   const [isRejectedOpen, setIsRejectedOpen] = useState(false);
   const { data: participants, isLoading } = useParticipationsQuery(meetingId);
-  const { mutate: approveAll } = useApproveAllParticipations();
+  const { mutate: approveAll, isPending: isApproveAllPending } = useApproveAllParticipations();
   const navigate = useNavigate();
 
   const handleBack = () => {
     navigate(-1);
+  };
+
+  const handleApproveAll = () => {
+    approveAll(
+      { meetingId },
+      { onSuccess: () => toast.success("모든 모이미기 승인되었습니다!") }
+    );
   };
 
   const waitingParticipants = participants?.filter((participant) => participant.status === "PENDING") || [];
@@ -28,7 +36,7 @@ const Participations = () => {
   const rejectedParticipants = participants?.filter((participant) => participant.status === "REJECTED") || [];
 
   return (
-    <div className="w-full h-full p-10 bg-white overflow-y-auto">
+    <div className="w-full h-full pt-10 bg-white overflow-y-auto">
       <div className="flex items-center gap-2 mb-8">
         <button
           onClick={handleBack}
@@ -48,7 +56,7 @@ const Participations = () => {
         <>
           {/* 참여 대기 멤버 섹션 */}
           <ParticipantSection
-            title="참여 대기 멤버"
+            title="승인 대기 중"
             count={waitingParticipants.length}
             isOpen={isWaitingOpen}
             onToggle={() => setIsWaitingOpen(!isWaitingOpen)}
@@ -58,8 +66,9 @@ const Participations = () => {
                 className="border-2 border-[#FFB800] text-[#FFB800] hover:bg-[#FFB800]/10 font-semibold h-10 px-4 rounded-md text-xs shadow-none gap-2"
                 onClick={(e) => {
                   e.stopPropagation();
-                  approveAll({ meetingId });
+                  handleApproveAll();
                 }}
+                disabled={isApproveAllPending}
               >
                 <UserCheck className="w-3 h-3" fill="currentColor" />
                 모두승인
@@ -71,9 +80,9 @@ const Participations = () => {
             ))}
           </ParticipantSection>
 
-          {/* 참여 확정 멤버 섹션 */}
+          {/* 승인된 멤버 섹션 */}
           <ParticipantSection
-            title="참여 확정 멤버"
+            title="승인된 모이미"
             count={confirmedParticipants.length}
             isOpen={isConfirmedOpen}
             onToggle={() => setIsConfirmedOpen(!isConfirmedOpen)}
@@ -85,7 +94,7 @@ const Participations = () => {
 
           {/* 거절된 멤버 섹션 */}
           <ParticipantSection
-            title="거절된 멤버"
+            title="거절된 모이미"
             count={rejectedParticipants.length}
             isOpen={isRejectedOpen}
             onToggle={() => setIsRejectedOpen(!isRejectedOpen)}

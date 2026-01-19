@@ -22,7 +22,7 @@ const ParticipantSection = ({
   contentClassName,
 }: ParticipantSectionProps) => {
   return (
-    <div className="mb-12">
+    <div className="mb-12 pl-12">
       <div
         className="flex justify-between items-center pb-4 border-b border-gray-200 cursor-pointer mb-6"
         onClick={onToggle}

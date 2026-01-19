@@ -11,6 +11,7 @@ import { useState } from "react";
 import ProfileModal from "./ProfileModal";
 import defaultProfile from "@/assets/images/profile.png";
 import MeetingActionButtons from "@/components/features/meetings/MeetingActionButtons";
+import { toast } from "sonner";
 
 interface ParticipantCardProps {
   meetingId: number;
@@ -19,16 +20,33 @@ interface ParticipantCardProps {
 
 const ParticipantCard = ({ meetingId, participant }: ParticipantCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { mutate: approve } = useApproveParticipation();
-  const { mutate: reject } = useRejectParticipation();
-  const { mutate: cancelApproval } = useCancelApprovalParticipation();
-  const { mutate: cancelReject } = useCancelRejectParticipation();
+  const { mutate: approve, isPending: isApprovePending } = useApproveParticipation();
+  const { mutate: reject, isPending: isRejectPending } = useRejectParticipation();
+  const { mutate: cancelApproval, isPending: isCancelApprovePending } = useCancelApprovalParticipation();
+  const { mutate: cancelReject, isPending: isCancelRejectPending } = useCancelRejectParticipation();
 
-  const handleApprove = () => approve({ meetingId, participationId: participant.participationId });
-  const handleReject = () => reject({ meetingId, participationId: participant.participationId });
-  const handleCancel = () => cancelApproval({ meetingId, participationId: participant.participationId });
+  const isLoading = isApprovePending || isRejectPending || isCancelApprovePending || isCancelRejectPending;
+
+  const handleApprove = () =>
+    approve(
+      { meetingId, participationId: participant.participationId },
+      { onSuccess: () => toast.success("해당 모이미를 승인했습니다.") }
+    );
+  const handleReject = () =>
+    reject(
+      { meetingId, participationId: participant.participationId },
+      { onSuccess: () => toast.success("해당 모이미를 거절했습니다.") }
+    );
+  const handleCancel = () =>
+    cancelApproval(
+      { meetingId, participationId: participant.participationId },
+      { onSuccess: () => toast.success("해당 모이미의 승인이 취소되었습니다.") }
+    );
   const handleReset = () => {
-    cancelReject({ meetingId, participationId: participant.participationId });
+    cancelReject(
+      { meetingId, participationId: participant.participationId },
+      { onSuccess: () => toast.success("해당 모이미의 거절이 취소되었습니다.") }
+    );
   };
 
 
@@ -59,6 +77,7 @@ const ParticipantCard = ({ meetingId, participant }: ParticipantCardProps) => {
         onReject={handleReject}
         onCancelApproval={handleCancel}
         onCancelReject={handleReset}
+        isLoading={isLoading}
       />
 
       <ProfileModal

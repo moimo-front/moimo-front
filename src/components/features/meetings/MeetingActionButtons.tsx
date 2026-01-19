@@ -25,6 +25,7 @@ interface MeetingActionButtonsProps {
   onReject?: () => void;
   onCancelApproval?: () => void;
   onCancelReject?: () => void;
+  isLoading?: boolean;
 }
 
 function MeetingActionButtons({
@@ -43,6 +44,7 @@ function MeetingActionButtons({
   onReject,
   onCancelApproval,
   onCancelReject,
+  isLoading = false,
 }: MeetingActionButtonsProps) {
   const navigate = useNavigate();
 
@@ -175,6 +177,7 @@ function MeetingActionButtons({
               variant="outline"
               className="h-10 border-2 border-[#FF8A8A] text-[#FF8A8A] font-bold hover:bg-[#FF8A8A]/10 shadow-none gap-2"
               onClick={onReject}
+              disabled={isLoading}
             >
               <X className="w-4 h-4" fill="currentColor" />
               거절
@@ -183,6 +186,7 @@ function MeetingActionButtons({
               variant="outline"
               className="h-10 border-2 border-[#FFB800] text-[#FFB800] hover:bg-[#FFB800]/10 shadow-none gap-2 font-bold"
               onClick={onApprove}
+              disabled={isLoading}
             >
               <UserCheck className="w-4 h-4" fill="currentColor" />
               승인
@@ -194,6 +198,7 @@ function MeetingActionButtons({
             variant="outline"
             className="h-10 border-2 border-gray-400 text-gray-500 hover:bg-gray-50 shadow-none gap-2 font-bold"
             onClick={onCancelApproval}
+            disabled={isLoading}
           >
             <RotateCcw className="w-4 h-4" />
             승인취소
@@ -204,6 +209,7 @@ function MeetingActionButtons({
             variant="outline"
             className="h-10 border-2 border-blue-400 text-blue-500 hover:bg-blue-50 shadow-none gap-2 font-semibold"
             onClick={onCancelReject}
+            disabled={isLoading}
           >
             <RotateCcw className="w-4 h-4" />
             거절취소
