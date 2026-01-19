@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { useDeleteMeetingDialog } from "@/hooks/useDeleteMeetingDialog";
 import { useInterestQuery } from "@/hooks/useInterestQuery";
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { ParticipantsCard } from "@/components/features/meetings/ParticipantsCard";
+import { MeetingParticipantsCard } from "@/components/features/meetings/MeetingParticipantsCard";
 
 function MeetingDetailPage() {
   const { meetingId } = useParams<{ meetingId: string }>();
@@ -265,7 +265,7 @@ function MeetingDetailPage() {
         </Card>
 
         {/* 참여자 */}
-        <ParticipantsCard
+        <MeetingParticipantsCard
           meetingId={Number(meetingId)}
           host={meetingDetail.host}
           currentParticipants={meetingDetail.currentParticipants || 1}

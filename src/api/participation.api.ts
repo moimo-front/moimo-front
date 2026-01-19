@@ -1,14 +1,25 @@
-import type { Participant } from "@/models/participation.model";
+import type { Participant, ParticipationDetail } from "@/models/participation.model";
 import { apiClient } from "./client";
 
 
-// 내 모임 참여자 목록 조회
+// 참여자 목록 조회 (일반 사용자용 - isHost 포함)
 export const getParticipants = async (meetingId: number) => {
     try {
-        const response = await apiClient.get<Participant[]>(`/meetings/${meetingId}/participations`);
+        const response = await apiClient.get<Participant[]>(`/meetings/${meetingId}/participants`);
         return response.data;
     } catch (error) {
         console.error("Error fetching participants:", error);
+        throw error;
+    }
+};
+
+// 내 모임 신청자 목록 조회 (모임장용 - status 포함)
+export const getParticipations = async (meetingId: number) => {
+    try {
+        const response = await apiClient.get<ParticipationDetail[]>(`/meetings/${meetingId}/participations`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching participations:", error);
         throw error;
     }
 };
