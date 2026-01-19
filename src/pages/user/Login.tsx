@@ -143,8 +143,7 @@ const Login = () => {
                 {/* 테스트 계정 - 추후 제거 */}
                 <div className="flex flex-col items-center border border-muted-foreground bg-background rounded-[12px] p-2 gap-1 mb-6">
                     <p className="text-[11px] font-medium text-muted-foreground italic">테스트 계정</p>
-                    <p className="text-[11px] text-muted-foreground italic">기존: moimo@email.com / 12345678</p>
-                    <p className="text-[11px] text-muted-foreground italic">신규: newuser@email.com / 12345678</p>
+                    <p className="text-[11px] text-muted-foreground italic">moimo@email.com / 12345678</p>
                 </div>
                 <CardContent className="flex flex-col gap-8 p-0">
                     <form onSubmit={handleSubmit(onSubmit)}>

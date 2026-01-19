@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUserInfoQuery } from "@/hooks/useUserInfoQuery";
 import { Check } from "lucide-react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import defaultProfile from "@/assets/images/profile.png";
 
 export const MypageSidebar = () => {
@@ -41,20 +41,38 @@ export const MypageSidebar = () => {
             <nav className="w-full px-8 flex-1">
                 <div className="flex flex-col gap-6">
                     <div>
-                        <Link to="/mypage/profile" className="block text-lg font-bold text-gray-900 mb-2 hover:text-gray-700">
+                        <NavLink
+                            to="/mypage/profile"
+                            className={({ isActive }) =>
+                                `block text-lg font-bold mb-2 transition-colors ${isActive ? "text-primary" : "text-gray-900 hover:text-gray-700"
+                                }`
+                            }
+                        >
                             프로필
-                        </Link>
+                        </NavLink>
                     </div>
 
                     <div>
                         <h3 className="text-lg font-bold text-gray-900 mb-4">모임</h3>
                         <div className="flex flex-col gap-3 pl-2">
-                            <Link to="/mypage/meetings/join" className="text-gray-500 hover:text-gray-900">
+                            <NavLink
+                                to="/mypage/meetings/join"
+                                className={({ isActive }) =>
+                                    `transition-colors ${isActive ? "text-primary font-bold" : "text-gray-500 hover:text-gray-900"
+                                    }`
+                                }
+                            >
                                 참여 모임
-                            </Link>
-                            <Link to="/mypage/meetings/hosting" className="text-gray-500 hover:text-gray-900">
+                            </NavLink>
+                            <NavLink
+                                to="/mypage/meetings/hosting"
+                                className={({ isActive }) =>
+                                    `transition-colors ${isActive ? "text-primary font-bold" : "text-gray-500 hover:text-gray-900"
+                                    }`
+                                }
+                            >
                                 내 모임
-                            </Link>
+                            </NavLink>
                         </div>
                     </div>
                 </div>
