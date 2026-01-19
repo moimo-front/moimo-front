@@ -11,6 +11,7 @@ import { IoIosSend } from "react-icons/io";
 import { getChatRooms } from "@/api/chat.api";
 import { useChatSocket } from "@/hooks/useChatSocket";
 import type { ChatRoom, ChatMessage } from "@/models/chat.model";
+import { useLocation } from "react-router-dom";
 
 const Chatting = () => {
   const { nickname, userId } = useAuthStore();
@@ -20,9 +21,10 @@ const Chatting = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const location = useLocation();
 
   // 1. 채팅방 목록 조회 (Left Panel)
-  const { data: chatRooms } = useQuery({
+  const { data: chatRooms, isLoading } = useQuery({
     queryKey: ["chatRooms", userId],
     queryFn: getChatRooms,
     enabled: !!userId,
@@ -55,7 +57,9 @@ const Chatting = () => {
         });
 
         // 해당 채팅방을 목록의 맨 위로 이동
-        const targetRoomIndex = updatedData.findIndex(room => room.meetingId === newMessage.meetingId);
+        const targetRoomIndex = updatedData.findIndex(
+          (room) => room.meetingId === newMessage.meetingId,
+        );
         if (targetRoomIndex > 0) {
           const targetRoom = updatedData.splice(targetRoomIndex, 1)[0];
           updatedData.unshift(targetRoom);
@@ -64,7 +68,7 @@ const Chatting = () => {
         return updatedData;
       });
     },
-    [queryClient, selectedMeeting?.meetingId],
+    [queryClient, selectedMeeting?.meetingId, userId],
   );
 
   const { initialMessages, sendMessage } = useChatSocket(
@@ -72,7 +76,7 @@ const Chatting = () => {
     handleNewMessage,
   );
 
-  // 방을 바꿀 때마다 `useChatSocket`으로부터 받은 초기 메시지로 화면 상태를 동기화
+  // 방을 바꿀 때마다 useChatSocket 으로부터 받은 초기 메시지로 화면 상태를 동기화
   useEffect(() => {
     if (initialMessages) {
       setMessages(initialMessages);
@@ -85,6 +89,20 @@ const Chatting = () => {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // URL state에 meetingId가 있으면 해당 채팅방 자동 선택
+  useEffect(() => {
+    if (!isLoading && chatRooms && location.state?.meetingId) {
+      const meetingIdFromState = location.state.meetingId;
+      const targetRoom = chatRooms.find(
+        (room) => room.meetingId === meetingIdFromState,
+      );
+
+      if (targetRoom) {
+        setSelectedMeeting(targetRoom);
+      }
+    }
+  }, [isLoading, chatRooms, location.state]);
 
   // 메시지 전송 핸들러
   const handleSendMessage = () => {
@@ -103,7 +121,9 @@ const Chatting = () => {
   return (
     <div className="flex flex-row h-[calc(100vh-80px)] bg-background">
       {/* [왼쪽 패널] 채팅방 목록*/}
-      <div className={`${selectedMeeting ? "hidden lg:flex" : "flex"} w-full lg:w-[28%] min-w-[300px] flex-col h-full border-r`}>
+      <div
+        className={`${selectedMeeting ? "hidden lg:flex" : "flex"} w-full lg:w-[28%] min-w-[300px] flex-col h-full border-r`}
+      >
         <div className="p-4 font-semibold shrink-0">
           {nickname ? `${nickname} 님의 채팅` : "로그인이 필요합니다"}
         </div>
@@ -115,10 +135,15 @@ const Chatting = () => {
                 id={room.meetingId}
                 meetingImage={room.image || ""}
                 meetingTitle={room.title}
-                lastMessageContent={room.lastMessage?.content || "대화를 시작하세요"}
+                lastMessageContent={
+                  room.lastMessage?.content || "대화를 시작하세요"
+                }
                 lastMessageTime={
                   room.lastMessage?.createdAt
-                    ? new Date(room.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    ? new Date(room.lastMessage.createdAt).toLocaleTimeString(
+                        [],
+                        { hour: "2-digit", minute: "2-digit" },
+                      )
                     : ""
                 }
               />
@@ -128,7 +153,9 @@ const Chatting = () => {
       </div>
 
       {/* [오른쪽 패널] 채팅창 */}
-      <div className={`${selectedMeeting ? "flex" : "hidden lg:flex"} w-full lg:w-[70%] flex-col h-full bg-card`}>
+      <div
+        className={`${selectedMeeting ? "flex" : "hidden lg:flex"} w-full lg:w-[70%] flex-col h-full bg-card`}
+      >
         {selectedMeeting ? (
           <>
             {/* 헤더 */}
