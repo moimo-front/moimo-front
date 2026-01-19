@@ -4,7 +4,8 @@ import {
     approveParticipation,
     rejectParticipation,
     approveAllParticipations,
-    cancelParticipation
+    cancelApprovalParticipation,
+    cancelRejectParticipation
 } from "@/api/participation.api";
 import type { Participant } from "@/models/participation.model";
 import type { MeetingDetail } from "@/models/meeting.model";
@@ -177,12 +178,12 @@ export const useApproveAllParticipations = () => {
 };
 
 // 승인 취소 Mutation
-export const useCancelParticipation = () => {
+export const useCancelApprovalParticipation = () => {
     const queryClient = useQueryClient();
 
     return useMutation<void, AxiosError, { meetingId: number, participationId: number }, MutationContext>({
         mutationFn: ({ meetingId, participationId }) =>
-            cancelParticipation(meetingId, participationId),
+            cancelApprovalParticipation(meetingId, participationId),
 
         onMutate: async ({ meetingId, participationId }) => {
             await queryClient.cancelQueries({ queryKey: ["participants", meetingId] });
@@ -212,6 +213,49 @@ export const useCancelParticipation = () => {
         },
 
         onSettled: (_, __, context) => {
+            if (context) {
+                queryClient.invalidateQueries({ queryKey: ["participants", context.meetingId] });
+                queryClient.invalidateQueries({ queryKey: ["meeting", context.meetingId] });
+                queryClient.invalidateQueries({ queryKey: ["my-meetings"] });
+            }
+        },
+    });
+};
+
+// 거절 취소 Mutation
+export const useCancelRejectParticipation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation<void, AxiosError, { meetingId: number, participationId: number }, MutationContext>({
+        mutationFn: ({ meetingId, participationId }) =>
+            cancelRejectParticipation(meetingId, participationId),
+
+        onMutate: async ({ meetingId, participationId }) => {
+            await queryClient.cancelQueries({ queryKey: ["participants", meetingId] });
+            await queryClient.cancelQueries({ queryKey: ["meeting", meetingId] });
+
+            const previousParticipants = queryClient.getQueryData<Participant[]>(["participants", meetingId]);
+            const previousMeeting = queryClient.getQueryData<MeetingDetail>(["meeting", meetingId]);
+
+            // 낙관적 업데이트: 상태 PENDING으로 변경
+            if (previousParticipants) {
+                queryClient.setQueryData<Participant[]>(["participants", meetingId], (old) =>
+                    old?.map(p => p.participationId === participationId ? { ...p, status: 'PENDING' } : p)
+                );
+            }
+
+            return { previousParticipants, previousMeeting, meetingId };
+        },
+
+        onError: (_, __, context) => {
+            if (context) {
+                queryClient.setQueryData(["participants", context.meetingId], context.previousParticipants);
+                queryClient.setQueryData(["meeting", context.meetingId], context.previousMeeting);
+            }
+        },
+
+        onSettled: (_, __, context) => {
+
             if (context) {
                 queryClient.invalidateQueries({ queryKey: ["participants", context.meetingId] });
                 queryClient.invalidateQueries({ queryKey: ["meeting", context.meetingId] });
