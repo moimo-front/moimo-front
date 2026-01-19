@@ -49,7 +49,7 @@ export const MeetingFilterControls = ({
           value={filters.interestFilter}
           onValueChange={handleInterestFilterChange}
         >
-          <SelectTrigger className="w-[180px] bg-secondary text-primary-foreground">
+          <SelectTrigger className="w-[180px] bg-secondary/10 text-primary-foreground hover:bg-primary/20">
             <SelectValue placeholder="카테고리" />
           </SelectTrigger>
           <SelectContent>
@@ -81,7 +81,7 @@ export const MeetingFilterControls = ({
           value={filters.sort}
           onValueChange={(value) => handleSortChange(value as SortType)}
         >
-          <SelectTrigger className="w-[120px] bg-secondary text-primary-foreground">
+          <SelectTrigger className="w-[120px] bg-secondary/10 text-primary-foreground hover:bg-primary/20">
             <SelectValue placeholder="정렬" />
           </SelectTrigger>
           <SelectContent>
@@ -110,7 +110,7 @@ export const MeetingFilterControls = ({
           value={limit.toString()}
           onValueChange={(value) => handleLimitChange(Number(value))}
         >
-          <SelectTrigger className="w-[110px] bg-secondary text-primary-foreground">
+          <SelectTrigger className="w-[110px] bg-secondary/10 text-primary-foreground hover:bg-primary/20">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
