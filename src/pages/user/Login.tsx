@@ -12,6 +12,7 @@ import { Link, useNavigate } from "react-router-dom";
 import * as z from "zod";
 // import { GoogleLogin } from "@react-oauth/google";
 import { useGoogleLogin, type CodeResponse } from "@react-oauth/google";
+import { toast } from "sonner";
 
 // zod schema 정의
 export const loginSchema = z.object({
@@ -61,10 +62,12 @@ const Login = () => {
                 navigate("/");
             }
         } catch (error: any) {
-            setError("root", {
-                type: "manual",
-                message: "로그인에 실패했습니다"
-            });
+            setError("root",
+                {
+                    type: "manual",
+                    message: "로그인에 실패했습니다"
+                }
+            );
         }
     };
 
@@ -108,7 +111,7 @@ const Login = () => {
                 token: credentialResponse.credential,
                 redirectUri: window.location.origin
             });
-
+  
             if (res.isNewUser) {
                 // 신규 유저인 경우 추가 정보 입력 페이지로 이동
                 navigate("/user-info", {
@@ -125,7 +128,7 @@ const Login = () => {
             setError("root", { type: "manual", message: "Google 로그인에 실패했습니다." });
         }
     };
-
+  
     const handleGoogleError = () => {
         setError("root", { type: "manual", message: "Google 로그인에 실패했습니다." });
     };
@@ -133,7 +136,7 @@ const Login = () => {
 
     return (
         <div className="flex min-h-full w-full flex-col items-center justify-center bg-transparent p-4">
-            <Card className="w-full max-w-[440px] p-8 shadow-lg border-none bg-card rounded-[12px]">
+            <Card className="w-full max-w-[440px] p-8 shadow-lg border-none bg-login-form rounded-[12px]">
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold text-center text-foreground mb-2">모이모 로그인</CardTitle>
                     <CardDescription className="text-center">이메일과 비밀번호를 입력하여 로그인하세요</CardDescription>
@@ -214,8 +217,8 @@ const Login = () => {
                                 theme="filled_black"
                             />
                             */}
-                            <SiNaver size={24} color="#03C75A" />
-                            <SiKakaotalk size={24} color="#FFEB3B" />
+                            <SiNaver size={24} color="#03C75A" onClick={() => toast.error("준비 중인 서비스입니다.")} />
+                            <SiKakaotalk size={24} color="#FFEB3B" onClick={() => toast.error("준비 중인 서비스입니다.")} />
                         </div>
                     </div>
                 </CardContent>

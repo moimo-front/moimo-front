@@ -73,9 +73,9 @@ export const useLogoutMutation = () => {
       return await logout();
     },
     onSuccess: () => {
-      // 로그아웃 성공 시 전역 상태 업데이트
+      // 로그아웃 성공 시 전역 상태 업데이트 및 캐시 전체 삭제
       storeLogout();
-      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      queryClient.clear();
     },
     onError: (error) => {
       console.error(error);
@@ -113,7 +113,7 @@ export const useEmailCheckMutation = () => {
     mutationFn: async (email: string) => {
       return await checkEmail({ email });
     },
-    onSuccess: () => {},
+    onSuccess: () => { },
     onError: (error: AxiosError<{ message: string }>) => {
       console.error(error);
     },
@@ -126,7 +126,7 @@ export const useNicknameCheckMutation = () => {
     mutationFn: async (nickname: string) => {
       return await checkNickname({ nickname });
     },
-    onSuccess: () => {},
+    onSuccess: () => { },
     onError: (error: AxiosError<{ message: string }>) => {
       console.error(error);
     },

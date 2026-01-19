@@ -13,8 +13,9 @@ import { useUserUpdateMutation } from "@/hooks/useUserInfoMutations";
 
 // zod schema 정의
 const userInfoSchema = z.object({
-  bio: z.string().max(100, "자기소개는 100자 이내로 입력해주세요."),
-  interests: z.array(z.number()).min(3, "관심사를 3개 이상 선택해주세요."),
+    bio: z.string().min(1, "자기소개를 입력해주세요.")
+        .max(100, "자기소개는 100자 이내로 입력해주세요."),
+    interests: z.array(z.number()).min(3, "관심사를 3개 이상 선택해주세요."),
 });
 
 export type UserInfoFormValues = z.infer<typeof userInfoSchema>;

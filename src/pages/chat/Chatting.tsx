@@ -23,8 +23,9 @@ const Chatting = () => {
 
   // 1. 채팅방 목록 조회 (Left Panel)
   const { data: chatRooms } = useQuery({
-    queryKey: ["chatRooms"],
+    queryKey: ["chatRooms", userId],
     queryFn: getChatRooms,
+    enabled: !!userId,
   });
 
   const handleNewMessage = useCallback(
@@ -35,7 +36,7 @@ const Chatting = () => {
       }
 
       // 2. 'chatRooms' 쿼리 데이터(왼쪽 채팅방 목록)를 직접 업데이트
-      queryClient.setQueryData<ChatRoom[]>(["chatRooms"], (oldData) => {
+      queryClient.setQueryData<ChatRoom[]>(["chatRooms", userId], (oldData) => {
         if (!oldData) return [];
 
         // 최신 메시지를 받은 채팅방을 찾아 lastMessage 정보 업데이트

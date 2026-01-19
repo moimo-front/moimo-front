@@ -59,7 +59,7 @@ export const useDeleteMeetingMutation = () => {
     onSuccess: () => {
       // 성공 시 모임 목록 다시 가져오기
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      queryClient.invalidateQueries({ queryKey: ["myMeetings"] });
+      queryClient.invalidateQueries({ queryKey: ["my-meetings"] });
     },
     onError: (error: any) => {
       console.error("모임 삭제 실패:", error);
