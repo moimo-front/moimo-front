@@ -15,22 +15,22 @@ function TopicCard({
   return (
     <Link
       to={to}
-      className="flex flex-col items-center justify-center rounded-lg transition-colors cursor-pointer hover:bg-accent/50 px-4 w-full"
+      className="flex flex-col items-center justify-center transition-colors cursor-pointer hover:bg-accent/50 p-2 w-full max-w-[120px]"
     >
-      <div className="w-full aspect-square rounded-full bg-secondary flex items-center justify-center overflow-hidden mb-3 border border-yellow-500">
+      <div className="w-full aspect-square rounded-full bg-secondary flex items-center justify-center overflow-hidden mb-2 border border-yellow-500">
         {imageUrl ? (
           <img
             src={imageUrl}
             alt={topicName}
-            className="w-full h-full object-cover scale-120"
+            className="w-full h-full object-cover"
           />
         ) : (
-          <span className="font-semibold text-primary-foreground text-2xl">
+          <span className="font-semibold text-primary-foreground text-xl">
             {topicName.charAt(0)}
           </span>
         )}
       </div>
-      <p className="font-medium text-center text-lg mt-1 whitespace-nowrap">{topicName}</p>
+      <p className="font-medium text-center text-sm mt-1 whitespace-nowrap overflow-hidden text-ellipsis w-full px-1">{topicName}</p>
     </Link>
   );
 }

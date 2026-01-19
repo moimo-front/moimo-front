@@ -37,12 +37,15 @@ function TopicSection() {
 
   if (isLoading) {
     return (
-      <div className="py-4 pb-8">
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4 md:gap-6 justify-items-center">
-          {Array.from({ length: 10 }).map((_, index) => (
-            <div key={index} className="flex flex-col items-center justify-center w-full px-4">
-              <Skeleton className="w-full aspect-square rounded-full bg-secondary mb-3 border border-gray-200/10" />
-              <Skeleton className="h-7 w-full rounded-md bg-secondary/50" />
+      <div className="py-4 pb-8 w-full max-w-screen-xl mx-auto px-4 md:px-8">
+        <div
+          ref={containerRef}
+          className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4 md:gap-6 justify-items-center"
+        >
+          {Array.from({ length: columns * 2 }).map((_, index) => (
+            <div key={index} className="flex flex-col items-center justify-center w-full max-w-[120px] p-2">
+              <Skeleton className="w-full aspect-square rounded-full mb-2" />
+              <Skeleton className="h-4 w-16 rounded-md bg-secondary/50" />
             </div>
           ))}
         </div>
@@ -53,10 +56,10 @@ function TopicSection() {
   if (error) return <div>Error loading interests: {error.message}</div>;
 
   return (
-    <div className="px-4 md:px-8">
+    <div className="w-full max-w-screen-xl mx-auto px-4 md:px-8">
       <div
         ref={containerRef}
-        className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-4 md:gap-6 justify-items-center"
+        className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-x-4 gap-y-6 md:gap-x-6 justify-items-center"
       >
         {visibleInterests.map((interest) => (
           <TopicCard
