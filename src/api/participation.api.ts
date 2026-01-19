@@ -3,7 +3,7 @@ import { apiClient } from "./client";
 
 
 // 내 모임 참여자 목록 조회
-export const getParticipants = async (meetingId: number) => {
+export const getParticipants = async (_meetingId: number) => {
     // TODO: 백엔드 API 권한 수정되면 실제 API 호출로 변경
     return new Promise<Participant[]>((resolve) => {
         setTimeout(() => {

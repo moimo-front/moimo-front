@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@/store/authStore";
 import type { ChatMessage } from "@/models/chat.model";
-import { createMockSocket } from "@/mock/socketMock";
+import type { createMockSocket } from "@/mock/socketMock";
 
 type MockSocketType = ReturnType<typeof createMockSocket>;
 
@@ -12,8 +12,9 @@ const isMockingEnabled =
   (import.meta.env.VITE_ENABLE_MOCK || "true") === "true";
 
 // 소켓 인스턴스 팩토리
-const getSocketInstance = (accessToken: string | null): Socket | MockSocketType | null => {
+const getSocketInstance = async (accessToken: string | null): Promise<Socket | MockSocketType | null> => {
   if (isMockingEnabled) {
+    const { createMockSocket } = await import("@/mock/socketMock");
     return createMockSocket();
   }
 
@@ -48,31 +49,35 @@ export const useChatSocket = (
     // 싱글턴 유지
     if (socketRef.current) return;
 
-    const socket = getSocketInstance(accessToken);
-    if (!socket) return;
+    const initSocket = async () => {
+      const socket = await getSocketInstance(accessToken);
+      if (!socket) return;
 
-    socketRef.current = socket;
+      socketRef.current = socket;
 
-    // --- 공통 이벤트 리스너 등록 ---
-    socket.on("connect", () => {
+      // --- 공통 이벤트 리스너 등록 ---
+      socket.on("connect", () => {
 
-    });
+      });
 
-    socket.on("disconnect", (reason: string) => {
+      socket.on("disconnect", (_reason: string) => {
 
-    });
+      });
 
-    socket.on("connect_error", (error: Error) => {
-      console.error("Socket connection error:", error);
-    });
+      socket.on("connect_error", (error: Error) => {
+        console.error("Socket connection error:", error);
+      });
 
-    // 메시지 수신 리스너 (전역적으로 한 번만 등록)
-    socket.on("newMessage", (message: ChatMessage) => {
+      // 메시지 수신 리스너 (전역적으로 한 번만 등록)
+      socket.on("newMessage", (message: ChatMessage) => {
 
-      if (onNewMessageRef.current) {
-        onNewMessageRef.current(message);
-      }
-    });
+        if (onNewMessageRef.current) {
+          onNewMessageRef.current(message);
+        }
+      });
+    };
+
+    initSocket();
 
     // 컴포넌트가 언마운트되거나 토큰이 아예 바뀔 때만 연결 해제
     return () => {
@@ -95,7 +100,7 @@ export const useChatSocket = (
 
 
     // 방 입장 요청
-    socket.emit("joinRoom", meetingId, (response: any) => {
+    socket.emit("joinRoom", meetingId, (_response: any) => {
 
     });
 
@@ -122,7 +127,7 @@ export const useChatSocket = (
       };
 
       
-      socketRef.current.emit("sendMessage", payload, (response: any) => {
+      socketRef.current.emit("sendMessage", payload, (_response: any) => {
 
       });
     } else {

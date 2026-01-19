@@ -26,4 +26,49 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react-icons')) {
+              return 'vendor-react-icons';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-lucide';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'vendor-radix';
+            }
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@tanstack')) {
+              return 'vendor-tanstack';
+            }
+            if (id.includes('axios') || id.includes('socket.io-client') || id.includes('zustand')) {
+              return 'vendor-data';
+            }
+            if (id.includes('class-variance-authority') || id.includes('clsx') || id.includes('tailwind-merge') || id.includes('tailwindcss-animate')) {
+              return 'vendor-styling';
+            }
+            if (id.includes('react-hook-form') || id.includes('zod') || id.includes('@hookform')) {
+              return 'vendor-forms';
+            }
+            if (id.includes('pretendard')) {
+              return 'vendor-font';
+            }
+            if (id.includes('react-day-picker') || id.includes('date-fns')) {
+              return 'vendor-calendar';
+            }
+            if (id.includes('@react-oauth')) {
+              return 'vendor-auth';
+            }
+            return 'vendor-utils';
+          }
+        }
+      }
+    }
+  }
 })
