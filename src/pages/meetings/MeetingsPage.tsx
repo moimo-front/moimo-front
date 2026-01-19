@@ -35,7 +35,7 @@ const MeetingsPage = () => {
 
   const handleFilterChange = (
     key: "sort" | "interestFilter" | "finishedFilter" | "limit",
-    value: string | number | boolean
+    value: string | number | boolean,
   ) => {
     // 페이지를 1로 초기화하며 필터 변경
     updateUrlParams({
@@ -58,10 +58,8 @@ const MeetingsPage = () => {
     isError,
   } = useMeetingsQuery({ page, limit, ...filters });
 
-  const {
-    data: interestsData,
-    isLoading: isInterestsLoading,
-  } = useInterestQuery();
+  const { data: interestsData, isLoading: isInterestsLoading } =
+    useInterestQuery();
 
   const { totalPages, isFirstPage, isLastPage } = usePagination({
     page,
@@ -113,7 +111,9 @@ const MeetingsPage = () => {
         </div>
       )}
       {isError && (
-        <p className="text-center text-red-500">에러가 발생했습니다.</p>
+        <p className="text-center text-red-500">
+          모임을 불러오는 중 에러가 발생했습니다.
+        </p>
       )}
 
       {!isLoading && !isError && meetings.length > 0 && (

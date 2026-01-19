@@ -5,6 +5,7 @@ import { AiOutlineTeam } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import type { Meeting } from "@/models/meeting.model";
 import { getDistrictFromAddress } from "@/lib/formatAddress";
+import defaultMeetingImage from "@/assets/images/moimo-meetings.png";
 
 interface MeetingCardProps {
   meeting: Meeting;
@@ -23,7 +24,7 @@ function MeetingCard({ meeting, imageUrl, className }: MeetingCardProps) {
       <Card
         className={cn(
           "h-full flex flex-col overflow-hidden cursor-pointer hover:shadow-lg transition-shadow",
-          className
+          className,
         )}
       >
         {/* 상단: 모임 사진*/}
@@ -35,11 +36,11 @@ function MeetingCard({ meeting, imageUrl, className }: MeetingCardProps) {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-secondary flex items-center justify-center">
-              <span className="text-xl font-bold text-primary-foreground">
-                {title}
-              </span>
-            </div>
+            <img
+              src={defaultMeetingImage}
+              alt={title}
+              className="w-full h-full object-cover"
+            />
           )}
         </div>
 
