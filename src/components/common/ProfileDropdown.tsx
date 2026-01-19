@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AiOutlineUser, AiOutlineTeam } from "react-icons/ai";
+import { IoIosPerson } from "react-icons/io";
 import { LuLogOut } from "react-icons/lu";
 import { useAuthStore } from "@/store/authStore";
 import { useNavigate } from "react-router-dom";
@@ -34,9 +35,11 @@ export const ProfileDropdown = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full">
-          <Avatar>
+          <Avatar className="cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors border-none bg-transparent">
             <AvatarImage src={userProfileImage} alt="User Avatar" />
-            <AvatarFallback>USER</AvatarFallback>
+            <AvatarFallback className="bg-transparent">
+              <IoIosPerson className="w-7 h-7 text-foreground/80" />
+            </AvatarFallback>
           </Avatar>
         </button>
       </DropdownMenuTrigger>

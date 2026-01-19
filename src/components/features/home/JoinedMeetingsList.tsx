@@ -1,13 +1,13 @@
-import MeetingList from "@/components/common/MeetingList";
+import MeetingList from "@/components/features/home/MeetingList";
 import { useMeQuery } from "@/hooks/useMeQuery";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { useAuthStore } from "@/store/authStore";
 
-function PendingMeetingsList() {
+function JoinedMeetingsList() {
   const { nickname } = useAuthStore();
   const { meetings, isLoading, isError, error } = useMeQuery(
     "joined",
-    "pending",
+    "accepted",
     1,
     4,
   );
@@ -26,16 +26,16 @@ function PendingMeetingsList() {
 
   return (
     <div className="w-full max-w-6xl mx-auto py-8">
-      <div className="text-xl font-bold mb-4">{nickname} 님이 신청한 모임</div>
+      <div className="text-xl font-bold mb-4">{nickname} 님이 가입한 모임</div>
       {meetings && meetings.length > 0 ? (
         <MeetingList meetings={meetings} />
       ) : (
         <p className="text-center py-16 text-muted-foreground">
-          신청한 모임이 없습니다.
+          가입된 모임이 없습니다.
         </p>
       )}
     </div>
   );
 }
 
-export default PendingMeetingsList;
+export default JoinedMeetingsList;

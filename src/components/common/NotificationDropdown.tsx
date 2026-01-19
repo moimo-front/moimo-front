@@ -14,10 +14,10 @@ export const NotificationDropdown = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full">
-          <Avatar>
+          <Avatar className="cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors border-none bg-medium">
             <AvatarImage alt="Notification Avatar" />
-            <AvatarFallback>
-              <IoIosNotifications />
+            <AvatarFallback className="bg-medium">
+              <IoIosNotifications className="w-7 h-7 text-foreground/80" />
             </AvatarFallback>
           </Avatar>
         </button>

@@ -50,14 +50,14 @@ function MeetingActionButtons({
         <div className="flex gap-2">
           <Button
             onClick={handleManageClick}
-            className="flex-[3] py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors text-sm font-medium"
+            className="flex-[3] h-16 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors text-base font-medium"
           >
             승인 요청 목록 보기
           </Button>
           <Button
             onClick={handleChatClick}
             variant="outline"
-            className="flex-[2] py-2.5 rounded-md transition-colors text-sm font-medium"
+            className="flex-[2] h-16  py-2.5 rounded-md transition-colors text-base font-medium"
           >
             채팅
           </Button>
@@ -139,7 +139,7 @@ function MeetingActionButtons({
 
         <Button
           onClick={handleChatClick}
-          className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold border-none shadow-none"
+          className="bg-yellow-400 hover:bg-yellow-500 text-gray font-bold border-none shadow-none"
         >
           채팅
         </Button>
@@ -155,7 +155,7 @@ function MeetingActionButtons({
         return (
           <Button
             onClick={onChat || handleChatClick}
-            className="w-full py-2.5 bg-yellow-400 hover:bg-yellow-500 text-white font-bold rounded-md transition-colors text-sm"
+            className="w-full h-16 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-gray font-bold rounded-md transition-colors text-base"
           >
             채팅방으로 이동
           </Button>
@@ -165,7 +165,7 @@ function MeetingActionButtons({
         return (
           <FixedBottomButton
             onClick={onChat || handleChatClick}
-            className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold"
+            className="bg-yellow-400 hover:bg-yellow-500 text-gray font-bold"
           >
             채팅방으로 이동
           </FixedBottomButton>
@@ -185,7 +185,7 @@ function MeetingActionButtons({
         <Button
           onClick={onJoin}
           disabled={isPending}
-          className="w-full py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors text-sm font-medium disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
+          className="w-full h-16 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors text-base font-medium disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
         >
           {buttonText}
         </Button>

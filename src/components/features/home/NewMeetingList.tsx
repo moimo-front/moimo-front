@@ -1,4 +1,4 @@
-import MeetingListSection from "@/components/common/MeetingListSection";
+import MeetingListSection from "@/components/features/home/MeetingListSection";
 
 function NewMeetingList() {
   return (
