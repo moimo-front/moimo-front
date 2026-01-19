@@ -1,6 +1,6 @@
 import TopicCard from "@features/topics/TopicCard";
 import { useInterestQuery } from "@/hooks/useInterestQuery";
-import interest_all from '@/assets/images/interests/interest_all.png';
+import interest_all from '@/assets/images/interests/interest_all.webp';
 import { useRef, useState, useEffect } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";

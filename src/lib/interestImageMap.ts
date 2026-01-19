@@ -12,7 +12,7 @@ const INTEREST_NAMES = [
 // Vite의 Glob Import 기능을 사용하여 동적으로 이미지 로드
 // eager: true -> 비동기가 아닌 정적으로 로드 (import 구문과 동일 효과)
 // import: 'default' -> 모듈의 default export (이미지 경로 string)만 가져옴
-const images = import.meta.glob<{ default: string }>('../assets/images/interests/*.png', {
+const images = import.meta.glob<{ default: string }>('../assets/images/interests/*.webp', {
   eager: true,
   import: 'default',
 });
@@ -23,7 +23,7 @@ export const interestImageMap: { [key: string]: string } = INTEREST_NAMES.reduce
   
   // 파일 경로에서 해당 id를 포함하는 키를 찾음
   // 예: ../assets/images/interests/interest_1.png
-  const imagePath = Object.keys(images).find(path => path.includes(`interest_${id}.png`));
+  const imagePath = Object.keys(images).find(path => path.includes(`interest_${id}.webp`));
   
   if (imagePath) {
     acc[name] = images[imagePath] as unknown as string;
