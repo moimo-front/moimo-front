@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import FormField from "@components/common/FormField";
 import { useCreateMeetingMutation, useUpdateMeetingMutation } from "@/hooks/useMeetingMutations";
@@ -44,6 +45,7 @@ interface CreateMeetingModalProps {
 }
 
 function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalProps) {
+  const navigate = useNavigate();
   const { data: interests } = useInterestQuery();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -270,9 +272,10 @@ function CreateMeetingModal({ open, onOpenChange, meeting }: CreateMeetingModalP
       } else {
         await createMeetingMutation.mutateAsync(formData);
         toast.success("모임이 생성되었습니다!", {
-          description: "마이페이지 - 내모임에서 확인해보세요!"
+          description: "마이페이지 - 내 모임에서 확인할 수 있습니다!"
         });
         onOpenChange(false);
+        navigate("/");
       }
     } catch (error: any) {
       console.error("Submission error:", error);
