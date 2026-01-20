@@ -46,7 +46,7 @@ const generateChatMessages = (
       sender: {
         id: sender.id,
         nickname: sender.nickname,
-        profileImage: sender.profileImage || "",
+        image: sender.profileImage || "",
       },
     });
   }

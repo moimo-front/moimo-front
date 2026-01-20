@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { ChatMessage as ChatMessageType } from "@/models/chat.model";
-import defaultProfileIcon from "@/assets/images/profile.png"; // 사용자 기본 아이콘 import
+import defaultProfileIcon from "@/assets/images/profile.png";
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -31,7 +31,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       {!isMine && (
         <Avatar className="w-10 h-10">
           <AvatarImage
-            src={sender.profileImage || defaultProfileIcon}
+            src={sender.image || defaultProfileIcon}
             alt={sender.nickname}
           />
           <AvatarFallback>
